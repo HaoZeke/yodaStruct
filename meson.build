@@ -1,12 +1,12 @@
 project(
-  'yodaStruct',
+  'luadseams',
   ['cpp', 'c'],
-  version: '2.1.0',
+  version: '2.2.0',
   default_options: ['warning_level=1', 'cpp_std=c++20'],
   meson_version: '>=1.3.0',
 )
 
-# C++ engine. This repo is the Lua/Fennel CLI only.
+# C++ engine. This repo is the Lua/Fennel library (require("dseams")).
 seams = subproject(
   'seams-core',
   default_options: [
@@ -28,78 +28,44 @@ endif
 
 inc = include_directories('src/include/internal', 'src/include/external')
 
-fennel_lua = meson.project_source_root() / 'src/include/external/fennel/fennel.lua'
-lua_dir = meson.project_source_root() / 'lua'
-install_data(
-  [
-    'src/include/external/fennel/fennel.lua',
-    'src/include/external/fennel/LICENSE-fennel',
-  ],
-  install_dir: get_option('datadir') / 'yodaStruct',
-)
-install_data(
-  ['lua/yoda.lua', 'lua/yoda.fnl'],
-  install_dir: get_option('datadir') / 'yodaStruct' / 'lua',
-)
-
 link_args = []
 if host_machine.system() == 'linux'
   link_args += ['-Wl,--enable-new-dtags']
 endif
 
-yoda = executable(
-  'yodaStruct',
-  files('src/main.cpp', 'src/lua_api.cpp', 'src/opt_parser.cpp'),
+dseams_core = shared_module(
+  'dseams_core',
+  files('src/lua_api.cpp', 'src/luaopen.cpp'),
+  name_prefix: '',
   dependencies: [yds_dep, lua_dep],
   include_directories: inc,
-  cpp_args: [
-    '-DYODA_FENNEL_LUA="' + fennel_lua + '"',
-    '-DYODA_LUA_DIR="' + lua_dir + '"',
-    '-DYODA_VERSION="' + meson.project_version() + '"',
-  ],
   link_args: link_args,
   install: true,
 )
 
-test(
-  'yoda_fennel',
-  yoda,
-  args: ['-c', 'example_lua/fennel/config.yml'],
-  workdir: meson.project_source_root(),
-  timeout: 120,
+install_data(
+  ['lua/dseams.lua', 'lua/dseams.fnl', 'lua/yoda.lua'],
+  install_dir: get_option('datadir') / 'luadseams' / 'lua',
 )
-test(
-  'yoda_fennel_full',
-  yoda,
-  args: ['-c', 'example_lua/fennel_full/config.yml'],
-  workdir: meson.project_source_root(),
-  timeout: 240,
+install_data(
+  [
+    'src/include/external/fennel/fennel.lua',
+    'src/include/external/fennel/LICENSE-fennel',
+  ],
+  install_dir: get_option('datadir') / 'luadseams',
 )
-test(
-  'yoda_full_api',
-  yoda,
-  args: ['-c', 'example_lua/full_api/config.yml'],
-  workdir: meson.project_source_root(),
-  timeout: 240,
-)
-test(
-  'yoda_structure_desc',
-  yoda,
-  args: ['-c', 'example_lua/structureDesc/config.yml'],
-  workdir: meson.project_source_root(),
-  timeout: 120,
-)
-test(
-  'yoda_idiomatic',
-  yoda,
-  args: ['-c', 'example_lua/idiomatic/config.yml'],
-  workdir: meson.project_source_root(),
-  timeout: 120,
-)
-test(
-  'yoda_idiomatic_fnl',
-  yoda,
-  args: ['-c', 'example_lua/idiomatic_fnl/config.yml'],
-  workdir: meson.project_source_root(),
-  timeout: 120,
-)
+
+lua_exe = find_program('lua', 'lua5.4', 'lua5.3', required: false)
+if lua_exe.found()
+  test(
+    'dseams_library_read',
+    lua_exe,
+    args: [meson.project_source_root() / 'example_lua/library/read.lua'],
+    env: {
+      'LUA_PATH': meson.project_source_root() / 'lua' / '?.lua;;',
+      'LUA_CPATH': meson.current_build_dir() / '?.so;;',
+    },
+    workdir: meson.project_source_root(),
+    timeout: 120,
+  )
+endif

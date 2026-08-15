@@ -1,0 +1,5 @@
+(local dseams (require :dseams))
+(local cloud (dseams.read "input/traj/exampleTraj.lammpstrj" {:type 2}))
+(assert (> cloud.nop 0))
+(local types (dseams.chill_plus cloud {:cutoff 3.5 :type 2}))
+(print (string.format "dseams_fnl nop=%d ntypes=%d" cloud.nop (length types)))

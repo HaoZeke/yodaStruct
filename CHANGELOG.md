@@ -1,5 +1,11 @@
 # Changelog
 
+## 2.2.0
+
+This repository is the Lua/Fennel **library** `dseams` (`luadseams`).
+`require("dseams")` loads Lua helpers on `dseams_core`. There is no
+`yodaStruct` executable. The engine CLI is `seams` in seams-core.
+
 ## 2.1.0
 
 `require("yoda")` and `(require :yoda-fnl)` are the table-first helpers:
