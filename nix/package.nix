@@ -52,6 +52,7 @@ stdenv.mkDerivation {
     mkdir -p subprojects
     cp -r ${seams-core-src} subprojects/seams-core
     chmod -R u+w subprojects/seams-core
+    rm -rf subprojects/seams-core/subprojects
   '';
 
   doCheck = true;
