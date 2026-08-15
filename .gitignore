@@ -1,0 +1,6 @@
+/subprojects/*
+!/subprojects/*.wrap
+build/
+bbdir/
+*.swp
+.DS_Store

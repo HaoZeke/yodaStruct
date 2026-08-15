@@ -1,0 +1,35 @@
+name: Build yodaStruct and test
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+jobs:
+  build_test:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: mamba-org/setup-micromamba@v2
+        with:
+          environment-name: yoda
+          create-args: >-
+            cxx-compiler
+            meson
+            ninja
+            pkg-config
+            eigen
+            libblas
+            liblapack
+            lua
+            cmake
+          cache-environment: true
+      - name: Configure and build
+        shell: bash -el {0}
+        run: |
+          meson setup bbdir --wrap-mode=nofallback
+          meson compile -C bbdir
+      - name: Tests
+        shell: bash -el {0}
+        run: meson test -C bbdir -v --print-errorlogs
