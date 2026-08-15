@@ -8,8 +8,13 @@ This repository is the `yodaStruct` CLI. The C++ library lives in
 [`PydSEAMSlib`](https://github.com/d-SEAMS/PydSEAMSlib). Do not grow a
 second engine here.
 
+Needs Meson >= 1.3, a C++20 compiler, Eigen 3.4, BLAS, LAPACK, and Lua
+5.3 or 5.4. The engine is pulled as a wrap-git of `seams-core`. Use
+`--wrap-mode=nofallback` unless you have rustc and cbindgen for the
+optional `.con` reader.
+
 ```bash
-meson setup bbdir
+meson setup bbdir --wrap-mode=nofallback
 meson compile -C bbdir
 ./bbdir/yodaStruct -c example_lua/full_api/config.yml
 ```

@@ -28,7 +28,7 @@ jobs:
       - name: Configure and build
         shell: bash -el {0}
         run: |
-          meson setup bbdir
+          meson setup bbdir --wrap-mode=nofallback
           meson compile -C bbdir
       - name: Tests
         shell: bash -el {0}
