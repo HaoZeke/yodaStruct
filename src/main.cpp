@@ -34,6 +34,48 @@ std::string fennelSourcePath() {
 #endif
 }
 
+std::string luaModuleDir() {
+  const char *env = std::getenv("YODA_LUA_PATH");
+  if (env != nullptr && *env != '\0') {
+    return env;
+  }
+#ifdef YODA_LUA_DIR
+  return YODA_LUA_DIR;
+#else
+  return "lua";
+#endif
+}
+
+void setupHelpers(sol::state &lua) {
+  const std::string dir = luaModuleDir();
+  const std::string pkg = lua["package"]["path"].get<std::string>();
+  lua["package"]["path"] = dir + "/?.lua;" + pkg;
+  const std::string yodaLua = dir + "/yoda.lua";
+  auto loaded = lua.require_file("yoda", yodaLua);
+  lua["yoda"] = loaded;
+  sol::table fennelMods = lua["package"]["loaded"];
+  if (!fennelMods["fennel"].is<sol::table>()) {
+    auto mod = lua.safe_script_file(fennelSourcePath(), sol::script_pass_on_error);
+    if (mod.valid()) {
+      fennelMods["fennel"] = mod.get<sol::table>();
+    }
+  }
+  if (sol::object cached = fennelMods["fennel"]; cached.is<sol::table>()) {
+    sol::table fennel = cached;
+    std::string fnlPath;
+    if (fennel["path"].is<std::string>()) {
+      fnlPath = fennel["path"].get<std::string>();
+    }
+    fennel["path"] = dir + "/?.fnl;" + fnlPath;
+    sol::protected_function dofile = fennel["dofile"];
+    const std::string fnlMod = dir + "/yoda.fnl";
+    auto compiled = dofile(fnlMod);
+    if (compiled.valid()) {
+      fennelMods["yoda-fnl"] = compiled;
+    }
+  }
+}
+
 //! Runs a user script in protected mode. Paths ending in .fnl are compiled by
 //! the vendored Fennel (a lisp that compiles to Lua) against the same
 //! globals; anything else runs as plain Lua. Errors in either language are
@@ -95,6 +137,7 @@ int main(int argc, char *argv[]) {
   sol::state lua;
   lua.open_libraries();
   luaApi::registerAll(lua);
+  setupHelpers(lua);
 
   if (cfg.topoTwoDim) {
     if (runScriptFile(lua, cfg.variables) != 0) {

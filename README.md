@@ -21,7 +21,24 @@ meson compile -C bbdir
 
 Scripts ending in `.fnl` go through the vendored Fennel compiler
 (`src/include/external/fennel/fennel.lua`). Set `YODA_FENNEL_PATH` if the
-binary is installed away from the source tree.
+binary is installed away from the source tree. Set `YODA_LUA_PATH` to the
+directory that holds `yoda.lua` / `yoda.fnl` for an installed binary.
+
+```lua
+local yoda = require("yoda")
+local cloud = yoda.read("input/traj/exampleTraj.lammpstrj", {type = 2})
+print(yoda.chill_plus(cloud, {cutoff = 3.5, type = 2}))
+```
+
+```fennel
+(local yoda (require :yoda-fnl))
+(local cloud (yoda.read "input/traj/exampleTraj.lammpstrj" {:type 2}))
+(print (yoda.chill-plus cloud {:cutoff 3.5 :type 2}))
+```
+
+`example_lua/idiomatic/` and `example_lua/idiomatic_fnl/` are the short
+forms. Suffix dispatch covers LAMMPS, XYZ, `.con`, and chemfiles
+(PDB/GRO/DCD) when those readers are linked.
 
 Registered Lua functions are listed in [`docs/luaFunctions.md`](docs/luaFunctions.md).
 Examples live in `example_lua/`. The small trajectories they read are

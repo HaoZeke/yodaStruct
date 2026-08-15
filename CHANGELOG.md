@@ -1,5 +1,12 @@
 # Changelog
 
+## 2.1.0
+
+`require("yoda")` and `(require :yoda-fnl)` are the table-first helpers:
+`read`, `neighbors`, `knn`, `chill_plus` / `chill-plus`, `cages`. Suffix
+dispatch covers LAMMPS, XYZ, `.con`, and chemfiles formats when linked.
+`getIceTypePlusNoPrint` is registered so CHILL+ does not write a file.
+
 ## 2.0.1
 
 - `prismAnalysis` takes `atomID` by reference so later frames keep the

@@ -1,0 +1,5 @@
+local yoda = require("yoda")
+local cloud = yoda.read(trajectory, {type = 2})
+assert(cloud.nop > 0)
+local types = yoda.chill_plus(cloud, {cutoff = 3.5, type = 2})
+print(string.format("idiomatic_lua nop=%d ntypes=%d", cloud.nop, #types))

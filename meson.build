@@ -1,7 +1,7 @@
 project(
   'yodaStruct',
   ['cpp', 'c'],
-  version: '2.0.1',
+  version: '2.1.0',
   default_options: ['warning_level=1', 'cpp_std=c++20'],
   meson_version: '>=1.3.0',
 )
@@ -29,12 +29,17 @@ endif
 inc = include_directories('src/include/internal', 'src/include/external')
 
 fennel_lua = meson.project_source_root() / 'src/include/external/fennel/fennel.lua'
+lua_dir = meson.project_source_root() / 'lua'
 install_data(
   [
     'src/include/external/fennel/fennel.lua',
     'src/include/external/fennel/LICENSE-fennel',
   ],
   install_dir: get_option('datadir') / 'yodaStruct',
+)
+install_data(
+  ['lua/yoda.lua', 'lua/yoda.fnl'],
+  install_dir: get_option('datadir') / 'yodaStruct' / 'lua',
 )
 
 link_args = []
@@ -49,6 +54,7 @@ yoda = executable(
   include_directories: inc,
   cpp_args: [
     '-DYODA_FENNEL_LUA="' + fennel_lua + '"',
+    '-DYODA_LUA_DIR="' + lua_dir + '"',
     '-DYODA_VERSION="' + meson.project_version() + '"',
   ],
   link_args: link_args,
@@ -80,6 +86,20 @@ test(
   'yoda_structure_desc',
   yoda,
   args: ['-c', 'example_lua/structureDesc/config.yml'],
+  workdir: meson.project_source_root(),
+  timeout: 120,
+)
+test(
+  'yoda_idiomatic',
+  yoda,
+  args: ['-c', 'example_lua/idiomatic/config.yml'],
+  workdir: meson.project_source_root(),
+  timeout: 120,
+)
+test(
+  'yoda_idiomatic_fnl',
+  yoda,
+  args: ['-c', 'example_lua/idiomatic_fnl/config.yml'],
   workdir: meson.project_source_root(),
   timeout: 120,
 )
