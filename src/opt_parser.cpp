@@ -5,6 +5,7 @@
 
 #include <opt_parser.h>
 
+#include <cstdlib>
 #include <iostream>
 
 cxxopts::ParseResult parse(int argc, char *argv[]) {

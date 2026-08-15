@@ -12,8 +12,8 @@
  *  @brief Lua registration of the d-SEAMS library for the yodaStruct front
  *   end. Each group registers one cohesive slice of the API; registerAll wires
  *   every group into the given state. New-style functions take and return
- *   plain Lua tables; the legacy names bound before this file existed keep
- *   their container-userdata semantics so older scripts keep running.
+ *   plain Lua tables; the legacy names keep container-userdata semantics
+ *   so older scripts keep running.
  */
 
 namespace luaApi {

@@ -1,5 +1,13 @@
 # Changelog
 
+## 2.0.1
+
+- `prismAnalysis` takes `atomID` by reference so later frames keep the
+  first-frame ID.
+- `templates/{hc,ddc}.xyz` and the selection/clathrate example dumps
+  ship in this tree.
+- `shellSeparation` is registered. Fennel installs with the binary.
+
 ## 2.0.0
 
 First release of the `yodaStruct` CLI as its own repository. Lua and

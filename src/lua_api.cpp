@@ -11,7 +11,6 @@
 #include <cage_affiliation.hpp>
 #include <cluster.hpp>
 #include <franzblau.hpp>
-#include <generic.hpp>
 #include <mol_sys.hpp>
 #include <neighbours.hpp>
 #include <rdf2d.hpp>
@@ -27,6 +26,7 @@
 
 #include <array>
 #include <string>
+#include <tuple>
 #include <vector>
 
 namespace {
@@ -163,6 +163,12 @@ void registerNeighbours(sol::state &lua) {
                      return sol::as_nested(nneigh::kNearestNeighbourList(
                          yCloud, k, candidateCutoff, typeI,
                          mutual.value_or(true)));
+                   });
+  lua.set_function("shellSeparation",
+                   [](const Cloud &yCloud, int k, int typeI) {
+                     const auto sep =
+                         nneigh::shellSeparation(yCloud, k, typeI);
+                     return std::make_tuple(sep.first, sep.second);
                    });
   // Legacy spellings, container-userdata semantics
   lua.set_function("neighborList", nneigh::neighListO);
@@ -426,7 +432,7 @@ void registerTopology(sol::state &lua) {
       "prismAnalysis",
       [](std::string path, const std::vector<std::vector<int>> &rings,
          const std::vector<std::vector<int>> &nList, Cloud &cloud, int maxDepth,
-         int atomID, int firstFrame, int currentFrame, bool doShapeMatching) {
+         int &atomID, int firstFrame, int currentFrame, bool doShapeMatching) {
         return ring::prismAnalysis(path, rings, nList, cloud, maxDepth, atomID,
                                    firstFrame, currentFrame, doShapeMatching);
       });
