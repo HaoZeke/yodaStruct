@@ -82,7 +82,7 @@ sol::table packSteinhardt(sol::state_view lua, const chill::SteinhardtQl &q) {
 
 namespace luaApi {
 
-void registerIO(sol::state &lua) {
+void registerIO(sol::state_view lua, sol::table m) {
   lua.new_usertype<Cloud>(
       "PointCloud", sol::constructors<Cloud()>(), "nop",
       sol::readonly(&Cloud::nop), "currentFrame",
@@ -90,7 +90,7 @@ void registerIO(sol::state &lua) {
       [](const Cloud &c) { return sol::as_table(c.box); }, "boxLow",
       [](const Cloud &c) { return sol::as_table(c.boxLow); }, "iceTypes",
       [](const Cloud &c) { return sol::as_table(iceStateNames(c)); });
-  lua.set_function(
+  m.set_function(
       "readLammpsTrjO",
       [](std::string filename, int targetFrame, int typeO,
          sol::optional<bool> isSlice, sol::optional<std::array<double, 3>> low,
@@ -101,7 +101,7 @@ void registerIO(sol::state &lua) {
                                     low.value_or(zeroBounds),
                                     high.value_or(zeroBounds));
       });
-  lua.set_function(
+  m.set_function(
       "readLammpsTrjreduced",
       [](std::string filename, int targetFrame, int typeI,
          sol::optional<bool> isSlice, sol::optional<std::array<double, 3>> low,
@@ -112,9 +112,9 @@ void registerIO(sol::state &lua) {
                                           low.value_or(zeroBounds),
                                           high.value_or(zeroBounds));
       });
-  lua.set_function("readXYZ", sinp::readXYZ);
+  m.set_function("readXYZ", sinp::readXYZ);
 #ifdef SEAMS_HAS_CHEMFILES
-  lua.set_function("readChemfiles",
+  m.set_function("readChemfiles",
                    [](std::string filename, int targetFrame,
                       sol::optional<int> typeFilter) {
                      Cloud scratch;
@@ -123,26 +123,26 @@ void registerIO(sol::state &lua) {
                    });
 #endif
 #ifdef SEAMS_HAS_READCON
-  lua.set_function("readCon", [](std::string filename, int targetFrame) {
+  m.set_function("readCon", [](std::string filename, int targetFrame) {
     Cloud scratch;
     return sinp::readCon(filename, targetFrame, scratch);
   });
 #endif
   // Legacy spellings, container-userdata semantics
-  lua.set_function("readFrameOnlyOne", sinp::readLammpsTrjreduced);
-  lua.set_function("readFrameOnlyOneAllAtoms", sinp::readLammpsTrj);
-  lua.set_function("readFrame", sinp::readLammpsTrjO);
-  lua.set_function("writeDump", sout::writeDump);
-  lua.set_function("writeHistogram", sout::writeHisto);
+  m.set_function("readFrameOnlyOne", sinp::readLammpsTrjreduced);
+  m.set_function("readFrameOnlyOneAllAtoms", sinp::readLammpsTrj);
+  m.set_function("readFrame", sinp::readLammpsTrjO);
+  m.set_function("writeDump", sout::writeDump);
+  m.set_function("writeHistogram", sout::writeHisto);
 }
 
-void registerNeighbours(sol::state &lua) {
-  lua.set_function("neighListO",
+void registerNeighbours(sol::state_view lua, sol::table m) {
+  m.set_function("neighListO",
                    [](double rcutoff, const Cloud &yCloud, int typeI) {
                      return sol::as_nested(
                          nneigh::neighListO(rcutoff, yCloud, typeI));
                    });
-  lua.set_function("getNewNeighbourListByIndex",
+  m.set_function("getNewNeighbourListByIndex",
                    [](const Cloud &yCloud, double cutoff) {
                      return sol::as_nested(
                          nneigh::getNewNeighbourListByIndex(yCloud, cutoff));
@@ -150,33 +150,33 @@ void registerNeighbours(sol::state &lua) {
   // New-style bindings take the neighbour list by value: sol2 can build a
   // container from a plain Lua table only when the parameter owns it, while
   // a reference parameter binds container userdata alone.
-  lua.set_function(
+  m.set_function(
       "neighbourListByIndex",
       [](const Cloud &yCloud, std::vector<std::vector<int>> nList) {
         return sol::as_nested(nneigh::neighbourListByIndex(yCloud, nList));
       });
   // Optional trailing flag selects the symmetrization: mutual (default) or
   // union
-  lua.set_function("kNearestNeighbourList",
+  m.set_function("kNearestNeighbourList",
                    [](const Cloud &yCloud, int k, double candidateCutoff,
                       int typeI, sol::optional<bool> mutual) {
                      return sol::as_nested(nneigh::kNearestNeighbourList(
                          yCloud, k, candidateCutoff, typeI,
                          mutual.value_or(true)));
                    });
-  lua.set_function("shellSeparation",
+  m.set_function("shellSeparation",
                    [](const Cloud &yCloud, int k, int typeI) {
                      const auto sep =
                          nneigh::shellSeparation(yCloud, k, typeI);
                      return std::make_tuple(sep.first, sep.second);
                    });
   // Legacy spellings, container-userdata semantics
-  lua.set_function("neighborList", nneigh::neighListO);
-  lua.set_function("bondNetworkByIndex", nneigh::neighbourListByIndex);
+  m.set_function("neighborList", nneigh::neighListO);
+  m.set_function("bondNetworkByIndex", nneigh::neighbourListByIndex);
   // distCutoff/angleCutoff default to the water criterion (2.42 A, 30 deg)
   // Neighbour lists arrive as plain Lua tables; container parameters must be
   // taken by value or sol2 dereferences a null userdata
-  lua.set_function("getHbondNetwork",
+  m.set_function("getHbondNetwork",
                    [](std::string filename, Cloud &yCloud,
                       std::vector<std::vector<int>> nList,
                       int targetFrame, int Htype, sol::optional<double> dist,
@@ -186,7 +186,7 @@ void registerNeighbours(sol::state &lua) {
                                                  dist.value_or(2.42),
                                                  angle.value_or(30.0));
                    });
-  lua.set_function("getHbondNetworkFromClouds",
+  m.set_function("getHbondNetworkFromClouds",
                    [](Cloud &yCloud, Cloud &hCloud,
                       std::vector<std::vector<int>> nList,
                       sol::optional<double> dist, sol::optional<double> angle) {
@@ -196,8 +196,8 @@ void registerNeighbours(sol::state &lua) {
                    });
 }
 
-void registerRings(sol::state &lua) {
-  lua.set_function("ringNetwork",
+void registerRings(sol::state_view lua, sol::table m) {
+  m.set_function("ringNetwork",
                    [](std::vector<std::vector<int>> nList, int maxDepth) {
                      return sol::as_nested(primitive::ringNetwork(nList, maxDepth));
                    });
@@ -209,9 +209,9 @@ void registerRings(sol::state &lua) {
       "lastRecomputedSources", &primitive::RingUpdater::lastRecomputedSources,
       "lastBallsRefreshed", &primitive::RingUpdater::lastBallsRefreshed);
   // Legacy spelling, container-userdata semantics
-  lua.set_function("getPrimitiveRings", primitive::ringNetwork);
+  m.set_function("getPrimitiveRings", primitive::ringNetwork);
   // Order-free per-ring cage classification and its exact incremental form
-  lua.set_function("cageAffiliation",
+  m.set_function("cageAffiliation",
                    [](sol::this_state ts,
                       std::vector<std::vector<int>> rings,
                       std::vector<std::vector<int>> nList) {
@@ -238,7 +238,7 @@ void registerRings(sol::state &lua) {
       "lastReclassified", &ring::AffiliationUpdater::lastReclassified);
   // Seeded (hysteresis) affiliation: strict-graph seeds, permissive-graph
   // completion, component-gated acceptance
-  lua.set_function("seededCageAffiliation",
+  m.set_function("seededCageAffiliation",
                    [](sol::this_state ts,
                       std::vector<std::vector<int>> strictRings,
                       std::vector<std::vector<int>> strictNList,
@@ -255,7 +255,7 @@ void registerRings(sol::state &lua) {
                    });
 }
 
-void registerOrder(sol::state &lua) {
+void registerOrder(sol::state_view lua, sol::table m) {
   // Bond-classification rule sets: CHILL and CHILL+ are registered
   // instances; scripts register their own materials by name
   const auto ruleFromTable = [](const sol::table &t) {
@@ -267,7 +267,7 @@ void registerOrder(sol::state &lua) {
         t.get_or("coordinationNumber", rule.coordinationNumber);
     return rule;
   };
-  lua.set_function("classifyBonds",
+  m.set_function("classifyBonds",
                    [ruleFromTable](Cloud &yCloud,
                                    std::vector<std::vector<int>> nList,
                                    const sol::object &ruleSpec,
@@ -280,14 +280,14 @@ void registerOrder(sol::state &lua) {
                      chill::classifyBonds(yCloud, nList, rule,
                                           isSlice.value_or(false));
                    });
-  lua.set_function("registerBondClassifier",
+  m.set_function("registerBondClassifier",
                    [ruleFromTable](std::string name, const sol::table &t) {
                      chill::registerBondClassifier(name, ruleFromTable(t));
                    });
-  lua.set_function("bondClassifierNames", []() {
+  m.set_function("bondClassifierNames", []() {
     return sol::as_table(chill::bondClassifierNames());
   });
-  lua.set_function("getCorrelPlus",
+  m.set_function("getCorrelPlus",
                    [](Cloud &yCloud, std::vector<std::vector<int>> nList,
                       sol::optional<bool> isSlice,
                       sol::optional<int> coordinationNumber) {
@@ -295,7 +295,7 @@ void registerOrder(sol::state &lua) {
                                           isSlice.value_or(false),
                                           coordinationNumber.value_or(4));
                    });
-  lua.set_function(
+  m.set_function(
       "getIceTypePlus",
       [](Cloud &yCloud, std::vector<std::vector<int>> nList, std::string path,
          int firstFrame, sol::optional<bool> isSlice,
@@ -305,28 +305,28 @@ void registerOrder(sol::state &lua) {
                               outputFileName.value_or("chillPlus.txt"));
         return sol::as_table(iceStateNames(yCloud));
       });
-  lua.set_function(
+  m.set_function(
       "getIceTypePlusNoPrint",
       [](Cloud &yCloud, std::vector<std::vector<int>> nList,
          sol::optional<bool> isSlice) {
         chill::getIceTypePlusNoPrint(yCloud, nList, isSlice.value_or(false));
         return sol::as_table(iceStateNames(yCloud));
       });
-  lua.set_function(
+  m.set_function(
       "getIceTypeNoPrint",
       [](Cloud &yCloud, std::vector<std::vector<int>> nList,
          sol::optional<bool> isSlice) {
         chill::getIceTypeNoPrint(yCloud, nList, isSlice.value_or(false));
         return sol::as_table(iceStateNames(yCloud));
       });
-  lua.set_function("getCorrel",
+  m.set_function("getCorrel",
                    [](Cloud &yCloud, std::vector<std::vector<int>> nList,
                       sol::optional<bool> isSlice,
                       sol::optional<int> coordinationNumber) {
                      chill::getCorrel(yCloud, nList, isSlice.value_or(false),
                                       coordinationNumber.value_or(4));
                    });
-  lua.set_function(
+  m.set_function(
       "getIceType",
       [](Cloud &yCloud, std::vector<std::vector<int>> nList, std::string path,
          int firstFrame, sol::optional<bool> isSlice,
@@ -336,21 +336,21 @@ void registerOrder(sol::state &lua) {
                           outputFileName.value_or("chill.txt"));
         return sol::as_table(iceStateNames(yCloud));
       });
-  lua.set_function("steinhardtQl",
+  m.set_function("steinhardtQl",
                    [](sol::this_state ts, const Cloud &yCloud,
                       std::vector<std::vector<int>> nList, int orderL) {
                      return packSteinhardt(
                          sol::state_view(ts),
                          chill::steinhardtQl(yCloud, nList, orderL));
                    });
-  lua.set_function("steinhardtQlVoronoi",
+  m.set_function("steinhardtQlVoronoi",
                    [](sol::this_state ts, const Cloud &yCloud,
                       double candidateCutoff, int orderL) {
                      return packSteinhardt(sol::state_view(ts),
                                            chill::steinhardtQlVoronoi(
                                                yCloud, candidateCutoff, orderL));
                    });
-  lua.set_function(
+  m.set_function(
       "voronoiFacetWeights",
       [](sol::this_state ts, const Cloud &yCloud, double candidateCutoff) {
         sol::state_view lua(ts);
@@ -366,43 +366,43 @@ void registerOrder(sol::state &lua) {
         return out;
       });
   // Legacy spellings kept for the bulk example scripts
-  lua.set_function("chillPlus_cij",
+  m.set_function("chillPlus_cij",
                    [](Cloud &c, const std::vector<std::vector<int>> &n,
                       bool slice) -> Cloud & {
                      chill::getCorrelPlus(c, n, slice);
                      return c;
                    });
-  lua.set_function("chillPlus_iceType",
+  m.set_function("chillPlus_iceType",
                    [](Cloud &c, const std::vector<std::vector<int>> &n,
                       std::string path, int first, bool slice,
                       std::string outName) -> Cloud & {
                      chill::getIceTypePlus(c, n, path, first, slice, outName);
                      return c;
                    });
-  lua.set_function("chill_cij",
+  m.set_function("chill_cij",
                    [](Cloud &c, const std::vector<std::vector<int>> &n,
                       bool slice) -> Cloud & {
                      chill::getCorrel(c, n, slice);
                      return c;
                    });
-  lua.set_function("chill_iceType",
+  m.set_function("chill_iceType",
                    [](Cloud &c, const std::vector<std::vector<int>> &n,
                       std::string path, int first, bool slice,
                       std::string outName) -> Cloud & {
                      chill::getIceType(c, n, path, first, slice, outName);
                      return c;
                    });
-  lua.set_function("averageQ6", chill::getq6);
-  lua.set_function("modifyChill",
+  m.set_function("averageQ6", chill::getq6);
+  m.set_function("modifyChill",
                    [](Cloud &c, std::vector<double> &q6) -> Cloud & {
                      chill::reclassifyWater(c, q6);
                      return c;
                    });
-  lua.set_function("percentage_Ice", chill::printIceType);
+  m.set_function("percentage_Ice", chill::printIceType);
 }
 
-void registerDescriptors(sol::state &lua) {
-  lua.set_function(
+void registerDescriptors(sol::state_view lua, sol::table m) {
+  m.set_function(
       "classifyTemplates",
       [](sol::this_state ts, const Cloud &cloud,
          std::vector<std::vector<int>> nList, int kNeigh) {
@@ -417,14 +417,14 @@ void registerDescriptors(sol::state &lua) {
         }
         return out;
       });
-  lua.set_function("soapSpectrum",
+  m.set_function("soapSpectrum",
                    [](const Cloud &yCloud, int iatom,
                       std::vector<std::vector<int>> nList, int nMax, int lMax,
                       double rcut) {
                      return sol::as_table(chill::soapSpectrum(
                          yCloud, iatom, nList, nMax, lMax, rcut));
                    });
-  lua.set_function("soapSpectrumAll",
+  m.set_function("soapSpectrumAll",
                    [](const Cloud &yCloud,
                       std::vector<std::vector<int>> nList, int nMax,
                       int lMax, double rcut) {
@@ -432,17 +432,17 @@ void registerDescriptors(sol::state &lua) {
                                                                nMax, lMax,
                                                                rcut));
                    });
-  lua.set_function("voronoiFeatures",
+  m.set_function("voronoiFeatures",
                    [](const Cloud &yCloud, double candidateCutoff) {
                      return sol::as_nested(
                          chill::voronoiFeatures(yCloud, candidateCutoff));
                    });
 }
 
-void registerTopology(sol::state &lua) {
-  lua.set_function("ringAnalysis", ring::polygonRingAnalysis);
-  lua.set_function("calcRDF", rdf2::rdf2Danalysis_AA);
-  lua.set_function(
+void registerTopology(sol::state_view lua, sol::table m) {
+  m.set_function("ringAnalysis", ring::polygonRingAnalysis);
+  m.set_function("calcRDF", rdf2::rdf2Danalysis_AA);
+  m.set_function(
       "prismAnalysis",
       [](std::string path, const std::vector<std::vector<int>> &rings,
          const std::vector<std::vector<int>> &nList, Cloud &cloud, int maxDepth,
@@ -450,20 +450,20 @@ void registerTopology(sol::state &lua) {
         return ring::prismAnalysis(path, rings, nList, cloud, maxDepth, atomID,
                                    firstFrame, currentFrame, doShapeMatching);
       });
-  lua.set_function("clusterAnalysis", clump::clusterAnalysis);
-  lua.set_function("recenterCluster", clump::recenterClusterCloud);
-  lua.set_function("getPointCloudAtomsOfOneAtomType",
+  m.set_function("clusterAnalysis", clump::clusterAnalysis);
+  m.set_function("recenterCluster", clump::recenterClusterCloud);
+  m.set_function("getPointCloudAtomsOfOneAtomType",
                    gen::getPointCloudOneAtomType);
-  lua.set_function("selectInSingleSlice", gen::moleculesInSingleSlice);
-  lua.set_function("selectEdgeAtomsInRingsWithinSlice",
+  m.set_function("selectInSingleSlice", gen::moleculesInSingleSlice);
+  m.set_function("selectEdgeAtomsInRingsWithinSlice",
                    ring::getEdgeMoleculesInRings);
-  lua.set_function("selectAtomsInSliceWithRingEdgeAtoms",
+  m.set_function("selectAtomsInSliceWithRingEdgeAtoms",
                    ring::printSliceGetEdgeMoleculesInRings);
-  lua.set_function("bulkRingNumberAnalysis", ring::bulkPolygonRingAnalysis);
-  lua.set_function("bulkTopologicalNetworkCriterion", ring::topoBulkAnalysis);
+  m.set_function("bulkRingNumberAnalysis", ring::bulkPolygonRingAnalysis);
+  m.set_function("bulkTopologicalNetworkCriterion", ring::topoBulkAnalysis);
   // sol2 does not apply C++ default arguments, so the trailing
   // templatePath is optional here explicitly
-  lua.set_function("bulkTopoUnitMatching",
+  m.set_function("bulkTopoUnitMatching",
                    [](std::string path, std::vector<std::vector<int>> rings,
                       std::vector<std::vector<int>> nList,
                       molSys::PointCloud<molSys::Point<double>, double> &yCloud,
@@ -476,13 +476,13 @@ void registerTopology(sol::state &lua) {
                    });
 }
 
-void registerAll(sol::state &lua) {
-  registerIO(lua);
-  registerNeighbours(lua);
-  registerRings(lua);
-  registerOrder(lua);
-  registerDescriptors(lua);
-  registerTopology(lua);
+void registerAll(sol::state_view lua, sol::table m) {
+  registerIO(lua, m);
+  registerNeighbours(lua, m);
+  registerRings(lua, m);
+  registerOrder(lua, m);
+  registerDescriptors(lua, m);
+  registerTopology(lua, m);
 }
 
 } // namespace luaApi

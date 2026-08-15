@@ -9,9 +9,9 @@
 #include <sol/sol.hpp>
 
 /** @file lua_api.hpp
- *  @brief Lua registration of the d-SEAMS library for the yodaStruct front
- *   end. Each group registers one cohesive slice of the API; registerAll wires
- *   every group into the given state. New-style functions take and return
+ *  @brief Lua registration of the dseams library.
+ *   Each group registers one cohesive slice of the API; registerAll wires
+ *   every group into the given table. New-style functions take and return
  *   plain Lua tables; the legacy names keep container-userdata semantics
  *   so older scripts keep running.
  */
@@ -19,25 +19,25 @@
 namespace luaApi {
 
 //! PointCloud usertype, trajectory readers and the file writers
-void registerIO(sol::state &lua);
+void registerIO(sol::state_view lua, sol::table m);
 
 //! Neighbour list construction, by atom ID and by cloud index
-void registerNeighbours(sol::state &lua);
+void registerNeighbours(sol::state_view lua, sol::table m);
 
 //! Primitive ring enumeration and the RingUpdater usertype
-void registerRings(sol::state &lua);
+void registerRings(sol::state_view lua, sol::table m);
 
 //! CHILL, CHILL+, Steinhardt and Voronoi-weighted order parameters
-void registerOrder(sol::state &lua);
+void registerOrder(sol::state_view lua, sol::table m);
 
 //! Template overlay, SOAP and Voronoi structure descriptors
-void registerDescriptors(sol::state &lua);
+void registerDescriptors(sol::state_view lua, sol::table m);
 
 //! Topological network criteria, clustering and selection analyses
-void registerTopology(sol::state &lua);
+void registerTopology(sol::state_view lua, sol::table m);
 
-//! Every registration group above
-void registerAll(sol::state &lua);
+//! Every registration group above, into table m
+void registerAll(sol::state_view lua, sol::table m);
 
 } // namespace luaApi
 
