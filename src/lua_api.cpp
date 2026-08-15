@@ -305,6 +305,20 @@ void registerOrder(sol::state &lua) {
                               outputFileName.value_or("chillPlus.txt"));
         return sol::as_table(iceStateNames(yCloud));
       });
+  lua.set_function(
+      "getIceTypePlusNoPrint",
+      [](Cloud &yCloud, std::vector<std::vector<int>> nList,
+         sol::optional<bool> isSlice) {
+        chill::getIceTypePlusNoPrint(yCloud, nList, isSlice.value_or(false));
+        return sol::as_table(iceStateNames(yCloud));
+      });
+  lua.set_function(
+      "getIceTypeNoPrint",
+      [](Cloud &yCloud, std::vector<std::vector<int>> nList,
+         sol::optional<bool> isSlice) {
+        chill::getIceTypeNoPrint(yCloud, nList, isSlice.value_or(false));
+        return sol::as_table(iceStateNames(yCloud));
+      });
   lua.set_function("getCorrel",
                    [](Cloud &yCloud, std::vector<std::vector<int>> nList,
                       sol::optional<bool> isSlice,

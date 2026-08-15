@@ -4,6 +4,11 @@ Registered names live in `src/lua_api.cpp` (`luaApi::registerAll`).
 Legacy workflow names (`readFrameOnlyOne`, `neighborList`, ...) keep
 container-userdata semantics. New-style names take and return tables.
 
+`require("yoda")` (Lua) and `(require :yoda-fnl)` (Fennel) add
+`read` / `neighbors` / `knn` / `chill_plus` / `cages` on top of that
+surface. `yoda.read` picks LAMMPS, XYZ, `.con`, or chemfiles from the
+suffix.
+
 ## Currently Registered Lua Functions
 
 The workflows for quasi-two-dimensional ice, quasi-one-dimensional ice and bulk systems are separated. The `Lua` functions for each work-flow are registered in different blocks in the `C++` code.
