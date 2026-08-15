@@ -29,5 +29,7 @@ under `input/`.
 
 # License
 
-MIT. Fennel is under its own license in `src/include/external/fennel/`.
-sol2 is under its own license in `src/include/external/sol/`.
+[MIT](LICENSE). Fennel is `src/include/external/fennel/LICENSE-fennel`.
+sol2 is `src/include/external/sol/LICENSE.txt`. cxxopts is MIT in
+`src/include/external/cxxopts.hpp`. rang is Unlicense in
+`src/include/external/LICENSE-rang`.

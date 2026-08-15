@@ -1,10 +1,22 @@
 # Lua Function Documentation
 
-In the _functions.lua_ file, lua functions are called, which are registered on the C++ side to inferface with the C++ functions. Here, we document the lua functions currently available to the user. 
+Registered names live in `src/lua_api.cpp` (`luaApi::registerAll`).
+Legacy workflow names (`readFrameOnlyOne`, `neighborList`, ...) keep
+container-userdata semantics. New-style names take and return tables.
 
 ## Currently Registered Lua Functions
 
 The workflows for quasi-two-dimensional ice, quasi-one-dimensional ice and bulk systems are separated. The `Lua` functions for each work-flow are registered in different blocks in the `C++` code.
+
+### Neighbours and affiliation
+
+- **kNearestNeighbourList**(`cloud`, `k`, `candidateCutoff`, `typeI`[, `mutual`]):
+  k-nearest graph. `mutual` defaults to true. `false` is the union graph.
+- **shellSeparation**(`cloud`, `k`, `typeI`): `{max d_k, min d_{k+1}}`.
+  The two graphs coincide when `max d_k <= rcut <= min d_{k+1}`.
+- **seededCageAffiliation**(`strictRings`, `strictNList`, `permRings`, `permNList`):
+  `{hc, ddc}` per-atom flags. Mutual seeds, union completion.
+- **cageAffiliation** / **AffiliationUpdater**: claim-free HC/DDC flags on six-rings.
 
 ### Structure descriptors
 
