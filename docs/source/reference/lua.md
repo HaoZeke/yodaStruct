@@ -1,0 +1,27 @@
+# Lua surface
+
+Registered names live in `src/lua_api.cpp` (`luaApi::registerAll`).
+`require("dseams")` loads `lua/dseams.lua` on `dseams_core`.
+
+## Helpers (`require("dseams")`)
+
+| name | role |
+|------|------|
+| `read` | suffix-dispatching loader |
+| `neighbors` / `knn` | bonded graphs |
+| `chill_plus` / `chill` | four-neighbour labels |
+| `cages` | HC/DDC membership |
+
+## Compiled registrations (`dseams_core`)
+
+- `kNearestNeighbourList(cloud, k, candidateCutoff, typeI[, mutual])`
+- `shellSeparation(cloud, k, typeI)`
+- `seededCageAffiliation(strictRings, strictNList, permRings, permNList)`
+- `cageAffiliation` / `AffiliationUpdater`
+- `classifyTemplates`, `soapSpectrum`, `soapSpectrumAll`
+- `steinhardtQl` / `steinhardtQlVoronoi`
+- `voronoiFeatures`
+- `prismAnalysis`, `ringAnalysis`
+
+Legacy workflow names keep container-userdata semantics. New-style
+names take and return tables.

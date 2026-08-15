@@ -43,6 +43,8 @@ lua example_lua/library/read.lua
 
 `require("yoda")` still resolves to `dseams`.
 
+Docs: `docs/orgmode/` (ox-rst) and `docs/source/` (Shibuya).
+
 # License
 
 [MIT](LICENSE). Fennel is `src/include/external/fennel/LICENSE-fennel`.

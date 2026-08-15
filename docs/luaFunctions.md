@@ -1,5 +1,8 @@
 # Lua Function Documentation
 
+Narrative docs are `docs/orgmode/` (export with `emacs --batch --load export.el`).
+This page is the compiled-registration list.
+
 Registered names live in `src/lua_api.cpp` (`luaApi::registerAll`).
 Legacy workflow names (`readFrameOnlyOne`, `neighborList`, ...) keep
 container-userdata semantics. New-style names take and return tables.
