@@ -11,10 +11,10 @@ Lua and Fennel library for the d-SEAMS C++ engine.
 
 * Overview
 
-This repository is a *library*. ~require("dseams")~ in Lua,
-~(require :dseams)~ in Fennel. The engine CLI is ~seams~ in
-[[https://github.com/d-SEAMS/seams-core][seams-core]]. Python is
-[[https://github.com/d-SEAMS/PydSEAMSlib][pydseams]].
+This repository is a *library*. There is no ~yodaStruct~ executable.
+~require("dseams")~ in Lua, ~(require :dseams)~ in Fennel. The engine
+CLI is ~seams~ in [[https://github.com/d-SEAMS/seams-core][seams-core]].
+Python is [[https://github.com/d-SEAMS/PydSEAMSlib][pydseams]].
 
 #+begin_src lua
 local dseams = require("dseams")
@@ -34,6 +34,33 @@ Helpers stay in Lua. ~require("yoda")~ still resolves to ~dseams~.
      quickstart
 #+end_export
 
+* Tutorials
+#+begin_export rst
+  .. toctree::
+     :maxdepth: 1
+     :caption: Tutorials
+
+     tutorials/read-and-classify
+#+end_export
+
+* How-To
+#+begin_export rst
+  .. toctree::
+     :maxdepth: 1
+     :caption: How-To
+
+     howto/fennel
+#+end_export
+
+* Explanation
+#+begin_export rst
+  .. toctree::
+     :maxdepth: 1
+     :caption: Explanation
+
+     explanation/library-not-cli
+#+end_export
+
 * Reference
 #+begin_export rst
   .. toctree::
@@ -42,3 +69,6 @@ Helpers stay in Lua. ~require("yoda")~ still resolves to ~dseams~.
 
      reference/lua
 #+end_export
+
+The long compiled-registration list is ~docs/luaFunctions.md~
+(appendix, not a Diataxis page).

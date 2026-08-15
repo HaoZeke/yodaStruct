@@ -3,26 +3,312 @@
 
 Registered names live in ~src/lua_api.cpp~ (~luaApi::registerAll~).
 ~require("dseams")~ loads ~lua/dseams.lua~ on ~dseams_core~.
+~require("yoda")~ is the same table. Fennel: ~(require :dseams)~;
+~lua/dseams.fnl~ adds kebab-case aliases (~chill-plus~).
+
+The engine CLI injects the compiled names as globals. Library
+scripts call them on ~dseams.core~.
+
+* Calling conventions
+
+** Library vs globals
+
+#+begin_src lua
+local dseams = require("dseams")
+local cloud = dseams.read("water.lammpstrj", {type = 2})
+local types = dseams.chill_plus(cloud, {cutoff = 3.5, type = 2})
+local nl = dseams.core.neighListO(3.5, cloud, 2)
+#+end_src
+
+Usertypes (~PointCloud~, ~RingUpdater~, ~AffiliationUpdater~) are
+registered on the Lua state when ~dseams_core~ loads, so
+~RingUpdater.new(6)~ works after ~require~.
+
+** PointCloud userdata
+
+Readers return a ~PointCloud~ userdata, not a table.
+
+| member | kind | meaning |
+|--------+------+---------|
+| ~nop~ | field | particle count |
+| ~currentFrame~ | field | frame index just read |
+| ~box()~ | method | box lengths, 3-number table |
+| ~boxLow()~ | method | box origin, 3-number table |
+| ~iceTypes()~ | method | per-particle state name strings |
+
+~PointCloud.new()~ builds an empty cloud. Workflow scripts pass that
+scratch object into the legacy readers.
+
+Ice-state strings: ~cubic~, ~hexagonal~, ~water~, ~interfacial~,
+~clathrate~, ~interClathrate~, ~reCubic~, ~reHex~, ~unclassified~.
+
+** Tables vs userdata
+
+New-style names take neighbour lists and ring lists *by value*. sol2
+builds a C++ container from a plain Lua table of tables. Those names
+return ~sol::as_nested~ or ~sol::as_table~, so the result is a Lua
+table.
+
+Legacy names take C++ container *references*. They bind only
+container userdata (the object another C++ bind already put on the
+stack). A freshly written Lua table is not accepted.
+
+| style | examples | nList / rings in | result |
+|-------+----------+------------------+--------|
+| new | ~neighListO~, ~neighbourListByIndex~, ~kNearestNeighbourList~, ~ringNetwork~, ~cageAffiliation~, ~getCorrelPlus~ | Lua table | Lua table (or void / name table) |
+| new, userdata out | ~getHbondNetwork~, ~getHbondNetworkFromClouds~ | Lua table | C++ vector userdata |
+| legacy | ~neighborList~, ~bondNetworkByIndex~, ~getPrimitiveRings~, ~readFrame*~, ~chillPlus_*~, ~chill_*~ | userdata | userdata |
+
+~sol2~ does not apply C++ default arguments on a raw bind. Wrapped
+names spell optionals in Lua (~sol::optional~). Legacy names need
+every argument the bound C++ signature requires.
 
 * Helpers (~require("dseams")~)
 
-| name | role |
-|------+------|
-| ~read~ | suffix-dispatching loader |
-| ~neighbors~ / ~knn~ | bonded graphs |
-| ~chill_plus~ / ~chill~ | four-neighbour labels |
-| ~cages~ | HC/DDC membership |
+Option tables may be omitted. Defaults are those of ~lua/dseams.lua~.
+
+** ~read~(path[, opts])
+
+Suffix-dispatching loader. Returns a ~PointCloud~.
+
+| suffix | backend | notes |
+|--------+---------+-------|
+| ~.xyz~ | ~readXYZ~ | whole file; ~opts.frame~ unused |
+| ~.con~ | ~readCon~ | errors if this build has no readcon |
+| ~.pdb~ / ~.gro~ / ~.dcd~ | ~readChemfiles~ | errors if this build has no chemfiles; ~opts.type~ defaults to ~-1~ (keep all) |
+| other (LAMMPS dump) | ~readLammpsTrjO~ | ~opts.frame~ defaults to 1. If ~opts.type~ is nil, tries type 2 then type 1 |
+
+** ~neighbors~(cloud[, opts])
+
+Cutoff neighbour list by atom ID. Calls
+~core.neighListO(opts.cutoff or 3.5, cloud, opts.type or 1)~.
+Returns a Lua table of rows (self ID first).
+
+** ~knn~(cloud[, opts])
+
+k-nearest graph by atom ID. Calls ~kNearestNeighbourList~.
+
+- ~opts.k~ defaults to 4
+- ~opts.cutoff~ (candidate cutoff) defaults to 5.0
+- ~opts.type~ defaults to 1
+- ~opts.mutual~ defaults to true; only the boolean ~false~ selects the union graph
+
+** ~chill_plus~(cloud[, opts])
+
+Builds ~neighbors(cloud, opts)~, runs ~getCorrelPlus(cloud, nl, false)~,
+returns ~getIceTypePlusNoPrint(cloud, nl, false)~ (array of state
+names). Does not write a file. Mutates ~cloud~.
+
+** ~chill~(cloud[, opts])
+
+Same pipeline with ~getCorrel~ and ~getIceTypeNoPrint~.
+
+** ~cages~(cloud[, opts])
+
+Seeded HC/DDC membership. Builds mutual and union k-nearest graphs
+(~opts.k~ 4, ~opts.cutoff~ 5.0, ~opts.type~ 1), converts each to an
+index list, keeps six-membered rings, and returns
+~seededCageAffiliation(...)~: a table ~{hc = ..., ddc = ...}~ of
+per-atom flags.
 
 * Compiled registrations (~dseams_core~)
 
-- ~kNearestNeighbourList~(cloud, k, candidateCutoff, typeI[, mutual])
-- ~shellSeparation~(cloud, k, typeI)
-- ~seededCageAffiliation~(strictRings, strictNList, permRings, permNList)
-- ~cageAffiliation~ / ~AffiliationUpdater~
-- ~classifyTemplates~, ~soapSpectrum~, ~soapSpectrumAll~
-- ~steinhardtQl~ / ~steinhardtQlVoronoi~
-- ~voronoiFeatures~
-- ~prismAnalysis~, ~ringAnalysis~
+Names below are on ~dseams.core~, or globals under the engine CLI.
+Optional backends are listed only when the matching ~#ifdef~ is on.
 
-Legacy workflow names (~readFrameOnlyOne~, ~neighborList~, ...) keep
-container-userdata semantics. New-style names take and return tables.
+** I/O
+
+New-style readers allocate a scratch cloud and return it. They do
+not take an inout ~resCloud~.
+
+- ~readLammpsTrjO~(filename, targetFrame, typeO[, isSlice, low, high])
+  :: One LAMMPS dump frame, one atom type. ~isSlice~ defaults to
+  false; ~low~ / ~high~ default to ~{0,0,0}~.
+- ~readLammpsTrjreduced~(filename, targetFrame, typeI[, isSlice, low, high])
+  :: Same, dropping atoms outside the slice when ~isSlice~ is true.
+- ~readXYZ~(filename)
+  :: XYZ coordinates. Whole file.
+- ~readChemfiles~(filename, targetFrame[, typeFilter])
+  :: Chemfiles formats. Registered only with ~SEAMS_HAS_CHEMFILES~.
+  ~typeFilter~ defaults to ~-1~.
+- ~readCon~(filename, targetFrame)
+  :: eOn ~.con~. Registered only with ~SEAMS_HAS_READCON~.
+- ~writeDump~(yCloud, path, outFile)
+  :: Write a LAMMPS dump. Returns an int status.
+- ~writeHistogram~(yCloud, nList, avgQ6)
+  :: Write ~cij~ / ~q6~ / ~q3~ columns. Returns an int status.
+
+Legacy readers take an inout ~PointCloud~ userdata and return it.
+~sol2~ does not fill C++ defaults here; pass the slice arguments.
+
+- ~readFrame~(filename, targetFrame, resCloud, typeO, isSlice, low, high)
+  :: ~sinp::readLammpsTrjO~.
+- ~readFrameOnlyOne~(filename, targetFrame, resCloud, typeI, isSlice, low, high)
+  :: ~sinp::readLammpsTrjreduced~.
+- ~readFrameOnlyOneAllAtoms~(filename, targetFrame, resCloud, isSlice, low, high)
+  :: ~sinp::readLammpsTrj~ (every type).
+
+** Neighbours
+
+New-style lists return nested Lua tables. Rows are by atom ID unless
+the name says "ByIndex". ID rows lead with the self ID.
+
+- ~neighListO~(rcutoff, yCloud, typeI)
+  :: Distance cutoff, one type, by atom ID.
+- ~kNearestNeighbourList~(yCloud, k, candidateCutoff, typeI[, mutual])
+  :: k-nearest graph. ~mutual~ defaults to true (each nominates the
+  other). ~false~ is the union graph. ~candidateCutoff~ must exceed
+  the k-th neighbour distance.
+- ~shellSeparation~(yCloud, k, typeI)
+  :: Two numbers: ~max d_k~, ~min d_{k+1}~. The cutoff and k-nearest
+  graphs coincide when ~max d_k <= rcut <= min d_{k+1}~.
+- ~neighbourListByIndex~(yCloud, nList)
+  :: ID list to index list. ~nList~ may be a Lua table.
+- ~getNewNeighbourListByIndex~(yCloud, cutoff)
+  :: Index list built directly from the cloud.
+- ~getHbondNetwork~(filename, yCloud, nList, targetFrame, Htype[, dist, angle])
+  :: Hydrogen-bond graph from a trajectory. ~dist~ defaults to 2.42,
+  ~angle~ to 30.0 (water). Accepts a Lua-table ~nList~; returns
+  userdata.
+- ~getHbondNetworkFromClouds~(yCloud, hCloud, nList[, dist, angle])
+  :: Same criterion, H atoms from ~hCloud~. Same return convention.
+
+Legacy (userdata in and out):
+
+- ~neighborList~(rcutoff, yCloud, typeI)
+  :: ~nneigh::neighListO~.
+- ~bondNetworkByIndex~(yCloud, nList)
+  :: ~nneigh::neighbourListByIndex~.
+
+** CHILL
+
+New-style classifiers mutate the cloud. Name-returning calls also
+return a 1-based array of ice-state strings.
+
+- ~classifyBonds~(yCloud, nList, rule[, isSlice])
+  :: ~rule~ is ~"CHILL"~, ~"CHILL+"~, or a table
+  ~{staggeredMax, eclipsedMin, eclipsedMax, coordinationNumber}~.
+  ~isSlice~ defaults to false.
+- ~registerBondClassifier~(name, ruleTable)
+  :: Store or replace a named rule.
+- ~bondClassifierNames~()
+  :: Array of registered names.
+- ~getCorrelPlus~(yCloud, nList[, isSlice, coordinationNumber])
+  :: CHILL+ ~c_ij~. ~isSlice~ defaults to false;
+  ~coordinationNumber~ defaults to 4 (non-positive keeps each row).
+- ~getIceTypePlus~(yCloud, nList, path, firstFrame[, isSlice, outputFileName])
+  :: Classify and write ~path/bop/<outputFileName>~. File name
+  defaults to ~chillPlus.txt~. Returns state names.
+- ~getIceTypePlusNoPrint~(yCloud, nList[, isSlice])
+  :: Classify only. Returns state names.
+- ~getCorrel~(yCloud, nList[, isSlice, coordinationNumber])
+  :: CHILL ~c_ij~. Same defaults as ~getCorrelPlus~.
+- ~getIceType~(yCloud, nList, path, firstFrame[, isSlice, outputFileName])
+  :: Classify and write. File name defaults to ~chill.txt~.
+- ~getIceTypeNoPrint~(yCloud, nList[, isSlice])
+  :: Classify only.
+- ~steinhardtQl~(yCloud, nList, orderL)
+  :: ~{ql = ..., qlBar = ...}~ arrays. ~orderL~ is 3, 4, or 6.
+- ~steinhardtQlVoronoi~(yCloud, candidateCutoff, orderL)
+  :: Same table, Voronoi facet-area weights. ~orderL~ is 3, 4, 6, or 8.
+- ~voronoiFacetWeights~(yCloud, candidateCutoff)
+  :: 1-based array of ~{neighbours, weights, certified}~ per atom.
+  ~candidateCutoff~ must exceed the largest facet-neighbour distance.
+
+Legacy (userdata ~nList~, return the cloud or a C++ vector):
+
+- ~chillPlus_cij~(yCloud, nList, isSlice)
+  :: ~getCorrelPlus~; returns ~yCloud~.
+- ~chillPlus_iceType~(yCloud, nList, path, firstFrame, isSlice, outName)
+  :: ~getIceTypePlus~; returns ~yCloud~.
+- ~chill_cij~(yCloud, nList, isSlice)
+  :: ~getCorrel~; returns ~yCloud~.
+- ~chill_iceType~(yCloud, nList, path, firstFrame, isSlice, outName)
+  :: ~getIceType~; returns ~yCloud~.
+- ~averageQ6~(yCloud, nList, isSlice)
+  :: Per-atom averaged ~q6~ vector.
+- ~modifyChill~(yCloud, q6)
+  :: Reclassify water from ~q6~; returns ~yCloud~.
+- ~percentage_Ice~(yCloud, path, firstFrame, isSlice, outputFileName)
+  :: Write ice-type percentages.
+
+** Rings
+
+Index neighbour lists (leading self entry). New-style ~nList~ may be
+a Lua table.
+
+- ~ringNetwork~(nList, maxDepth)
+  :: Primitive rings of every size up to ~maxDepth~, each a table of
+  atom indices. Returns a Lua table of rings.
+- ~RingUpdater~
+  :: Usertype. ~RingUpdater.new(maxDepth)~; ~updater:update(nList)~
+  returns the same ring table as ~ringNetwork~. After a repeat call
+  on an unchanged graph, ~updater:lastRecomputedSources()~ is 0.
+  ~updater:lastBallsRefreshed()~ is the ball-refresh count.
+- ~getPrimitiveRings~(nList, maxDepth)
+  :: Legacy spelling of ~primitive::ringNetwork~ (userdata).
+
+** Cages
+
+Six-membered rings, neighbour lists by index.
+
+- ~cageAffiliation~(rings, nList)
+  :: Per-ring flags ~{hc = ..., ddc = ...}~, same length as ~rings~.
+- ~AffiliationUpdater~
+  :: Usertype. ~AffiliationUpdater.new()~;
+  ~updater:update(rings, nList)~ returns the same table as
+  ~cageAffiliation~. ~updater:lastReclassified()~ is the dirty
+  closure (every ring on the first call).
+- ~seededCageAffiliation~(strictRings, strictNList, permRings, permNList)
+  :: Per-atom flags ~{hc = ..., ddc = ...}~. Mutual-graph seeds,
+  union-graph completion, component-gated acceptance.
+
+** Descriptors
+
+- ~classifyTemplates~(yCloud, nList, kNeigh)
+  :: Overlay each k-neighbour shell onto FCC, HCP, BCC, SC. Returns a
+  1-based array of ~{name, rmsd}~.
+- ~soapSpectrum~(yCloud, iatom, nList, nMax, lMax, rcut)
+  :: Bartok SOAP of one particle. Flat array of length
+  ~nMax * nMax * (lMax + 1)~. ~iatom~ is 0-based.
+- ~soapSpectrumAll~(yCloud, nList, nMax, lMax, rcut)
+  :: SOAP of every particle. Nested table, ~nop~ rows.
+- ~voronoiFeatures~(yCloud, candidateCutoff)
+  :: Per-atom ~{q4, q6, q8}~ from one Voronoi pass per order.
+
+** Prism
+
+- ~prismAnalysis~(path, rings, nList, yCloud, maxDepth, atomID, firstFrame, currentFrame, doShapeMatching)
+  :: Quasi-one-dimensional prism assignment. ~rings~ and ~nList~ are
+  index lists (userdata on this bind). ~atomID~ is the lowest atom ID
+  used as a reference; it is passed by value from Lua. Returns an int
+  status.
+
+** Topology (ring sheets, RDF, clusters, selection, bulk)
+
+These binds keep C++ reference semantics (userdata clouds and lists).
+
+- ~ringAnalysis~(path, rings, nList, yCloud, maxDepth, sheetArea, firstFrame)
+  :: Quasi-two-dimensional polygon-ring analysis.
+- ~calcRDF~(path, rdfValues, yCloud, cutoff, binwidth, firstFrame, finalFrame)
+  :: 2-D RDF. ~rdfValues~ is an inout vector userdata.
+- ~clusterAnalysis~(path, iceCloud, yCloud, nList, iceNeighbourList, cutoff, firstFrame[, bopAnalysis])
+  :: Largest ice cluster into ~iceCloud~. ~bopAnalysis~ is ~"q6"~ or
+  ~"chill"~ (C++ default ~"q6"~ is not applied unless passed).
+- ~recenterCluster~(iceCloud, nList)
+  :: Recenter the cluster cloud on the box.
+- ~getPointCloudAtomsOfOneAtomType~(yCloud, outCloud, atomTypeI, isSlice, low, high)
+  :: Copy one type into ~outCloud~.
+- ~selectInSingleSlice~(yCloud, clearPrevious, low, high)
+  :: Mark molecules that touch the slice.
+- ~selectEdgeAtomsInRingsWithinSlice~(rings, oCloud, yCloud, low, high, identicalCloud)
+  :: Expand the slice to ring-edge molecules.
+- ~selectAtomsInSliceWithRingEdgeAtoms~(path, rings, oCloud, yCloud, low, high, identicalCloud)
+  :: Same, and write IDs plus a LAMMPS data file.
+- ~bulkRingNumberAnalysis~(path, rings, nList, yCloud, maxDepth, firstFrame)
+  :: Bulk primitive-ring counts.
+- ~bulkTopologicalNetworkCriterion~(path, rings, nList, yCloud, firstFrame, onlyTetrahedral)
+  :: DDC / HC search on six-rings.
+- ~bulkTopoUnitMatching~(path, rings, nList, yCloud, firstFrame, printClusters, onlyTetrahedral[, templatePath])
+  :: Topological unit matching. ~templatePath~ defaults to
+  ~"templates"~. ~rings~ / ~nList~ may be Lua tables on this wrap.
