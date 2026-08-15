@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.2.1
+
+Flake-based Nix package for the `dseams` Lua library.
+
 ## 2.2.0
 
 This repository is the Lua/Fennel **library** `dseams` (`luadseams`).

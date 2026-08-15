@@ -446,7 +446,7 @@ void registerTopology(sol::state_view lua, sol::table m) {
       "prismAnalysis",
       [](std::string path, const std::vector<std::vector<int>> &rings,
          const std::vector<std::vector<int>> &nList, Cloud &cloud, int maxDepth,
-         int &atomID, int firstFrame, int currentFrame, bool doShapeMatching) {
+         int atomID, int firstFrame, int currentFrame, bool doShapeMatching) {
         return ring::prismAnalysis(path, rings, nList, cloud, maxDepth, atomID,
                                    firstFrame, currentFrame, doShapeMatching);
       });
