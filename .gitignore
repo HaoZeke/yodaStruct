@@ -2,5 +2,6 @@
 !/subprojects/*.wrap
 build/
 bbdir/
+/result
 *.swp
 .DS_Store

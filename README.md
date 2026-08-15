@@ -1,5 +1,7 @@
 # luadseams (`dseams`)
 
+[![built with nix](https://builtwithnix.org/badge.svg)](https://builtwithnix.org)
+
 Lua and Fennel library for the [d-SEAMS](https://dseams.info) C++ engine
 ([`seams-core`](https://github.com/d-SEAMS/seams-core)).
 
@@ -29,6 +31,14 @@ meson setup bbdir --wrap-mode=nofallback
 meson compile -C bbdir
 LUA_PATH="$PWD/lua/?.lua;;" LUA_CPATH="$PWD/bbdir/?.so;;" \
   lua example_lua/library/read.lua
+```
+
+Nix flake (meson, `require("dseams")`):
+
+```bash
+nix build
+nix develop
+lua example_lua/library/read.lua
 ```
 
 `require("yoda")` still resolves to `dseams`.
