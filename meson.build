@@ -29,6 +29,13 @@ endif
 inc = include_directories('src/include/internal', 'src/include/external')
 
 fennel_lua = meson.project_source_root() / 'src/include/external/fennel/fennel.lua'
+install_data(
+  [
+    'src/include/external/fennel/fennel.lua',
+    'src/include/external/fennel/LICENSE-fennel',
+  ],
+  install_dir: get_option('datadir') / 'yodaStruct',
+)
 
 link_args = []
 if host_machine.system() == 'linux'
@@ -40,7 +47,10 @@ yoda = executable(
   files('src/main.cpp', 'src/lua_api.cpp', 'src/opt_parser.cpp'),
   dependencies: [yds_dep, lua_dep],
   include_directories: inc,
-  cpp_args: ['-DYODA_FENNEL_LUA="' + fennel_lua + '"'],
+  cpp_args: [
+    '-DYODA_FENNEL_LUA="' + fennel_lua + '"',
+    '-DYODA_VERSION="' + meson.project_version() + '"',
+  ],
   link_args: link_args,
   install: true,
 )

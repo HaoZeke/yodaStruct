@@ -14,12 +14,20 @@ cxxopts::ParseResult parse(int argc, char *argv[]) {
     options.positional_help("[optional args]").show_positional_help();
     options.allow_unrecognised_options().add_options()(
         "c,config", "Yaml Config",
-        cxxopts::value<std::string>()->default_value("conf.yml"))("h,help",
-                                                                 "Print help");
+        cxxopts::value<std::string>()->default_value("conf.yml"))(
+        "h,help", "Print help")("v,version", "Print version");
     auto result = options.parse(argc, argv);
 
     if (result.count("help")) {
       std::cout << options.help({"", "Group"}) << "\n";
+      std::exit(0);
+    }
+    if (result.count("version")) {
+#ifdef YODA_VERSION
+      std::cout << "yodaStruct " << YODA_VERSION << "\n";
+#else
+      std::cout << "yodaStruct\n";
+#endif
       std::exit(0);
     }
     return result;
