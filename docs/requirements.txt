@@ -1,0 +1,4 @@
+sphinx>=8
+shibuya
+myst-parser
+sphinx-sitemap

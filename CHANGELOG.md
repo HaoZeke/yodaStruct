@@ -1,5 +1,10 @@
 # Changelog
 
+## 2.2.2
+
+Shibuya docs from `docs/orgmode/`. The Lua surface is documented
+there; `docs/luaFunctions.md` remains the registration list.
+
 ## 2.2.1
 
 Flake-based Nix package for the `dseams` Lua library.

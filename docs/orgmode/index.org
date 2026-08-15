@@ -1,0 +1,44 @@
+#+TITLE: dseams
+#+OPTIONS: toc:nil todo:nil num:nil author:nil title:nil ^:nil
+
+#+begin_export rst
+======
+dseams
+======
+
+Lua and Fennel library for the d-SEAMS C++ engine.
+#+end_export
+
+* Overview
+
+This repository is a *library*. ~require("dseams")~ in Lua,
+~(require :dseams)~ in Fennel. The engine CLI is ~seams~ in
+[[https://github.com/d-SEAMS/seams-core][seams-core]]. Python is
+[[https://github.com/d-SEAMS/PydSEAMSlib][pydseams]].
+
+#+begin_src lua
+local dseams = require("dseams")
+local cloud = dseams.read("water.lammpstrj")
+print(dseams.chill_plus(cloud, {cutoff = 3.5}))
+#+end_src
+
+~dseams.core~ is the compiled registrations (~dseams_core.so~).
+Helpers stay in Lua. ~require("yoda")~ still resolves to ~dseams~.
+
+* Getting Started
+#+begin_export rst
+  .. toctree::
+     :maxdepth: 1
+     :caption: Getting Started
+
+     quickstart
+#+end_export
+
+* Reference
+#+begin_export rst
+  .. toctree::
+     :maxdepth: 2
+     :caption: Reference
+
+     reference/lua
+#+end_export
