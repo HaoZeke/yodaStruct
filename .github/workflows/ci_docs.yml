@@ -14,9 +14,10 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-      - run: |
-          pip install -r docs/requirements.txt
-          sphinx-build -b html docs/source docs/build
+      - name: Install Sphinx (Shibuya, sphinx-design, mermaid)
+        run: pip install -r docs/requirements.txt
+      - name: Build HTML from committed RST
+        run: sphinx-build -b html docs/source docs/build
       - name: Deploy to GitHub Pages
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         uses: peaceiris/actions-gh-pages@v4

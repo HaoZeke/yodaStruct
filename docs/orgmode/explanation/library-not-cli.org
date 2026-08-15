@@ -1,62 +1,103 @@
-#+TITLE: The 2020 executable and the 2.2 library
+#+TITLE: The library, not a second CLI
+#+AUTHOR: [[https://rgoswami.me][Rohit Goswami]]
 #+OPTIONS: toc:nil num:nil
 
 Call ~require("dseams")~. The 2020 Deferred Structural Elucidation
 Analysis for Molecular Simulations (d-SEAMS) release ran as an
-executable named ~yodaStruct~. 2.2 builds no such binary. Call
-~seams~ for the engine CLI, in
+executable named ~yodaStruct~. This tree builds no such binary.
+Call ~seams~ for the engine CLI, in
 [[https://github.com/d-SEAMS/seams-core][seams-core]].
+
+* The problem
+
+Two binaries for one engine split the driver story. A process you
+cannot ~require~ does not compose: you cannot embed it in a
+Fennel REPL, and you cannot call it from a program that already
+owns ~main~.
+
+#+begin_export rst
+.. mermaid::
+
+   flowchart LR
+     subgraph old["2020 release"]
+       YS[yodaStruct executable]
+       YAML[config.yml]
+       GLOB[Lua globals]
+       YAML --> YS
+       YS --> GLOB
+     end
+     subgraph now["this tree"]
+       REQ["require(\"dseams\")"]
+       SO[dseams_core.so]
+       REQ --> SO
+     end
+     subgraph engine["seams-core"]
+       CLI[seams CLI]
+       YDS[libyodaLib]
+       CLI --> YDS
+       SO --> YDS
+     end
+#+end_export
 
 * The 2020 executable
 
 The Journal of Chemical Information and Modeling paper (Goswami,
-Goswami, and Singh, 2020, doi:10.1021/acs.jcim.0c00031) released
-the same code as ~yodaStruct~. A run looked like:
+Goswami, and Singh, 2020,
+[[https://doi.org/10.1021/acs.jcim.0c00031][doi:10.1021/acs.jcim.0c00031]])
+released the same code as ~yodaStruct~. A run looked like:
 
 #+begin_src bash
 yodaStruct -c lua_inputs/config.yml
 #+end_src
 
-The binary parsed YAML, created a Lua state, registered C++ functions
-as globals (~readFrameOnlyOne~, ~neighborList~, and others), and
-evaluated ~vars.lua~ plus ~functions.lua~. The script never called
-~require~. It lived inside the driver. The process owned the program.
+The binary parsed YAML, created a Lua state, registered C++
+functions as globals (~readFrameOnlyOne~, ~neighborList~, and
+others), and evaluated ~vars.lua~ plus ~functions.lua~. The
+script never called ~require~. It lived inside the driver. The
+process owned the program.
 
-This tree, at 2.0, rebuilt that driver as a Lua and Fennel front end:
-~./bbdir/yodaStruct -c example.yml~. The same YAML schema, the same
-globals, plus vendored Fennel for ~.fnl~ scripts.
+A later rebuild of that driver in this tree kept the same YAML
+schema and the same globals, plus vendored Fennel for ~.fnl~
+scripts. seams-core already owns the engine CLI (~seams~).
 
-~seams-core~ already owns the engine CLI (~seams~). Two binaries for
-one engine split the driver story.
+* The library
 
-* The 2.2 library
-
-2.2 drops the driver from this tree. meson builds the shared module
-~dseams_core~. ~lua/dseams.lua~ does ~require("dseams_core")~ and
-exports ~read~, ~neighbors~, ~knn~, ~chill_plus~, ~chill~, and
-~cages~. A normal ~lua~ or Fennel process loads it:
+meson builds the shared module ~dseams_core~. ~lua/dseams.lua~
+does ~require("dseams_core")~ and exports ~read~, ~neighbors~,
+~knn~, ~chill_plus~, ~chill~, and ~cages~. A normal ~lua~ or
+Fennel process loads it:
 
 #+begin_src lua
 local dseams = require("dseams")
 #+end_src
 
-~require("yoda")~ returns the same table. Python already works this
-way: [[https://github.com/d-SEAMS/PydSEAMSlib][pydseams]] loads as a
-module. Helpers stay in the scripting language. The compiled module
-exports the registration surface (~dseams_core~, ~pydseams._core~).
+~require("yoda")~ returns the same table. Python already works
+this way: [[https://github.com/d-SEAMS/PydSEAMSlib][pydseams]]
+loads as a module. Helpers stay in the scripting language. The
+compiled module exports the registration surface (~dseams_core~,
+~pydseams._core~).
 
-* Why the driver left this tree
+* Why the driver is not here
 
-A library composes. A binary does not. You cannot ~require~ a process,
-embed it in a Fennel REPL, or call it from a script that already owns
-~main~.
+A library composes. A binary does not.
 
-One CLI belongs with the engine. Call ~seams~ in ~seams-core~.
+One CLI belongs with the engine. Call ~seams~ in seams-core.
 This repository does not grow a second one.
 
 The 2020 YAML workflow (config plus globals) belongs to ~seams~.
 Run an ordinary file with ~lua~ after setting ~LUA_PATH~ and
-~LUA_CPATH~, or after ~nix develop~.
+~LUA_CPATH~, or after ~nix develop~. Hosts that already own
+~main~ load ~luaopen_dseams_core~; see
+[[file:../howto/embed-lua.org][Embed in a Lua host]].
+
+* Trade-offs
+
+- Library scripts lose the YAML driver. They gain a normal
+  ~require~, a Fennel REPL, and an embeddable ~.so~.
+- Compiled names live on ~dseams.core~, not as globals. Scripts
+  that mention ~readFrameOnlyOne~ as a global need a rewrite.
+- Optional I/O (~readCon~, ~readChemfiles~) follows the
+  seams-core build flags. The helper surface stays the same.
 
 * What to call
 
@@ -64,5 +105,5 @@ Run an ordinary file with ~lua~ after setting ~LUA_PATH~ and
 |------+------|
 | Lua / Fennel library | ~require("dseams")~ in this repository |
 | old Lua name | ~require("yoda")~ (alias) |
-| engine CLI | ~seams~ in ~seams-core~ |
+| engine CLI | ~seams~ in seams-core |
 | Python library | ~pydseams~ |

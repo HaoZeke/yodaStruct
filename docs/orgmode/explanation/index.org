@@ -1,0 +1,29 @@
+#+TITLE: Explanation
+#+AUTHOR: [[https://rgoswami.me][Rohit Goswami]]
+#+OPTIONS: toc:nil num:nil
+
+* Explanation
+
+Explanation documents are understanding-oriented. Use them to
+understand concepts and design.
+
+** Available Explanations
+
+| Explanation | Description |
+|-------------+-------------|
+| [[file:library-not-cli.org][The library, not a second CLI]] | Why this tree exports ~require("dseams")~ |
+| [[file:frontends.org][Four front ends]] | Lua, Fennel, Python, and ~seams~ |
+| [[file:citation.org][How to cite]] | JCIM paper and ~CITATION.cff~ |
+
+** Structure
+
+Each explanation includes:
+- Problem statement
+- Solution rationale
+- Design trade-offs
+
+** Getting Help
+
+- [[file:../tutorials/index.org][Tutorials]] - Learn from scratch
+- [[file:../howto/index.org][How-to Guides]] - Solve problems
+- [[file:../reference/lua.org][Lua surface]] - API documentation

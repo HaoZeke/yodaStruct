@@ -1,0 +1,30 @@
+#+TITLE: How-to Guides
+#+AUTHOR: [[https://rgoswami.me][Rohit Goswami]]
+#+OPTIONS: toc:nil num:nil
+
+* How-to Guides
+
+How-to guides are goal-oriented. Use them to solve specific problems.
+
+** Available How-tos
+
+| Guide | Description |
+|-------+-------------|
+| [[file:install.org][Install the library]] | Build ~dseams_core.so~ and put it on ~LUA_CPATH~ |
+| [[file:fennel.org][Call dseams from Fennel]] | ~(require :dseams)~ and kebab-case wrappers |
+| [[file:embed-lua.org][Embed in a Lua host]] | Load the module from a process that owns ~main~ |
+| [[file:faq.org][FAQ]] | Short answers |
+| [[file:troubleshooting.org][Troubleshooting]] | Common failures and fixes |
+
+** Structure
+
+Each how-to guide follows this structure:
+1. Problem statement
+2. Solution with code examples
+3. See also links
+
+** Getting Help
+
+- [[file:../tutorials/index.org][Tutorials]] - Learn from scratch
+- [[file:../reference/lua.org][Lua surface]] - API documentation
+- [[file:../explanation/index.org][Explanation]] - Understand concepts

@@ -1,24 +1,35 @@
-#+TITLE: Read a dump and classify
-#+OPTIONS: toc:nil num:nil
+#+TITLE: Tutorial: Read a dump and classify
+#+AUTHOR: [[https://rgoswami.me][Rohit Goswami]]
+#+EMAIL: rgoswami@ieee.org
+#+OPTIONS: toc:nil num:nil author:t title:t
 
-You will read the LAMMPS dump that ships in this repository and ask
-two different questions of the same oxygen cloud.
+* Prerequisites
 
-- =dseams.chill_plus= labels each oxygen from its four-neighbour
-  bond order (CHILL+).
-- =dseams.cages= flags whether that oxygen sits in a hexagonal
-  cage (HC) or a double-diamond cage (DDC).
+- Lua 5.4 on ~PATH~
+- meson >= 1.3, ninja, a C++20 compiler, pkg-config
+- This repository, with work from the repository root so the dump
+  path resolves
+- The [[file:../quickstart.org][Quickstart]] build, or the meson / Nix
+  steps in Step 1
 
-Those calls do not answer the same thing. The script prints both
-tables. This repository does not pin the CHILL+ histogram, so you
-read the counts you get.
+* Learning Objectives
 
-Work from the repository root. The dump path is relative.
+By the end of this tutorial you will be able to:
 
-* Build
+1. Call ~require("dseams")~ from a stock ~lua~ process
+2. Read one LAMMPS dump frame into a ~PointCloud~
+3. Label each oxygen with ~dseams.chill_plus~
+4. Flag hexagonal-cage and double-diamond-cage membership with
+   ~dseams.cages~
+5. See why those two tables answer different questions
 
-Meson. =LUA_PATH= finds =lua/dseams.lua=. =LUA_CPATH= finds
-=dseams_core.so=.
+This repository does not pin the CHILL+ histogram. Print the counts
+you get. Do not treat a ~water~-heavy split as a failed run.
+
+* Step 1: Build the library
+
+Meson. ~LUA_PATH~ finds ~lua/dseams.lua~. ~LUA_CPATH~ finds
+~dseams_core.so~.
 
 #+begin_src bash
 meson setup bbdir --wrap-mode=nofallback
@@ -37,13 +48,13 @@ nix develop
 If you already ran the [[file:../quickstart.org][Quickstart]], the
 exports (or the Nix shell) are enough. Skip the compile.
 
-* Read the dump
+* Step 2: Require and read
 
-=input/traj/exampleTraj.lammpstrj= is one frame of 750 atoms: 500
+~input/traj/exampleTraj.lammpstrj~ is one frame of 750 atoms: 500
 of LAMMPS type 1 (hydrogen) and 250 of type 2 (oxygen). Ice
 helpers classify oxygen.
 
-The shipped reader is =example_lua/library/read.lua=:
+The shipped reader is ~example_lua/library/read.lua~:
 
 #+begin_src lua
 local dseams = require("dseams")
@@ -58,18 +69,18 @@ lua example_lua/library/read.lua
 
 You should see:
 
-#+begin_src text
+#+begin_example
 dseams_lib nop=250
-#+end_src
+#+end_example
 
-=dseams.read= keeps one atom type. Pass ={type = 2}= on this dump.
-=chill_plus= and =cages= build neighbour graphs with
-=opts.type or 1=, so they need =type = 2= as well. A cloud of
+~dseams.read~ keeps one atom type. Pass ~{type = 2}~ on this dump.
+~chill_plus~ and ~cages~ build neighbour graphs with
+~opts.type or 1~, so they need ~type = 2~ as well. A cloud of
 oxygens plus a type-1 neighbour filter is an empty graph.
 
-* Classify
+* Step 3: Label with CHILL+
 
-Save this as =/tmp/read-and-classify.lua=. It is the rest of the
+Save this as ~/tmp/read-and-classify.lua~. It is the rest of the
 tutorial.
 
 #+begin_src lua
@@ -118,18 +129,15 @@ lua /tmp/read-and-classify.lua
 
 The first line is the 250 oxygens, frame 1, and the box
 (40 x 40 x 180 Angstrom, a long z). The ice-nanotube examples in
-=example_lua/iceNanotube/= use this dump.
+~example_lua/iceNanotube/~ use this dump.
 
-** CHILL+
+~dseams.chill_plus~ builds a 3.5 Angstrom cutoff neighbour list,
+runs ~getCorrelPlus~, and returns ~getIceTypePlusNoPrint~. No file
+is written. The cloud is mutated. The return value is a 1-based
+array of state names, length ~cloud.nop~.
 
-=dseams.chill_plus= builds a 3.5 Angstrom cutoff neighbour list,
-runs =getCorrelPlus=, and returns
-=getIceTypePlusNoPrint=. No file is written. The cloud is mutated.
-The return value is a 1-based array of state names, length
-=cloud.nop=.
-
-Names you can see: =cubic=, =hexagonal=, =water=, =interfacial=,
-=clathrate=, =interClathrate=, =unclassified=.
+Names you can see: ~cubic~, ~hexagonal~, ~water~, ~interfacial~,
+~clathrate~, ~interClathrate~, ~unclassified~.
 
 CHILL+ looks at the four-neighbour shell. A bond with correlation
 <= -0.8 is staggered; a bond in [-0.35, 0.25] is eclipsed.
@@ -143,20 +151,20 @@ CHILL+ looks at the four-neighbour shell. A bond with correlation
 
 Print the histogram. Add the counts. They sum to 250. This tree
 does not assert a particular split. A confined water dump can
-land mostly in =water= and =interfacial=. That is a
+land mostly in ~water~ and ~interfacial~. That is a
 classification, not a failed run.
 
-** Cages
+* Step 4: Flag cages
 
-=dseams.cages= builds two 4-nearest graphs (mutual = strict,
+~dseams.cages~ builds two 4-nearest graphs (mutual = strict,
 union = permissive; candidate cutoff 5.0), keeps six-membered
-rings, and returns =seededCageAffiliation=: a table
-={hc = ..., ddc = ...}= of per-atom flags, each length
-=cloud.nop=.
+rings, and returns ~seededCageAffiliation~: a table
+~{hc = ..., ddc = ...}~ of per-atom flags, each length
+~cloud.nop~.
 
-- =hc[i]= is true when oxygen =i= belongs to an accepted
+- ~hc[i]~ is true when oxygen ~i~ belongs to an accepted
   hexagonal cage.
-- =ddc[i]= is true when it belongs to an accepted double-diamond
+- ~ddc[i]~ is true when it belongs to an accepted double-diamond
   cage.
 
 HC and DDC are bulk ice motifs (two basal six-rings plus
@@ -165,25 +173,31 @@ affiliation accepts a permissive-graph atom only when its
 affiliated component contains a mutual-graph seed. An empty
 strict pass accepts nothing.
 
-Print =hc= and =ddc= counts. Zero is a valid answer: this dump
+Print ~hc~ and ~ddc~ counts. Zero is a valid answer: this dump
 is confined water, not a bulk ice lattice.
 
-* Two questions
+* Step 5: Read both tables
 
-=chill_plus= is a local bond-order label. =cages= is six-ring
+~chill_plus~ is a local bond-order label. ~cages~ is six-ring
 membership. A cubic oxygen need not sit in a DDC. An HC oxygen
 need not be labeled hexagonal. Read both tables; do not expect
 them to match.
 
-The helpers live in =lua/dseams.lua=. The compiled names they
-call are on =dseams.core=; see
+The helpers live in ~lua/dseams.lua~. The compiled names they
+call are on ~dseams.core~; see
 [[file:../reference/lua.org][Lua surface]].
+
+* Complete Example Script
+
+The block in Step 3 is the complete script. Save it as
+~/tmp/read-and-classify.lua~ and run it from the repository root
+with ~LUA_PATH~ and ~LUA_CPATH~ set.
 
 * Fennel
 
-=(require :dseams)= is the same Lua table. Names stay
+~(require :dseams)~ is the same Lua table. Names stay
 snake_case. The vendored compiler is
-=src/include/external/fennel/fennel.lua=.
+~src/include/external/fennel/fennel.lua~.
 
 #+begin_src fennel
 (local dseams (require :dseams))
@@ -195,14 +209,72 @@ snake_case. The vendored compiler is
                       (length aff.ddc)))
 #+end_src
 
-Save the snippet as =/tmp/read-and-classify.fnl=, or run the
-shipped file =example_lua/library/chill.fnl= (that one stops
-after =chill_plus=):
+Save the snippet as ~/tmp/read-and-classify.fnl~, or run the
+shipped file ~example_lua/library/chill.fnl~ (that one stops
+after ~chill_plus~):
 
 #+begin_src bash
 lua src/include/external/fennel/fennel.lua /tmp/read-and-classify.fnl
 lua src/include/external/fennel/fennel.lua example_lua/library/chill.fnl
 #+end_src
 
-How Fennel finds =dseams=, and how =lua/dseams.fnl= adds
-=chill-plus=, is in [[file:../howto/fennel.org][Fennel]].
+How Fennel finds ~dseams~, and how ~lua/dseams.fnl~ adds
+~chill-plus~, is in [[file:../howto/fennel.org][Fennel]].
+
+* Troubleshooting
+
+** module 'dseams' not found
+
+~LUA_PATH~ does not contain ~lua/?.lua~. From the repository
+root:
+
+#+begin_src bash
+export LUA_PATH="$PWD/lua/?.lua;;"
+#+end_src
+
+** module 'dseams_core' not found
+
+~LUA_CPATH~ does not contain the build directory that holds
+~dseams_core.so~:
+
+#+begin_src bash
+export LUA_CPATH="$PWD/bbdir/?.so;;"
+#+end_src
+
+** empty cloud, or ~nop=0~
+
+You omitted ~{type = 2}~ on a dump whose oxygens are type 2, or
+you ran the script from a directory where
+~input/traj/exampleTraj.lammpstrj~ does not exist. Work from the
+repository root.
+
+** cages hc=0 ddc=0
+
+Zero is a valid answer on this dump. Confined water need not
+contain an accepted hexagonal cage or double-diamond cage.
+
+** Import-style globals (~readFrameOnlyOne~ is nil)
+
+Scripts that mention ~readFrameOnlyOne~, ~functionScript~, or
+~trajectory~ as a global expect the 2020 driver. Rewrite them to
+~require("dseams")~. See
+[[file:../explanation/library-not-cli.org][The library, not a second CLI]].
+
+* Next Steps
+
+- [[file:../howto/fennel.org][Call dseams from Fennel]] - Lisp syntax on the same table
+- [[file:../howto/embed-lua.org][Embed in a Lua host]] - Load the ~.so~ from your own process
+- [[file:../reference/lua.org][Lua surface]] - Helpers and ~dseams.core~ names
+- [[file:../howto/install.org][Install the library]] - How the ~.so~ is built and found
+
+* Summary
+
+You learned to:
+1. ✓ Call ~require("dseams")~ from stock ~lua~
+2. ✓ Read one dump frame into a ~PointCloud~
+3. ✓ Label oxygens with ~dseams.chill_plus~
+4. ✓ Flag cage membership with ~dseams.cages~
+5. ✓ Treat the two tables as different questions
+
+The helpers stay in ~lua/dseams.lua~. The compiled registrations
+stay on ~dseams.core~.

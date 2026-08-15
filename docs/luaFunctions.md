@@ -1,13 +1,14 @@
 # Lua Function Documentation
 
 Narrative API reference is the org book:
-`docs/orgmode/reference/lua.org` (helpers, calling conventions,
-grouped `dseams_core` names). Export with
-`emacs --batch --load export.el` from `docs/`. The Sphinx page is
-`docs/source/reference/lua.md`.
+`docs/orgmode/reference/lua.org` (the public `require("dseams")`
+table). Export with `emacs --batch --load export.el` from `docs/`.
+The Sphinx pages are `docs/source/reference/lua.rst` and the
+appendix `docs/source/reference/lua-functions.rst`.
 
 This page is the compiled-registration appendix. It is not the book.
-
+The Sphinx-readable form of this list is
+`docs/source/reference/lua-functions.rst`.
 Registered names live in `src/lua_api.cpp` (`luaApi::registerAll`).
 Legacy workflow names (`readFrameOnlyOne`, `neighborList`, ...) keep
 container-userdata semantics. New-style names take and return tables.

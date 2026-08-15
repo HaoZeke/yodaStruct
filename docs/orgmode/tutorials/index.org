@@ -1,0 +1,29 @@
+#+TITLE: Tutorials
+#+AUTHOR: [[https://rgoswami.me][Rohit Goswami]]
+#+OPTIONS: toc:nil num:nil
+
+* Tutorials
+
+Tutorials are learning-oriented. Follow them step by step to learn
+~require("dseams")~.
+
+** Available Tutorials
+
+| Tutorial | Description |
+|----------+-------------|
+| [[file:read-and-classify.org][Read a dump and classify]] | Load the shipped LAMMPS dump, run CHILL+, and flag HC / DDC cages |
+
+** What Makes a Good Tutorial?
+
+Following [[https://onegoodtutorial.org/][One Good Tutorial]] principles:
+- Clear learning objectives
+- Step-by-step instructions
+- Working code examples
+- Troubleshooting section
+- Summary of what you learned
+
+** Getting Help
+
+- [[file:../howto/index.org][How-to Guides]] - Solve specific problems
+- [[file:../reference/lua.org][Lua surface]] - API documentation
+- [[file:../explanation/index.org][Explanation]] - Understand concepts

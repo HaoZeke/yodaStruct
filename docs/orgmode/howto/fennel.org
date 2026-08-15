@@ -1,9 +1,11 @@
-#+TITLE: Fennel
+#+TITLE: Call dseams from Fennel
+#+AUTHOR: [[https://rgoswami.me][Rohit Goswami]]
 #+OPTIONS: toc:nil num:nil
 
-Call ~dseams~ from Fennel with ~(require :dseams)~. That loads
-~lua/dseams.lua~ on ~dseams_core.so~. This path uses no
-~yodaStruct~ binary and no YAML config.
+* Problem
+
+You want lisp syntax on the same library a Lua script loads with
+~require("dseams")~. No ~yodaStruct~ binary. No YAML config.
 
 * Paths
 
@@ -23,7 +25,8 @@ nix develop
 #+end_src
 
 The vendored compiler lives at
-~src/include/external/fennel/fennel.lua~. Invoke it as a Lua
+~src/include/external/fennel/fennel.lua~. A meson install puts a
+copy at ~$prefix/share/luadseams/fennel.lua~. Invoke it as a Lua
 script. It already puts ~fennel~ on ~package.loaded~.
 
 * ~(require :dseams)~
@@ -51,7 +54,8 @@ Fennel ~require~ falls through to Lua ~package.path~, so
 
 Scripts that mention ~readFrameOnlyOne~, ~functionScript~, or
 ~trajectory~ as a global expect the 2020 driver. Rewrite them to
-~(require :dseams)~.
+~(require :dseams)~. ~example_lua/fennel/script.fnl~ is that older
+shape.
 
 * ~lua/dseams.fnl~
 
@@ -71,4 +75,15 @@ Putting ~lua/?.fnl~ on ~fennel.path~ and then ~(require :dseams)~
 would compile ~dseams.fnl~ as ~dseams~ and load that file as
 itself. Do not do that.
 
+meson installs ~dseams.fnl~ next to ~dseams.lua~ under
+~share/luadseams/lua/~. Nix does not symlink it into the versioned
+~share/lua/~ tree. After ~meson install~, pass the installed path
+to ~fennel.dofile~.
+
 ~(require :yoda)~ aliases the Lua module. Prefer ~(require :dseams)~.
+
+* See also
+
+- [[file:../tutorials/read-and-classify.org][Read a dump and classify]]
+- [[file:embed-lua.org][Embed in a Lua host]]
+- [[file:install.org][Install the library]]

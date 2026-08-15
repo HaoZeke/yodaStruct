@@ -1,0 +1,59 @@
+#+TITLE: How to cite
+#+AUTHOR: [[https://rgoswami.me][Rohit Goswami]]
+#+EMAIL: rgoswami@ieee.org
+#+OPTIONS: toc:nil num:nil
+
+* How to cite
+
+If you use this library, cite the d-SEAMS paper. The software
+record is the ~CITATION.cff~ in this tree.
+
+** Preferred citation
+
+Goswami, Rohit; Goswami, Amrita; Singh, Jayant Kumar.
+d-SEAMS: Deferred Structural Elucidation Analysis for Molecular
+Simulations. *Journal of Chemical Information and Modeling*
+2020, doi:[[https://doi.org/10.1021/acs.jcim.0c00031][10.1021/acs.jcim.0c00031]].
+
+#+begin_src bibtex
+@article{goswami2020dseams,
+  author  = {Goswami, Rohit and Goswami, Amrita and Singh, Jayant Kumar},
+  title   = {d-{SEAMS}: Deferred Structural Elucidation Analysis
+             for Molecular Simulations},
+  journal = {Journal of Chemical Information and Modeling},
+  year    = {2020},
+  doi     = {10.1021/acs.jcim.0c00031},
+}
+#+end_src
+
+** Software citation
+
+~CITATION.cff~ names the software
+~yodaStruct: Lua and Fennel front end for d-SEAMS~ and points
+the preferred citation at the paper above. Cite the paper for
+the methods. Cite the CFF when you need a software artifact
+(repository [[https://github.com/d-SEAMS/yodaStruct][d-SEAMS/yodaStruct]],
+license MIT).
+
+Call the library ~dseams~ in prose (~require("dseams")~). The
+repository name remains ~yodaStruct~.
+
+** Acknowledgments
+
+#+begin_src text
+Structural classification used dseams
+(https://github.com/d-SEAMS/yodaStruct), the Lua and Fennel
+library for the d-SEAMS engine [Goswami, Goswami, and Singh,
+J. Chem. Inf. Model. 2020, 10.1021/acs.jcim.0c00031].
+#+end_src
+
+** Related software
+
+- [[https://github.com/d-SEAMS/seams-core][seams-core]] :: C++ engine and ~seams~ CLI
+- [[https://github.com/d-SEAMS/PydSEAMSlib][pydseams]] :: Python bindings on the same engine
+
+** See also
+
+- [[file:library-not-cli.org][The library, not a second CLI]]
+- [[file:../reference/lua.org][Lua surface]]
+- [[file:../tutorials/index.org][Tutorials]]

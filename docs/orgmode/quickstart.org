@@ -1,11 +1,22 @@
 #+TITLE: Quickstart
+#+AUTHOR: [[https://rgoswami.me][Rohit Goswami]]
 #+OPTIONS: toc:nil num:nil
 
 Call ~require("dseams")~ from Lua, or ~(require :dseams)~ from
-Fennel. 2.2 builds no ~yodaStruct~ executable. Call ~seams~ for the
-engine CLI, in [[https://github.com/d-SEAMS/seams-core][seams-core]].
+Fennel. This tree builds no ~yodaStruct~ executable. Call ~seams~
+for the engine CLI, in
+[[https://github.com/d-SEAMS/seams-core][seams-core]].
 
 ~require("yoda")~ still resolves to ~dseams~.
+
+* Prerequisites
+
+- A Lua 5.4 interpreter on ~PATH~
+- meson >= 1.3, ninja, a C++20 compiler, pkg-config
+- Work from the repository root so the shipped dump path resolves
+
+How meson emits ~dseams_core.so~, and where an install puts it, is
+in [[file:howto/install.org][Install the library]].
 
 * Meson
 
@@ -27,6 +38,15 @@ local cloud = dseams.read("input/traj/exampleTraj.lammpstrj", {type = 2})
 assert(cloud.nop > 0, "empty cloud")
 print(string.format("dseams_lib nop=%d", cloud.nop))
 #+end_src
+
+You should see:
+
+#+begin_example
+dseams_lib nop=250
+#+end_example
+
+~dseams.read~ keeps one atom type. This dump stores oxygen as
+LAMMPS type 2, so the option table is ~{type = 2}~.
 
 * Nix
 
@@ -51,3 +71,12 @@ Fennel loads the same Lua module:
 
 How to invoke the vendored compiler and the kebab-case wrappers in
 ~lua/dseams.fnl~ is in [[file:howto/fennel.org][Fennel]].
+
+* Next steps
+
+- [[file:tutorials/read-and-classify.org][Read a dump and classify]] ::
+  CHILL+ labels and cage flags on the same cloud
+- [[file:howto/install.org][Install the library]] ::
+  How the ~.so~ is built and found
+- [[file:howto/embed-lua.org][Embed in a host]] ::
+  Load ~dseams_core~ from a process that already owns ~main~

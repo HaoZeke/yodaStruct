@@ -1,0 +1,25 @@
+#+TITLE: Four front ends
+#+OPTIONS: toc:nil num:nil
+
+Four entry points look like four products. They share one engine.
+
+| want | call | lives in |
+|------+------+----------|
+| Lua library | ~require("dseams")~ | this repository |
+| Fennel, same table | ~(require :dseams)~ | this repository |
+| Fennel kebab aliases | ~fennel.dofile("lua/dseams.fnl")~ | this repository |
+| Old Lua name | ~require("yoda")~ | this repository (alias) |
+| Compiled registrations only | ~require("dseams_core")~ | ~dseams_core.so~ |
+| Python library | ~import pydseams~ | [[https://github.com/d-SEAMS/PydSEAMSlib][PydSEAMSlib]] |
+| Engine CLI | ~seams~ | [[https://github.com/d-SEAMS/seams-core][seams-core]] |
+
+Helpers stay in the scripting language (~lua/dseams.lua~ here,
+Python helpers in pydseams). The compiled module is the registration
+surface (~dseams_core~, ~pydseams.yoda~).
+
+YAML plus globals (~readFrameOnlyOne~, ~trajectory~,
+~functionScript~) is the 2020 / ~seams~ driver contract. A library
+script never sees those globals unless the host injects them. This
+tree does not grow a second CLI.
+
+See [[file:library-not-cli.org][The library, not a second CLI]].

@@ -1,0 +1,204 @@
+require("dseams")
+=================
+
+Public table from ``require("dseams")`` (``lua/dseams.lua`` on
+``dseams_core``). ``require("yoda")`` is the same table.
+
+Fennel call shape is in :doc:`../howto/fennel`.
+Compiled names on ``dseams.core`` are in :doc:`lua-functions`.
+
+Public names
+------------
+
+.. code-block:: lua
+
+   local dseams = require("dseams")
+   local cloud = dseams.read("water.lammpstrj", {type = 2})
+   local types = dseams.chill_plus(cloud, {cutoff = 3.5, type = 2})
+   local nl = dseams.core.neighListO(3.5, cloud, 2)
+
+.. list-table::
+   :header-rows: 1
+
+   * - name
+     - kind
+     - role
+   * - ``read``
+     - function
+     - suffix-dispatching loader
+   * - ``neighbors``
+     - function
+     - cutoff neighbour list by atom ID
+   * - ``knn``
+     - function
+     - k-nearest graph by atom ID
+   * - ``chill_plus``
+     - function
+     - CHILL+ state names; no file
+   * - ``chill``
+     - function
+     - CHILL state names; no file
+   * - ``cages``
+     - function
+     - seeded HC/DDC per-atom flags
+   * - ``core``
+     - table
+     - ``require("dseams_core")``; compiled registrations
+
+These seven names are the public surface. Locals in ``lua/dseams.lua``
+(``suffix``, ``opts``) are not exported. Option tables may be omitted.
+Defaults are those of ``lua/dseams.lua``.
+
+The engine CLI injects compiled names as globals. Library scripts
+call them on ``dseams.core``.
+
+Calling conventions
+-------------------
+
+PointCloud userdata
+~~~~~~~~~~~~~~~~~~~
+
+Readers return a ``PointCloud`` userdata, not a table. The usertype is
+registered on the Lua state when ``dseams_core`` loads, so
+``PointCloud.new()`` is a global after ``require``. Workflow scripts pass
+that scratch object into the legacy readers.
+
+.. list-table::
+   :header-rows: 1
+
+   * - member
+     - kind
+     - meaning
+   * - ``nop``
+     - field
+     - particle count
+   * - ``currentFrame``
+     - field
+     - frame index just read
+   * - ``box()``
+     - method
+     - box lengths, 3-number table
+   * - ``boxLow()``
+     - method
+     - box origin, 3-number table
+   * - ``iceTypes()``
+     - method
+     - per-particle state name strings
+
+Ice-state strings: ``cubic``, ``hexagonal``, ``water``, ``interfacial``,
+``clathrate``, ``interClathrate``, ``reCubic``, ``reHex``, ``unclassified``.
+
+Tables vs userdata
+~~~~~~~~~~~~~~~~~~
+
+New-style compiled names take neighbour lists and ring lists *by
+value*. sol2 builds a C++ container from a plain Lua table of
+tables. Those names return ``sol::as_nested`` or ``sol::as_table``, so
+the result is a Lua table.
+
+Legacy names take C++ container *references*. They bind only
+container userdata (the object another C++ bind already put on the
+stack). A freshly written Lua table is not accepted.
+
+.. list-table::
+   :header-rows: 1
+
+   * - style
+     - examples
+     - nList / rings in
+     - result
+   * - new
+     - ``neighListO``, ``neighbourListByIndex``, ``kNearestNeighbourList``, ``ringNetwork``, ``cageAffiliation``, ``getCorrelPlus``
+     - Lua table
+     - Lua table (or void / name table)
+   * - new, userdata out
+     - ``getHbondNetwork``, ``getHbondNetworkFromClouds``
+     - Lua table
+     - C++ vector userdata
+   * - legacy
+     - ``neighborList``, ``bondNetworkByIndex``, ``getPrimitiveRings``, ``readFrame*``, ``chillPlus_*``, ``chill_*``
+     - userdata
+     - userdata
+
+``sol2`` does not apply C++ default arguments on a raw bind. Wrapped
+names spell optionals in Lua (``sol::optional``). Legacy names need
+every argument the bound C++ signature requires.
+
+``read(path[, opts])``
+----------------------
+
+Suffix-dispatching loader. Returns a ``PointCloud``.
+
+.. list-table::
+   :header-rows: 1
+
+   * - suffix
+     - backend
+     - notes
+   * - ``.xyz``
+     - ``readXYZ``
+     - whole file; ``opts.frame`` unused
+   * - ``.con``
+     - ``readCon``
+     - errors if this build has no readcon
+   * - ``.pdb`` / ``.gro`` / ``.dcd``
+     - ``readChemfiles``
+     - errors if this build has no chemfiles; ``opts.type`` defaults to ``-1`` (keep all)
+   * - other (LAMMPS dump)
+     - ``readLammpsTrjO``
+     - ``opts.frame`` defaults to 1. If ``opts.type`` is nil, tries type 2 then type 1
+
+``opts.frame`` is the 1-based frame index (default 1). ``opts.type`` is
+the LAMMPS type ID to keep.
+
+``neighbors(cloud[, opts])``
+----------------------------
+
+Cutoff neighbour list by atom ID. Calls
+``core.neighListO(opts.cutoff or 3.5, cloud, opts.type or 1)``.
+Returns a Lua table of rows (self ID first).
+
+``knn(cloud[, opts])``
+----------------------
+
+k-nearest graph by atom ID. Calls ``core.kNearestNeighbourList``.
+
+- ``opts.k`` defaults to 4
+- ``opts.cutoff`` (candidate cutoff) defaults to 5.0
+- ``opts.type`` defaults to 1
+- ``opts.mutual`` defaults to true; only the boolean ``false`` selects the union graph
+
+``chill_plus(cloud[, opts])``
+-----------------------------
+
+Builds ``neighbors(cloud, opts)``, runs
+``core.getCorrelPlus(cloud, nl, false)``, returns
+``core.getIceTypePlusNoPrint(cloud, nl, false)`` (1-based array of
+state names). Does not write a file. Mutates ``cloud``.
+
+``chill(cloud[, opts])``
+------------------------
+
+Same pipeline with ``core.getCorrel`` and ``core.getIceTypeNoPrint``.
+Mutates ``cloud``. Does not write a file.
+
+``cages(cloud[, opts])``
+------------------------
+
+Seeded HC/DDC membership. Builds mutual and union k-nearest graphs
+(``opts.k`` 4, ``opts.cutoff`` 5.0, ``opts.type`` 1), converts each to an
+index list, keeps six-membered rings, and returns
+``core.seededCageAffiliation(...)``: a table ``{hc = ..., ddc = ...}``
+of per-atom flags.
+
+``core``
+--------
+
+The table returned by ``require("dseams_core")``. Every name from
+``luaApi::registerAll`` (``src/lua_api.cpp``) lives here.
+
+Usertypes (``PointCloud``, ``RingUpdater``, ``AffiliationUpdater``) are
+registered on the Lua state, not on this table.
+``RingUpdater.new(6)`` works after ``require``.
+
+Signatures for every compiled name are in :doc:`lua-functions`.
