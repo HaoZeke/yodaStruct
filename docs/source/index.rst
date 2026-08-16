@@ -133,8 +133,8 @@ This documentation follows the `Diataxis <https://diataxis.fr/>`_ framework.
    reference/lua
    reference/lua-functions
 
-The compiled-registration appendix is :doc:`reference/lua-functions`.
-``docs/luaFunctions.md`` carries the same list as a standalone file.
+The compiled-registration appendix is :doc:`reference/lua-functions`,
+generated from Doxygen of ``lua_api.hpp``.
 
 Related projects
 ================

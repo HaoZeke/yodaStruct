@@ -3,5 +3,6 @@
 build/
 bbdir/
 /result
+docs/source/xml/
 *.swp
 .DS_Store

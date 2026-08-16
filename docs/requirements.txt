@@ -3,3 +3,4 @@ shibuya
 sphinx-sitemap
 sphinx-design
 sphinxcontrib-mermaid
+breathe

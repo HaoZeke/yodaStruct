@@ -14,9 +14,11 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-      - name: Install Sphinx (Shibuya, sphinx-design, mermaid)
+      - name: Install Doxygen
+        run: sudo apt-get update && sudo apt-get install -y doxygen
+      - name: Install Sphinx (Shibuya, sphinx-design, mermaid, Breathe)
         run: pip install -r docs/requirements.txt
-      - name: Build HTML from committed RST
+      - name: Build HTML from Doxygen XML and RST
         run: sphinx-build -b html docs/source docs/build
       - name: Deploy to GitHub Pages
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'

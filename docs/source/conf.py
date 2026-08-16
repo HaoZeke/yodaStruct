@@ -1,14 +1,24 @@
+import os
+import subprocess
+
+_conf_dir = os.path.dirname(os.path.abspath(__file__))
+subprocess.check_call(["doxygen", "Doxyfile"], cwd=_conf_dir)
+
 project = "dseams"
-release = "2.2.1"
+release = "2.2.4"
 copyright = "2019--present, d-SEAMS core team"
 author = "d-SEAMS core team"
 
 extensions = [
+    "breathe",
     "sphinx.ext.intersphinx",
     "sphinx_sitemap",
-    "sphinx_design",  # grids, cards, tabs, dropdowns (Shibuya-friendly)
-    "sphinxcontrib.mermaid",  # architecture / data-flow diagrams
+    "sphinx_design",
+    "sphinxcontrib.mermaid",
 ]
+
+breathe_projects = {"dseams": "xml"}
+breathe_default_project = "dseams"
 
 templates_path = ["_templates"]
 exclude_patterns = []
