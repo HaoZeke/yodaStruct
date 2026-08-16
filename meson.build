@@ -46,7 +46,7 @@ inc = include_directories('src/include/internal', 'src/include/external')
 # Eigen/BLAS add -I/usr/include, which also holds a distro Lua 5.5
 # lua.hpp. 5.3/5.4 packages ship lua.h. sol must use the C header,
 # and that -I must precede /usr/include.
-lua_inc_args = ['-DSOL_USE_LUA_HPP=0']
+lua_inc_args = ['-DSOL_NO_LUA_HPP=1']
 lua_includedir = lua_dep.get_variable('includedir', default_value: '')
 if lua_includedir != ''
     lua_inc_args += ['-I' + lua_includedir]

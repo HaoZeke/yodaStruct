@@ -6,10 +6,11 @@
 #ifndef SEAMS_LUA_API_H_
 #define SEAMS_LUA_API_H_
 
-// sol's default lua.hpp search hits a distro 5.5 header when Eigen
-// adds -I/usr/include. 5.3/5.4 packages ship lua.h only.
-#ifndef SOL_USE_LUA_HPP
-#define SOL_USE_LUA_HPP 0
+// __has_include(<lua.hpp>) is true whenever a distro 5.5 lua.hpp
+// exists in /usr/include. sol then includes that file even if a
+// 5.3/5.4 lua.h is already on the -I path. Force the C headers.
+#ifndef SOL_NO_LUA_HPP
+#define SOL_NO_LUA_HPP 1
 #endif
 
 #include <mol_sys.hpp>
