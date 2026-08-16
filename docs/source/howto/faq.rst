@@ -149,6 +149,8 @@ Where is the engine CLI?
 ^^^^^^^^^^^^^^^^^^^^^^^^
 
 ``seams`` in `seams-core <https://github.com/d-SEAMS/seams-core>`_.
+The engine CLI has ``seams cn`` and ``seams hbonds --donors``.
+Those commands are not this binary.
 The 2020 YAML workflow (config plus globals) is gone. Runtime knobs
 are twelve-factor (``SEAMS_CONFIG`` / ``./seams.env``, then the
 environment, then CLI flags).

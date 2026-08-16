@@ -31,6 +31,7 @@ YAML plus globals (``readFrameOnlyOne``, ``trajectory``,
 ``functionScript``) is the 2020 driver. It is not live. A library
 script never sees those globals unless the host injects them. This
 tree does not grow a second CLI. ``seams`` is flags and twelve-factor
-knobs, not ``conf.yaml``.
+knobs, not ``conf.yaml``. The engine CLI now has ``seams cn`` and
+``seams hbonds --donors``; those commands are not this binary.
 
 See `The library, not a second CLI <library-not-cli.rst>`_.

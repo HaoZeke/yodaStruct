@@ -85,7 +85,9 @@ Why the driver is not here
 A library composes. A binary does not.
 
 One CLI belongs with the engine. Call ``seams`` in seams-core.
-This repository does not grow a second one.
+The engine CLI has ``seams cn`` and ``seams hbonds --donors``.
+Those commands are not this binary. This repository does not
+grow a second one.
 
 The 2020 YAML workflow (config plus globals) belongs to ``seams``.
 Run an ordinary file with ``lua`` after setting ``LUA_PATH`` and
