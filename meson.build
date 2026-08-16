@@ -19,10 +19,20 @@ seams = subproject(
 )
 yds_dep = seams.get_variable('yds_dep')
 
-lua_dep = dependency('lua', required: false)
-if not lua_dep.found()
-  lua_dep = dependency('lua-5.4', required: false)
-endif
+# conda-forge gcc does not search /usr/include. The distro `lua` 5.5
+# pc file only ships `-I/usr/include`, which meson then drops, so
+# sol's `#include <lua.h>` fails. Prefer a pc that names a real
+# include dir and keep the wrap as last resort.
+cpp = meson.get_compiler('cpp')
+lua_dep = disabler()
+foreach name : ['lua-5.4', 'lua5.4', 'lua-5.3', 'lua5.3', 'lua']
+  if not lua_dep.found()
+    cand = dependency(name, required: false)
+    if cand.found() and cpp.has_header('lua.h', dependencies: cand)
+      lua_dep = cand
+    endif
+  endif
+endforeach
 if not lua_dep.found()
   lua_dep = dependency('lua-5.4', fallback: ['lua', 'lua_dep'])
 endif
