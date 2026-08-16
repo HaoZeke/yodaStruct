@@ -1,3 +1,4 @@
+
 ======
 dseams
 ======
@@ -48,25 +49,25 @@ Lua and Fennel library for the d-SEAMS C++ engine.
       Host ``dseams_core.so`` from Lua, Fennel, or C.
 
 About
-=====
+-----
 
-This repository is a *library*. There is no ``yodaStruct`` executable.
+This repository is a **library**. There is no ``yodaStruct`` executable.
 Call ``require("dseams")`` from Lua, or ``(require :dseams)`` from Fennel.
 The engine CLI is ``seams`` in
 `seams-core <https://github.com/d-SEAMS/seams-core>`_.
 Python is `pydseams <https://github.com/d-SEAMS/PydSEAMSlib>`_.
 
-.. code-block:: lua
+.. code:: lua
 
-   local dseams = require("dseams")
-   local cloud = dseams.read("water.lammpstrj")
-   print(dseams.chill_plus(cloud, {cutoff = 3.5}))
+    local dseams = require("dseams")
+    local cloud = dseams.read("water.lammpstrj")
+    print(dseams.chill_plus(cloud, {cutoff = 3.5}))
 
 ``dseams.core`` is the compiled registrations (``dseams_core.so``).
 Helpers stay in Lua. ``require("yoda")`` still resolves to ``dseams``.
 
 Suite stack
-===========
+-----------
 
 How the Lua library, the compiled module, and the rest of d-SEAMS
 relate:
@@ -107,7 +108,7 @@ relate:
    ``LUA_CPATH`` to the directory that holds ``dseams_core.so``.
 
 Documentation structure
-=======================
+-----------------------
 
 This documentation follows the `Diataxis <https://diataxis.fr/>`_ framework.
 
@@ -152,25 +153,39 @@ This documentation follows the `Diataxis <https://diataxis.fr/>`_ framework.
    reference/lua
    reference/lua-functions
 
-The compiled-registration appendix is :doc:`reference/lua-functions`,
-generated from Doxygen of ``lua_api.hpp``.
+The compiled-registration appendix is `Compiled registrations <reference/lua-functions.rst>`_,
+from Doxygen of ``lua_api.hpp``.
 
 Related projects
-================
+----------------
 
-- `seams-core <https://github.com/d-SEAMS/seams-core>`_ :: C++ engine and ``seams`` CLI
-- `pydseams <https://github.com/d-SEAMS/PydSEAMSlib>`_ :: Python Frame API on the same engine
-- `linkcell <https://github.com/d-SEAMS/linkcell>`_ :: periodic linked-cell k-nearest neighbours
-- `dseams.info <https://dseams.info>`_ :: Project site
+`seams-core <https://github.com/d-SEAMS/seams-core>`_
+    C++ engine and ``seams`` CLI
+
+`pydseams <https://github.com/d-SEAMS/PydSEAMSlib>`_
+    Python Frame API on the same engine
+
+`linkcell <https://github.com/d-SEAMS/linkcell>`_
+    periodic linked-cell k-nearest neighbours
+
+`dseams.info <https://dseams.info>`_
+    Project site
 
 License
-=======
+-------
 
 MIT. Cite the `2020 JCIM paper <https://doi.org/10.1021/acs.jcim.0c00031>`_
-and the ``CITATION.cff`` in this tree. See :doc:`explanation/citation`.
+and the ``CITATION.cff`` in this tree. See
+`How to cite <explanation/citation.rst>`_.
 
+#+begin\_export rst
 Indices and tables
-==================
+``================``
 
-* :ref:`genindex`
-* :ref:`search`
+:ref:\`genindex\`
+-----------------
+
+:ref:\`search\`
+---------------
+
+#+end\_export

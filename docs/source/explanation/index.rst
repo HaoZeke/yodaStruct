@@ -2,32 +2,45 @@
 Explanation
 ===========
 
+
+
+Explanation
+-----------
+
 Explanation documents are understanding-oriented. Use them to
 understand concepts and design.
 
 Available Explanations
-======================
+~~~~~~~~~~~~~~~~~~~~~~
 
-=====================================  ====================================================
-Explanation                            Description
-=====================================  ====================================================
-:doc:`library-not-cli`                 Why this tree exports ``require("dseams")``
-:doc:`frontends`                       Lua, Fennel, Python, and ``seams``
-:doc:`citation`                        JCIM paper and ``CITATION.cff``
-=====================================  ====================================================
+.. table::
+
+    +--------------------------------------------------------+----------------------------------------------------+
+    | Explanation                                            | Description                                        |
+    +========================================================+====================================================+
+    | `The library, not a second CLI <library-not-cli.rst>`_ | Why this tree exports ``require("dseams")``        |
+    +--------------------------------------------------------+----------------------------------------------------+
+    | `Three products <frontends.rst>`_                      | ``require("dseams")``, ``pydseams``, and ``seams`` |
+    +--------------------------------------------------------+----------------------------------------------------+
+    | `How to cite <citation.rst>`_                          | JCIM paper and ``CITATION.cff``                    |
+    +--------------------------------------------------------+----------------------------------------------------+
 
 Structure
-=========
+~~~~~~~~~
 
 Each explanation includes:
 
 - Problem statement
+
 - Solution rationale
+
 - Design trade-offs
 
 Getting Help
-============
+~~~~~~~~~~~~
 
-- :doc:`../tutorials/index` :: Learn from scratch
-- :doc:`../howto/index` :: Solve problems
-- :doc:`../reference/lua` :: API documentation
+- `Tutorials <../tutorials/index.rst>`_ - Learn from scratch
+
+- `How-to Guides <../howto/index.rst>`_ - Solve problems
+
+- `Lua surface <../reference/lua.rst>`_ - API documentation

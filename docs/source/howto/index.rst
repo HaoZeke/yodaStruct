@@ -2,33 +2,48 @@
 How-to Guides
 =============
 
+
+
+How-to Guides
+-------------
+
 How-to guides are goal-oriented. Use them to solve specific problems.
 
 Available How-tos
-=================
+~~~~~~~~~~~~~~~~~
 
-=========================  =======================================================
-Guide                      Description
-=========================  =======================================================
-:doc:`install`             Build ``dseams_core.so`` and put it on ``LUA_CPATH``
-:doc:`fennel`              ``(require :dseams)`` and kebab-case wrappers
-:doc:`embed-lua`           Load the module from a process that owns ``main``
-:doc:`faq`                 Short answers
-:doc:`troubleshooting`     Common failures and fixes
-=========================  =======================================================
+.. table::
+
+    +------------------------------------------+------------------------------------------------------+
+    | Guide                                    | Description                                          |
+    +==========================================+======================================================+
+    | `Install the library <install.rst>`_     | Build ``dseams_core.so`` and put it on ``LUA_CPATH`` |
+    +------------------------------------------+------------------------------------------------------+
+    | `Call dseams from Fennel <fennel.rst>`_  | ``(require :dseams)`` and kebab-case wrappers        |
+    +------------------------------------------+------------------------------------------------------+
+    | `Embed in a Lua host <embed-lua.rst>`_   | Load the module from a process that owns ``main``    |
+    +------------------------------------------+------------------------------------------------------+
+    | `FAQ <faq.rst>`_                         | Short answers                                        |
+    +------------------------------------------+------------------------------------------------------+
+    | `Troubleshooting <troubleshooting.rst>`_ | Common failures and fixes                            |
+    +------------------------------------------+------------------------------------------------------+
 
 Structure
-=========
+~~~~~~~~~
 
 Each how-to guide follows this structure:
 
 1. Problem statement
+
 2. Solution with code examples
+
 3. See also links
 
 Getting Help
-============
+~~~~~~~~~~~~
 
-- :doc:`../tutorials/index` :: Learn from scratch
-- :doc:`../reference/lua` :: API documentation
-- :doc:`../explanation/index` :: Understand concepts
+- `Tutorials <../tutorials/index.rst>`_ - Learn from scratch
+
+- `Lua surface <../reference/lua.rst>`_ - API documentation
+
+- `Explanation <../explanation/index.rst>`_ - Understand concepts
