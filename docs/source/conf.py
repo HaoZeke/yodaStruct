@@ -5,7 +5,7 @@ _conf_dir = os.path.dirname(os.path.abspath(__file__))
 subprocess.check_call(["doxygen", "Doxyfile"], cwd=_conf_dir)
 
 project = "dseams"
-release = "2.4.1"
+release = "2.5.0"
 copyright = "2019--present, d-SEAMS core team"
 author = "d-SEAMS core team"
 

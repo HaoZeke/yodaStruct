@@ -2,7 +2,12 @@
 
 ## Unreleased
 
-`calcRunningCN` binds `rdf::runningCN` (`{r, cn}`, `rhoJ = nJ / volume`).
+## 2.5.0
+
+`subprojects/seams-core.wrap` is `v2.5.0`. `calcRunningCN` binds
+`rdf::runningCN` (`{r, cn}`, `rhoJ = nJ / volume`). Ice-score
+`--family`, `seams cn --ions`, `seams pairs`, `seams domains`,
+and `seams density-z` live on the engine CLI.
 
 ## 2.4.1
 

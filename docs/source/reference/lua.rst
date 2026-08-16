@@ -97,7 +97,7 @@ stack). A freshly written Lua table is not accepted.
     +-------------------+------------------------------------------------------------------------------------------------------------------------------+------------------+----------------------------------+
     | style             | examples                                                                                                                     | nList / rings in | result                           |
     +===================+==============================================================================================================================+==================+==================================+
-    | new               | ``neighListO``, ``neighListPair``, ``neighbourListByIndex``, ``kNearestNeighbourList``, ``ringNetwork``, ``cageAffiliation``, ``getCorrelPlus``, ``calcCN``, ``calcRDF3D`` | Lua table        | Lua table (or void / name table) |
+    | new               | ``neighListO``, ``neighListPair``, ``neighbourListByIndex``, ``kNearestNeighbourList``, ``ringNetwork``, ``cageAffiliation``, ``getCorrelPlus``, ``calcCN``, ``calcRDF3D``, ``calcRunningCN`` | Lua table        | Lua table (or void / name table) |
     +-------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------+------------------+----------------------------------+
     | new, userdata out | ``getHbondNetwork``, ``getHbondNetworkFromClouds``, ``getHbondNetworkFromDonors``                                                                                        | Lua table        | C++ vector userdata              |
     +-------------------+------------------------------------------------------------------------------------------------------------------------------+------------------+----------------------------------+
@@ -152,6 +152,15 @@ Site-site coordination number. Calls ``core.calcCN`` with
 ``opts.cutoff`` (default 4.5), and ``opts.bins`` (default
 ``floor(cutoff / 0.1)``). ``rhoJ`` is ``nJ / volume`` from the
 partial RDF.
+
+~core.calcRunningCN~(cloud, typeI, typeJ, rmax, bins)
+-----------------------------------------------------
+
+Running integral of ``g_IJ``. Returns ``{r, cn}`` with
+``rhoJ = nJ / volume``. There is no ``dseams.running_cn`` helper;
+call the compiled name on ``dseams.core``. Ice-score ``--family``,
+contact pairs, polar/apolar domains, and type-resolved ``rho(z)``
+are the ``seams`` CLI in seams-core 2.5.0.
 
 ~knn~(cloud[, opts])
 --------------------
