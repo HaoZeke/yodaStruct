@@ -6,6 +6,10 @@
 #include <opt_parser.h>
 #include <seams_yaml.hpp>
 
+#if __has_include(<seams_config.hpp>)
+#include <seams_config.hpp>
+#endif
+
 #include <lua_api.hpp>
 #include <mol_sys.hpp>
 
@@ -130,6 +134,9 @@ void setupHelpers(sol::state &lua) {
 } // namespace
 
 int main(int argc, char *argv[]) {
+#if __has_include(<seams_config.hpp>)
+  seams::cfg::load();
+#endif
   auto result = parse(argc, argv);
   const auto cfg = seams::loadLuaConfig(result["c"].as<std::string>());
   const std::string tFile = cfg.trajectory;
