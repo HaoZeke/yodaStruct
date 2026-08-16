@@ -28,6 +28,8 @@ CLI.
 Lua is probed as ~lua-5.4~, ~lua5.4~, ~lua-5.3~, ~lua5.3~, then
 ~lua~, each ~>=5.3,<5.5~ and with a visible ~lua.h~. The wrap
 (~lua-5.4~) is last. ~--wrap-mode=nofallback~ disables that wrap.
+The build writes a ~lua.hpp~ that includes those headers by
+absolute path so sol does not pick a distro 5.5 ~lua.hpp~.
 
 Installed data (meson ~install: true~ on the module, plus
 ~install_data~):

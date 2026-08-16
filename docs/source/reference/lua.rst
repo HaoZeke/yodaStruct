@@ -22,25 +22,29 @@ Public names
 
 .. table::
 
-    +----------------+----------+----------------------------------------------------+
-    | name           | kind     | role                                               |
-    +================+==========+====================================================+
-    | ``read``       | function | suffix-dispatching loader                          |
-    +----------------+----------+----------------------------------------------------+
-    | ``neighbors``  | function | cutoff neighbour list by atom ID                   |
-    +----------------+----------+----------------------------------------------------+
-    | ``knn``        | function | k-nearest graph by atom ID                         |
-    +----------------+----------+----------------------------------------------------+
-    | ``chill_plus`` | function | CHILL+ state names; no file                        |
-    +----------------+----------+----------------------------------------------------+
-    | ``chill``      | function | CHILL state names; no file                         |
-    +----------------+----------+----------------------------------------------------+
-    | ``cages``      | function | seeded HC/DDC per-atom flags                       |
-    +----------------+----------+----------------------------------------------------+
-    | ``core``       | table    | ``require("dseams_core")``; compiled registrations |
-    +----------------+----------+----------------------------------------------------+
+    +--------------------+----------+----------------------------------------------------+
+    | name               | kind     | role                                               |
+    +====================+==========+====================================================+
+    | ``read``           | function | suffix-dispatching loader                          |
+    +--------------------+----------+----------------------------------------------------+
+    | ``neighbors``      | function | cutoff neighbour list by atom ID                   |
+    +--------------------+----------+----------------------------------------------------+
+    | ``neighbors_pair`` | function | I-J cutoff neighbour list                          |
+    +--------------------+----------+----------------------------------------------------+
+    | ``cn``             | function | site-site coordination number                      |
+    +--------------------+----------+----------------------------------------------------+
+    | ``knn``            | function | k-nearest graph by atom ID                         |
+    +--------------------+----------+----------------------------------------------------+
+    | ``chill_plus``     | function | CHILL+ state names; no file                        |
+    +--------------------+----------+----------------------------------------------------+
+    | ``chill``          | function | CHILL state names; no file                         |
+    +--------------------+----------+----------------------------------------------------+
+    | ``cages``          | function | seeded HC/DDC per-atom flags                       |
+    +--------------------+----------+----------------------------------------------------+
+    | ``core``           | table    | ``require("dseams_core")``; compiled registrations |
+    +--------------------+----------+----------------------------------------------------+
 
-These seven names are the public surface. Locals in ``lua/dseams.lua``
+These names are the public surface. Locals in ``lua/dseams.lua``
 (``suffix``, ``opts``) are not exported. Option tables may be omitted.
 Defaults are those of ``lua/dseams.lua``.
 
@@ -93,9 +97,9 @@ stack). A freshly written Lua table is not accepted.
     +-------------------+------------------------------------------------------------------------------------------------------------------------------+------------------+----------------------------------+
     | style             | examples                                                                                                                     | nList / rings in | result                           |
     +===================+==============================================================================================================================+==================+==================================+
-    | new               | ``neighListO``, ``neighbourListByIndex``, ``kNearestNeighbourList``, ``ringNetwork``, ``cageAffiliation``, ``getCorrelPlus`` | Lua table        | Lua table (or void / name table) |
-    +-------------------+------------------------------------------------------------------------------------------------------------------------------+------------------+----------------------------------+
-    | new, userdata out | ``getHbondNetwork``, ``getHbondNetworkFromClouds``                                                                           | Lua table        | C++ vector userdata              |
+    | new               | ``neighListO``, ``neighListPair``, ``neighbourListByIndex``, ``kNearestNeighbourList``, ``ringNetwork``, ``cageAffiliation``, ``getCorrelPlus``, ``calcCN``, ``calcRDF3D`` | Lua table        | Lua table (or void / name table) |
+    +-------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------+------------------+----------------------------------+
+    | new, userdata out | ``getHbondNetwork``, ``getHbondNetworkFromClouds``, ``getHbondNetworkFromDonors``                                                                                        | Lua table        | C++ vector userdata              |
     +-------------------+------------------------------------------------------------------------------------------------------------------------------+------------------+----------------------------------+
     | legacy            | ``neighborList``, ``bondNetworkByIndex``, ``getPrimitiveRings``, ``readFrame*``, ``chillPlus_*``, ``chill_*``                | userdata         | userdata                         |
     +-------------------+------------------------------------------------------------------------------------------------------------------------------+------------------+----------------------------------+
@@ -132,6 +136,22 @@ the LAMMPS type ID to keep.
 Cutoff neighbour list by atom ID. Calls
 ``core.neighListO(opts.cutoff or 3.5, cloud, opts.type or 1)``.
 Returns a Lua table of rows (self ID first).
+
+~neighbors_pair~(cloud[, opts])
+-------------------------------
+
+I-J cutoff neighbour list. Calls
+``core.neighListPair(opts.cutoff or 3.5, cloud, opts.type_i or 1,
+opts.type_j or 2)``. Like-type pairs reuse ``neighListO``.
+
+~cn~(cloud[, opts])
+-------------------
+
+Site-site coordination number. Calls ``core.calcCN`` with
+``opts.type_i`` (default 1), ``opts.type_j`` (default 2),
+``opts.cutoff`` (default 4.5), and ``opts.bins`` (default
+``floor(cutoff / 0.1)``). ``rhoJ`` is ``nJ / volume`` from the
+partial RDF.
 
 ~knn~(cloud[, opts])
 --------------------
