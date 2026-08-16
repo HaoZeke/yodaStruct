@@ -1,8 +1,8 @@
 # Changelog
 
-## 2.2.3
+## 2.2.4
 
-`subprojects/seams-core.wrap` is `68367c0` (linked-cell k-nearest).
+`subprojects/seams-core.wrap` is `v2.2.4` (linked-cell k-nearest).
 `dseams.knn` is unchanged.
 
 ## 2.2.2
