@@ -1,20 +1,14 @@
 # dseams branding
 
-Original mark for **dseams** (`require("dseams")`, the Lua/Fennel
-library). Same hexagonal ice cage as `dSeamsLogo.png`, drawn as
-geometry.
-
-## Concept
-
-- **Hexagonal prism** — the d-SEAMS cage (HC / ice nanotube).
-- **Teal primitive ring** — Franzblau rings on the front hex. Not
-  the Lua moon.
-- **Palette** — Shibuya teal (`#134E4A`, `#2DD4BF`, `#F0FDFA`).
+Mark for **dseams** (`require("dseams")`, the Lua/Fennel library).
+The d-SEAMS hexagonal ice cage sits inside a teal orbital ring: a
+Lua module, and the rings the library enumerates.
 
 ## Files
 
 | File | Use |
 | --- | --- |
-| `dseams-logo-light.svg` | Docs header (light), READMEs |
-| `dseams-logo-dark.svg` | Docs header (dark) |
-| `dseams-icon.svg` | Favicon / avatar (square) |
+| `dseams-logo-light.png` | Docs header and homepage (light) |
+| `dseams-logo-dark.png` | Docs header and homepage (dark) |
+| `dseams-icon.png` | README avatar |
+| `dseams-icon.ico` | Favicon |

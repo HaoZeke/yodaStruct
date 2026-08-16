@@ -2,10 +2,22 @@
 dseams
 ======
 
-.. image:: _static/logo/dseams-logo-light.svg
-   :alt: dseams
-   :width: 320px
-   :align: center
+.. raw:: html
+
+   <p class="dseams-hero">
+     <img class="dseams-hero-logo dseams-hero-logo--light"
+          src="_static/logo/dseams-logo-light.png"
+          alt="dseams"
+          width="320"
+          height="320"
+          loading="eager" />
+     <img class="dseams-hero-logo dseams-hero-logo--dark"
+          src="_static/logo/dseams-logo-dark.png"
+          alt="dseams"
+          width="320"
+          height="320"
+          loading="eager" />
+   </p>
 
 Lua and Fennel library for the d-SEAMS C++ engine.
 
@@ -82,6 +94,8 @@ relate:
      FNL --> HELPERS
      EMB --> CORE
      HELPERS --> CORE
+     LC[linkcell]
+     LC --> YDS
      CORE --> YDS
      SEAMS --> YDS
      PY --> YDS
@@ -146,6 +160,7 @@ Related projects
 
 - `seams-core <https://github.com/d-SEAMS/seams-core>`_ :: C++ engine and ``seams`` CLI
 - `pydseams <https://github.com/d-SEAMS/PydSEAMSlib>`_ :: Python Frame API on the same engine
+- `linkcell <https://github.com/d-SEAMS/linkcell>`_ :: periodic linked-cell k-nearest neighbours
 - `dseams.info <https://dseams.info>`_ :: Project site
 
 License

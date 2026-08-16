@@ -27,8 +27,8 @@ master_doc = "index"
 
 html_theme = "shibuya"
 html_static_path = ["_static"]
-html_favicon = "_static/logo/dseams-icon.svg"
-html_css_files = []  # sphinx-design ships its own CSS
+html_favicon = "_static/logo/dseams-icon.ico"
+html_css_files = ["custom.css"]
 html_js_files = []
 html_title = "dseams"
 html_baseurl = "https://d-seams.github.io/yodaStruct/"
@@ -48,8 +48,8 @@ mermaid_init_js = "mermaid.initialize({startOnLoad:true, theme:'neutral'});"
 html_theme_options = {
     "github_url": "https://github.com/d-SEAMS/yodaStruct",
     "accent_color": "teal",
-    "light_logo": "_static/logo/dseams-logo-light.svg",
-    "dark_logo": "_static/logo/dseams-logo-dark.svg",
+    "light_logo": "_static/logo/dseams-logo-light.png",
+    "dark_logo": "_static/logo/dseams-logo-dark.png",
     "dark_code": True,
     "globaltoc_expand_depth": 1,
     "toctree_collapse": True,
@@ -75,6 +75,12 @@ html_theme_options = {
                     "title": "dseams (Lua)",
                     "url": "https://d-seams.github.io/yodaStruct/",
                     "summary": "require(\"dseams\") and Fennel",
+                    "external": True,
+                },
+                {
+                    "title": "linkcell",
+                    "url": "https://github.com/d-SEAMS/linkcell",
+                    "summary": "Periodic linked-cell k-nearest neighbours",
                     "external": True,
                 },
             ],
