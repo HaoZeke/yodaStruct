@@ -45,14 +45,40 @@ endif
 
 inc = include_directories('src/include/internal', 'src/include/external')
 
-# Eigen/BLAS add -I/usr/include, which also holds a distro Lua 5.5
-# lua.hpp. 5.3/5.4 packages ship lua.h. sol must use the C header,
-# and that -I must precede /usr/include.
-lua_inc_args = ['-DSOL_NO_LUA_HPP=1']
+# sol does `#include <lua.hpp>` when __has_include(<lua.hpp>) is
+# true. That is true whenever a distro 5.5 lua.hpp sits in
+# /usr/include, even if a 5.3/5.4 -I is already on the line.
+# Write a build-dir lua.hpp that includes the pkg-config headers
+# by absolute path so -I<builddir> wins.
+fs = import('fs')
 lua_includedir = lua_dep.get_variable('includedir', default_value: '')
-if lua_includedir != ''
-    lua_inc_args += ['-I' + lua_includedir]
+lua_h = ''
+lua_lualib_h = ''
+lua_lauxlib_h = ''
+foreach base : [lua_includedir, lua_includedir / 'lua5.4', lua_includedir / 'lua5.3']
+    if lua_h == '' and base != '' and fs.exists(base / 'lua.h')
+        lua_h = base / 'lua.h'
+        lua_lualib_h = base / 'lualib.h'
+        lua_lauxlib_h = base / 'lauxlib.h'
+    endif
+endforeach
+if lua_h == ''
+    error(
+        'Lua 5.3/5.4 lua.h not found under includedir=@0@'.format(
+            lua_includedir,
+        ),
+    )
 endif
+lua_conf = configuration_data()
+lua_conf.set('LUA_H', lua_h)
+lua_conf.set('LUALIB_H', lua_lualib_h)
+lua_conf.set('LAUXLIB_H', lua_lauxlib_h)
+configure_file(
+    input: 'src/lua_picked.hpp.in',
+    output: 'lua.hpp',
+    configuration: lua_conf,
+)
+lua_inc_args = ['-I' + meson.current_build_dir()]
 add_project_arguments(lua_inc_args, language: 'cpp')
 
 link_args = []
