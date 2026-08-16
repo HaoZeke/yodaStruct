@@ -111,6 +111,16 @@ std::vector<std::vector<int>> getHbondNetworkFromClouds(
     Cloud &yCloud, Cloud &hCloud, std::vector<std::vector<int>> nList,
     sol::optional<double> dist, sol::optional<double> angle);
 
+/** I-J neighbour list. Like-type reuses neighListO. */
+std::vector<std::vector<int>> neighListPair(double rcutoff, const Cloud &yCloud,
+                                            int typeI, int typeJ);
+
+/** Hydrogen-bond network from a flat list of hCloud indices. */
+std::vector<std::vector<int>> getHbondNetworkFromDonors(
+    Cloud &yCloud, Cloud &hCloud, std::vector<std::vector<int>> nList,
+    std::vector<int> donorHs, sol::optional<double> dist,
+    sol::optional<double> angle);
+
 /** @} */
 
 /** @name Rings and cages
@@ -239,6 +249,10 @@ int calcRDF(std::string path, std::vector<double> &rdfValues,
 /** Partial 3D RDF g_IJ(r). Returns `{r, g}` bin centres and values. */
 sol::table calcRDF3D(sol::this_state ts, const Cloud &yCloud, int typeI,
                      int typeJ, double rmax, int nbins);
+
+/** Site-site CN to `rCut` (default `rmax`). `rhoJ = nJ / volume`. */
+double calcCN(const Cloud &yCloud, int typeI, int typeJ, double rmax, int nbins,
+              sol::optional<double> rCut);
 
 /** Quasi-1D prism analysis. `atomID` is the first-frame ID. */
 int prismAnalysis(std::string path, const std::vector<std::vector<int>> &rings,

@@ -2,8 +2,10 @@
 
 ## Unreleased
 
-`calcRDF3D` binds `rdf::partialRdf`. It takes a cloud, two type
-IDs, `rmax`, and `nbins`, and returns `{r, g}` tables.
+`calcRDF3D` binds `rdf::partialRdf`. `calcCN` / `dseams.cn` bind
+`rdf::coordinationNumber`. `neighListPair`, `parseSiteSpec`,
+`SiteTable`, `ionCloud`, `getHbondNetworkFromDonors`, and
+`donatedHydrogenBond` are on `dseams.core`.
 
 ## 2.4.0
 

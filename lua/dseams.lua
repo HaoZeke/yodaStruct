@@ -47,6 +47,19 @@ function dseams.neighbors(cloud, o)
   return core.neighListO(o.cutoff or 3.5, cloud, o.type or 1)
 end
 
+function dseams.neighbors_pair(cloud, o)
+  o = opts(o)
+  return core.neighListPair(o.cutoff or 3.5, cloud, o.type_i or 1,
+                            o.type_j or 2)
+end
+
+function dseams.cn(cloud, o)
+  o = opts(o)
+  local rmax = o.cutoff or 4.5
+  local bins = o.bins or math.max(1, math.floor(rmax / 0.1))
+  return core.calcCN(cloud, o.type_i or 1, o.type_j or 2, rmax, bins, rmax)
+end
+
 function dseams.knn(cloud, o)
   o = opts(o)
   local mutual = true

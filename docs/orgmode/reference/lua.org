@@ -21,6 +21,8 @@ local nl = dseams.core.neighListO(3.5, cloud, 2)
 |------+------+------|
 | ~read~ | function | suffix-dispatching loader |
 | ~neighbors~ | function | cutoff neighbour list by atom ID |
+| ~neighbors_pair~ | function | I-J cutoff neighbour list |
+| ~cn~ | function | site-site coordination number |
 | ~knn~ | function | k-nearest graph by atom ID |
 | ~chill_plus~ | function | CHILL+ state names; no file |
 | ~chill~ | function | CHILL state names; no file |
