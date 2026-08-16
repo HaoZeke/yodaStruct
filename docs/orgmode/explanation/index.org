@@ -12,7 +12,7 @@ understand concepts and design.
 | Explanation | Description |
 |-------------+-------------|
 | [[file:library-not-cli.org][The library, not a second CLI]] | Why this tree exports ~require("dseams")~ |
-| [[file:frontends.org][Four front ends]] | Lua, Fennel, Python, and ~seams~ |
+| [[file:frontends.org][Three products]] | ~require("dseams")~, ~pydseams~, and ~seams~ |
 | [[file:citation.org][How to cite]] | JCIM paper and ~CITATION.cff~ |
 
 ** Structure

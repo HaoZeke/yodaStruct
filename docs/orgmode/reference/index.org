@@ -4,6 +4,11 @@
 Public ~require("dseams")~ table, then the compiled-registration
 appendix. Fennel call shape is in [[file:../howto/fennel.org][Fennel]].
 
+| page | what it names |
+|------+---------------|
+| [[file:lua.org][require("dseams")]] | Public Lua helpers |
+| [[file:lua-functions.org][Compiled registrations]] | ~dseams.core~ via Doxygen |
+
 #+begin_export rst
 .. toctree::
    :maxdepth: 2

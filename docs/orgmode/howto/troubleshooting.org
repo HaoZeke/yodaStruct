@@ -25,6 +25,11 @@ export LUA_PATH="$PREFIX/share/luadseams/lua/?.lua;;"
 nix develop
 #+end_src
 
+~require("dseams")~ also applies the engine twelve-factor table
+(~SEAMS_CONFIG~ or ~./seams.env~, then the environment). Installed
+Lua/Fennel roots are ~YODA_LUA_PATH~ / ~YODA_FENNEL_PATH~. Those
+keys do not replace ~LUA_PATH~ / ~LUA_CPATH~ for ~require~.
+
 Confirm the file exists at that path, then:
 
 #+begin_src bash
@@ -164,6 +169,7 @@ Include:
 - meson / Nix revision
 - Lua version (~lua -v~)
 - The exact ~LUA_PATH~ and ~LUA_CPATH~
+- ~YODA_LUA_PATH~ / ~YODA_FENNEL_PATH~ / ~SEAMS_CONFIG~ if set
 - The script and the full error
 
 ** See Also
