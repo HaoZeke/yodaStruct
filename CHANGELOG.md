@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+## 2.3.0
+
+`subprojects/seams-core.wrap` is `v2.3.0`. `require("dseams")`
+applies the engine twelve-factor table when the header is present.
+
 The docs mark is the hexagonal ice cage with a primitive ring, as SVG.
 
 ## 2.2.5
