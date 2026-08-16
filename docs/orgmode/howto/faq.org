@@ -119,12 +119,15 @@ Do not put ~lua/?.fnl~ on ~fennel.path~ and then
 *** Where is the Python API?
 
 [[https://github.com/d-SEAMS/PydSEAMSlib][pydseams]]. Helpers stay
-in Python. The compiled surface is ~pydseams._core~.
+in Python. The compiled surface is ~pydseams.yoda~ (~_core~ is an
+alias).
 
 *** Where is the engine CLI?
 
 ~seams~ in [[https://github.com/d-SEAMS/seams-core][seams-core]].
-The 2020 YAML workflow (config plus globals) belongs there.
+The 2020 YAML workflow (config plus globals) is gone. Runtime knobs
+are twelve-factor (~SEAMS_CONFIG~ / ~./seams.env~, then the
+environment, then CLI flags).
 
 ** See Also
 
