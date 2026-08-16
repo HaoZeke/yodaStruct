@@ -2,10 +2,11 @@
 
 ## Unreleased
 
-`calcRDF3D` binds `rdf::partialRdf`. It takes a cloud, two type
-IDs, `rmax`, and `nbins`, and returns `{r, g}` tables.
-`calcRunningCN` binds `rdf::runningCN` on that histogram with
-`rhoJ = nJ / volume` and returns `{r, cn}`.
+`calcRDF3D` binds `rdf::partialRdf`. `calcRunningCN` binds
+`rdf::runningCN` (`{r, cn}`, `rhoJ = nJ / volume`). `calcCN` /
+`dseams.cn` bind `rdf::coordinationNumber`. `neighListPair`,
+`parseSiteSpec`, `SiteTable`, `ionCloud`, `getHbondNetworkFromDonors`,
+and `donatedHydrogenBond` are on `dseams.core`.
 
 ## 2.4.0
 
