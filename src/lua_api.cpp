@@ -13,7 +13,9 @@
 #include <franzblau.hpp>
 #include <mol_sys.hpp>
 #include <neighbours.hpp>
+#include <rdf.hpp>
 #include <rdf2d.hpp>
+#include <site.hpp>
 #include <ring.hpp>
 #include <seams_input.hpp>
 #include <seams_output.hpp>
@@ -169,6 +171,20 @@ std::vector<std::vector<int>> getHbondNetworkFromClouds(
   return bond::populateHbondsWithInputClouds(yCloud, hCloud, nList,
                                              dist.value_or(2.42),
                                              angle.value_or(30.0));
+}
+
+std::vector<std::vector<int>> neighListPair(double rcutoff, const Cloud &yCloud,
+                                            int typeI, int typeJ) {
+  return nneigh::neighListPair(rcutoff, yCloud, typeI, typeJ);
+}
+
+std::vector<std::vector<int>> getHbondNetworkFromDonors(
+    Cloud &yCloud, Cloud &hCloud, std::vector<std::vector<int>> nList,
+    std::vector<int> donorHs, sol::optional<double> dist,
+    sol::optional<double> angle) {
+  return bond::populateHbondsFromDonors(yCloud, hCloud, nList, donorHs,
+                                        dist.value_or(2.42),
+                                        angle.value_or(30.0));
 }
 
 std::vector<std::vector<int>> ringNetwork(std::vector<std::vector<int>> nList,
@@ -388,6 +404,19 @@ void registerNeighbours(sol::state_view lua, sol::table m) {
   m.set_function("bondNetworkByIndex", nneigh::neighbourListByIndex);
   m.set_function("getHbondNetwork", getHbondNetwork);
   m.set_function("getHbondNetworkFromClouds", getHbondNetworkFromClouds);
+  m.set_function("neighListPair", [](double rcutoff, const Cloud &yCloud,
+                                     int typeI, int typeJ) {
+    return sol::as_nested(neighListPair(rcutoff, yCloud, typeI, typeJ));
+  });
+  m.set_function("getHbondNetworkFromDonors", getHbondNetworkFromDonors);
+  m.set_function("donatedHydrogenBond",
+                 [](const Cloud &yCloud, const Cloud &hCloud, int acceptor,
+                    int donor, std::vector<int> donorHs,
+                    sol::optional<double> dist, sol::optional<double> angle) {
+                   return bond::donatedHydrogenBond(
+                       yCloud, hCloud, acceptor, donor, donorHs,
+                       dist.value_or(2.42), angle.value_or(30.0));
+                 });
 }
 
 void registerRings(sol::state_view lua, sol::table m) {
@@ -536,6 +565,24 @@ int calcRDF(std::string path, std::vector<double> &rdfValues,
                                 binwidth, firstFrame, finalFrame);
 }
 
+sol::table calcRDF3D(sol::this_state ts, const Cloud &yCloud, int typeI,
+                     int typeJ, double rmax, int nbins) {
+  sol::state_view lua(ts);
+  const auto gr = rdf::partialRdf(yCloud, typeI, typeJ, rmax, nbins);
+  sol::table t = lua.create_table(0, 2);
+  t["r"] = sol::as_table(gr.r);
+  t["g"] = sol::as_table(gr.g);
+  return t;
+}
+
+double calcCN(const Cloud &yCloud, int typeI, int typeJ, double rmax, int nbins,
+              sol::optional<double> rCut) {
+  const auto h = rdf::partialRdf(yCloud, typeI, typeJ, rmax, nbins);
+  const double rhoJ =
+      (h.volume > 0.0) ? static_cast<double>(h.nJ) / h.volume : 0.0;
+  return rdf::coordinationNumber(h, rCut.value_or(rmax), rhoJ);
+}
+
 int prismAnalysis(std::string path, const std::vector<std::vector<int>> &rings,
                   const std::vector<std::vector<int>> &nList, Cloud &cloud,
                   int maxDepth, int atomID, int firstFrame, int currentFrame,
@@ -621,6 +668,8 @@ int bulkTopoUnitMatching(std::string path, std::vector<std::vector<int>> rings,
 void registerTopology(sol::state_view lua, sol::table m) {
   m.set_function("ringAnalysis", ringAnalysis);
   m.set_function("calcRDF", calcRDF);
+  m.set_function("calcRDF3D", calcRDF3D);
+  m.set_function("calcCN", calcCN);
   m.set_function("prismAnalysis", prismAnalysis);
   m.set_function("clusterAnalysis", clusterAnalysis);
   m.set_function("recenterCluster", recenterCluster);
@@ -637,6 +686,39 @@ void registerTopology(sol::state_view lua, sol::table m) {
   m.set_function("bulkTopoUnitMatching", bulkTopoUnitMatching);
 }
 
+void registerSite(sol::state_view lua, sol::table m) {
+  lua.new_enum<site::Kind>("SiteKind",
+                           {{"unspecified", site::Kind::unspecified},
+                            {"cationHead", site::Kind::cationHead},
+                            {"anion", site::Kind::anion},
+                            {"tail", site::Kind::tail},
+                            {"donorH", site::Kind::donorH},
+                            {"acceptor", site::Kind::acceptor},
+                            {"polar", site::Kind::polar},
+                            {"apolar", site::Kind::apolar},
+                            {"waterO", site::Kind::waterO},
+                            {"waterH", site::Kind::waterH},
+                            {"solvent", site::Kind::solvent}});
+  lua.new_enum<site::Family>("SiteFamily",
+                             {{"waterIce", site::Family::waterIce},
+                              {"ionicLiquid", site::Family::ionicLiquid},
+                              {"moltenSalt", site::Family::moltenSalt},
+                              {"des", site::Family::des},
+                              {"electrolyte", site::Family::electrolyte},
+                              {"confinedIL", site::Family::confinedIL},
+                              {"confinedWater", site::Family::confinedWater},
+                              {"networkFormer", site::Family::networkFormer}});
+  lua.new_usertype<site::Table>(
+      "SiteTable", sol::constructors<site::Table()>(), "setType",
+      [](site::Table &t, int typeId, site::Kind k) { t.typeToKind[typeId] = k; },
+      "ofType", &site::Table::ofType);
+  m.set_function("parseSiteSpec", [](const std::string &spec) {
+    return site::parseSiteSpec(spec);
+  });
+  m.set_function("ionCloud", site::ionCloud);
+  m.set_function("indicesOf", site::indicesOf);
+}
+
 void registerAll(sol::state_view lua, sol::table m) {
   registerIO(lua, m);
   registerNeighbours(lua, m);
@@ -644,6 +726,7 @@ void registerAll(sol::state_view lua, sol::table m) {
   registerOrder(lua, m);
   registerDescriptors(lua, m);
   registerTopology(lua, m);
+  registerSite(lua, m);
 }
 
 } // namespace luaApi

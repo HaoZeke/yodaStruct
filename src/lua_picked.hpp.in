@@ -1,0 +1,8 @@
+#pragma once
+// Generated. Absolute paths to the 5.3/5.4 headers from pkg-config so
+// sol's #include <lua.hpp> does not pick a distro 5.5 header.
+extern "C" {
+#include "@LUA_H@"
+#include "@LUALIB_H@"
+#include "@LAUXLIB_H@"
+}

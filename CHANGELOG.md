@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+`calcRDF3D` binds `rdf::partialRdf`. `calcCN` / `dseams.cn` bind
+`rdf::coordinationNumber`. `neighListPair`, `parseSiteSpec`,
+`SiteTable`, `ionCloud`, `getHbondNetworkFromDonors`, and
+`donatedHydrogenBond` are on `dseams.core`.
+
 ## 2.4.0
 
 `subprojects/seams-core.wrap` is `v2.4.0`. Lua still has
