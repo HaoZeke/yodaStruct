@@ -1,5 +1,10 @@
 # Changelog
 
+## 2.2.3
+
+`subprojects/seams-core.wrap` is `68367c0` (linked-cell k-nearest).
+`dseams.knn` is unchanged.
+
 ## 2.2.2
 
 Shibuya docs from `docs/orgmode/`. The Lua surface is documented
