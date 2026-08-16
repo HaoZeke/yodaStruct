@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+## 2.4.0
+
+`subprojects/seams-core.wrap` is `v2.4.0`. Lua still has
+`neighListO`, `populateHbonds` / `populateHbondsWithInputClouds`
+(`getHbondNetwork` / `getHbondNetworkFromClouds`), and `calcRDF`
+(`rdf2D`). This library does not bind `site::`, `rdf::`, or
+`populateHbondsFromDonors`.
+
 ## 2.3.1
 
 `subprojects/seams-core.wrap` is `v2.3.1`. Remaining cutoff
