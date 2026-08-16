@@ -55,11 +55,17 @@ lua_includedir = lua_dep.get_variable('includedir', default_value: '')
 lua_h = ''
 lua_lualib_h = ''
 lua_lauxlib_h = ''
-foreach base : [lua_includedir, lua_includedir / 'lua5.4', lua_includedir / 'lua5.3']
-    if lua_h == '' and base != '' and fs.exists(base / 'lua.h')
-        lua_h = base / 'lua.h'
-        lua_lualib_h = base / 'lualib.h'
-        lua_lauxlib_h = base / 'lauxlib.h'
+# Versioned subdirs first. includedir itself is often /usr/include,
+# which holds a distro 5.5 lua.h next to lua5.4/lua.h.
+foreach base : [lua_includedir / 'lua5.4', lua_includedir / 'lua5.3', lua_includedir]
+    cand = base / 'lua.h'
+    if lua_h == '' and base != '' and fs.exists(cand)
+        # 5.5 headers define LUA_VERSION_MINOR_N; 5.3/5.4 do not.
+        if not fs.read(cand).contains('LUA_VERSION_MINOR_N')
+            lua_h = cand
+            lua_lualib_h = base / 'lualib.h'
+            lua_lauxlib_h = base / 'lauxlib.h'
+        endif
     endif
 endforeach
 if lua_h == ''
