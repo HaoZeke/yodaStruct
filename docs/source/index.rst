@@ -1,8 +1,3 @@
-#+TITLE: ~dseams~
-#+AUTHOR: [[https://rgoswami.me][Rohit Goswami]]
-#+OPTIONS: toc:nil todo:nil num:nil author:nil title:nil ^:nil
-
-#+begin_export rst
 ======
 dseams
 ======
@@ -34,31 +29,31 @@ Lua and Fennel library for the d-SEAMS C++ engine.
       :class-card: sd-shadow-sm
 
       Host ``dseams_core.so`` from Lua, Fennel, or C.
-#+end_export
 
-* About
+About
+=====
 
-This repository is a *library*. There is no ~yodaStruct~ executable.
-Call ~require("dseams")~ from Lua, or ~(require :dseams)~ from Fennel.
-The engine CLI is ~seams~ in
-[[https://github.com/d-SEAMS/seams-core][seams-core]].
-Python is [[https://github.com/d-SEAMS/PydSEAMSlib][pydseams]].
+This repository is a *library*. There is no ``yodaStruct`` executable.
+Call ``require("dseams")`` from Lua, or ``(require :dseams)`` from Fennel.
+The engine CLI is ``seams`` in
+`seams-core <https://github.com/d-SEAMS/seams-core>`_.
+Python is `pydseams <https://github.com/d-SEAMS/PydSEAMSlib>`_.
 
-#+begin_src lua
-local dseams = require("dseams")
-local cloud = dseams.read("water.lammpstrj")
-print(dseams.chill_plus(cloud, {cutoff = 3.5}))
-#+end_src
+.. code-block:: lua
 
-~dseams.core~ is the compiled registrations (~dseams_core.so~).
-Helpers stay in Lua. ~require("yoda")~ still resolves to ~dseams~.
+   local dseams = require("dseams")
+   local cloud = dseams.read("water.lammpstrj")
+   print(dseams.chill_plus(cloud, {cutoff = 3.5}))
 
-* Suite stack
+``dseams.core`` is the compiled registrations (``dseams_core.so``).
+Helpers stay in Lua. ``require("yoda")`` still resolves to ``dseams``.
+
+Suite stack
+===========
 
 How the Lua library, the compiled module, and the rest of d-SEAMS
 relate:
 
-#+begin_export rst
 .. mermaid::
 
    flowchart TB
@@ -91,13 +86,12 @@ relate:
    ``require("dseams")`` loads the helpers. Those helpers call
    ``require("dseams_core")``. Set ``LUA_PATH`` to the Lua files and
    ``LUA_CPATH`` to the directory that holds ``dseams_core.so``.
-#+end_export
 
-* Documentation structure
+Documentation structure
+=======================
 
-This documentation follows the [[https://diataxis.fr/][Diataxis]] framework.
+This documentation follows the `Diataxis <https://diataxis.fr/>`_ framework.
 
-#+begin_export rst
 .. toctree::
    :maxdepth: 2
    :caption: Getting Started
@@ -138,27 +132,25 @@ This documentation follows the [[https://diataxis.fr/][Diataxis]] framework.
    reference/index
    reference/lua
    reference/lua-functions
-#+end_export
 
-The compiled-registration appendix is [[file:reference/lua-functions.org][Compiled registrations]]
-(also ~docs/luaFunctions.md~).
+The compiled-registration appendix is :doc:`reference/lua-functions`.
+``docs/luaFunctions.md`` carries the same list as a standalone file.
 
-* Related projects
+Related projects
+================
 
-- [[https://github.com/d-SEAMS/seams-core][seams-core]] :: C++ engine and ~seams~ CLI
-- [[https://github.com/d-SEAMS/PydSEAMSlib][pydseams]] :: Python Frame API on the same engine
-- [[https://dseams.info][dseams.info]] :: Project site
+- `seams-core <https://github.com/d-SEAMS/seams-core>`_ :: C++ engine and ``seams`` CLI
+- `pydseams <https://github.com/d-SEAMS/PydSEAMSlib>`_ :: Python Frame API on the same engine
+- `dseams.info <https://dseams.info>`_ :: Project site
 
-* License
+License
+=======
 
-MIT. Cite the [[https://doi.org/10.1021/acs.jcim.0c00031][2020 JCIM paper]]
-and the ~CITATION.cff~ in this tree. See
-[[file:explanation/citation.org][How to cite]].
+MIT. Cite the `2020 JCIM paper <https://doi.org/10.1021/acs.jcim.0c00031>`_
+and the ``CITATION.cff`` in this tree. See :doc:`explanation/citation`.
 
-#+begin_export rst
 Indices and tables
 ==================
 
 * :ref:`genindex`
 * :ref:`search`
-#+end_export

@@ -1,0 +1,13 @@
+#+TITLE: Reference
+#+OPTIONS: toc:nil num:nil
+
+Public ~require("dseams")~ table, then the compiled-registration
+appendix. Fennel call shape is in [[file:../howto/fennel.org][Fennel]].
+
+#+begin_export rst
+.. toctree::
+   :maxdepth: 2
+
+   lua
+   lua-functions
+#+end_export

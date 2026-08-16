@@ -1,27 +1,54 @@
 # Lua Function Documentation
 
-Narrative docs are `docs/orgmode/` (export with `emacs --batch --load export.el`).
-This page is the compiled-registration list.
+Narrative API reference is the org book:
+`docs/orgmode/reference/lua.org` (the public `require("dseams")`
+table). Export with `emacs --batch --load export.el` from `docs/`.
+The Sphinx pages are `docs/source/reference/lua.rst` and the
+appendix `docs/source/reference/lua-functions.rst`.
 
+This page is the compiled-registration appendix. It is not the book.
+The Sphinx-readable form of this list is
+`docs/source/reference/lua-functions.rst`.
 Registered names live in `src/lua_api.cpp` (`luaApi::registerAll`).
 Legacy workflow names (`readFrameOnlyOne`, `neighborList`, ...) keep
 container-userdata semantics. New-style names take and return tables.
 
-`require("yoda")` (Lua) and `(require :yoda-fnl)` (Fennel) add
-`read` / `neighbors` / `knn` / `chill_plus` / `cages` on top of that
-surface. `yoda.read` picks LAMMPS, XYZ, `.con`, or chemfiles from the
-suffix.
+`require("dseams")` (Lua) and `(require :dseams)` (Fennel) add
+`read` / `neighbors` / `knn` / `chill_plus` / `chill` / `cages` on
+top of that surface. `dseams.read` picks LAMMPS, XYZ, `.con`, or
+chemfiles from the suffix. `require("yoda")` is the same table.
 
 ## Currently Registered Lua Functions
 
 The workflows for quasi-two-dimensional ice, quasi-one-dimensional ice and bulk systems are separated. The `Lua` functions for each work-flow are registered in different blocks in the `C++` code.
 
+### I/O (new-style)
+
+- **readLammpsTrjO**(`filename`, `targetFrame`, `typeO`[, `isSlice`, `low`, `high`]):
+  One LAMMPS dump frame, one atom type. Returns a `PointCloud`.
+- **readLammpsTrjreduced**(`filename`, `targetFrame`, `typeI`[, `isSlice`, `low`, `high`]):
+  Same, dropping atoms outside the slice when `isSlice` is true.
+- **readXYZ**(`filename`): XYZ coordinates. Whole file.
+- **writeDump**(`yCloud`, `path`, `outFile`): Write a LAMMPS dump.
+- **writeHistogram**(`yCloud`, `nList`, `avgQ6`): Write `cij` / `q6` / `q3` columns.
+- **PointCloud**: usertype. Fields `nop`, `currentFrame`. Methods
+  `box()`, `boxLow()`, `iceTypes()`.
+
 ### Neighbours and affiliation
 
+- **neighListO**(`rcutoff`, `yCloud`, `typeI`):
+  Distance cutoff, one type, by atom ID. Returns a Lua table.
+- **neighbourListByIndex**(`yCloud`, `nList`):
+  ID list to index list. `nList` may be a Lua table.
+- **getNewNeighbourListByIndex**(`yCloud`, `cutoff`):
+  Index list built directly from the cloud.
 - **kNearestNeighbourList**(`cloud`, `k`, `candidateCutoff`, `typeI`[, `mutual`]):
   k-nearest graph. `mutual` defaults to true. `false` is the union graph.
 - **shellSeparation**(`cloud`, `k`, `typeI`): `{max d_k, min d_{k+1}}`.
   The two graphs coincide when `max d_k <= rcut <= min d_{k+1}`.
+- **ringNetwork**(`nList`, `maxDepth`) / **RingUpdater**:
+  Primitive rings as Lua tables. `RingUpdater.new(maxDepth)`;
+  `updater:update(nList)`.
 - **seededCageAffiliation**(`strictRings`, `strictNList`, `permRings`, `permNList`):
   `{hc, ddc}` per-atom flags. Mutual seeds, union completion.
 - **cageAffiliation** / **AffiliationUpdater**: claim-free HC/DDC flags on six-rings.
@@ -35,7 +62,18 @@ Enabled when `structureDesc.use` is true in the YAML config
 - **soapSpectrum**: Bartok SOAP of one particle (`nMax`, `lMax`, `rcut`). Returns a flat array of length `nMax*nMax*(lMax+1)`.
 - **soapSpectrumAll**: SOAP of every particle.
 - **steinhardtQl** / **steinhardtQlVoronoi**: tables with `ql` and `qlBar` arrays.
+- **voronoiFacetWeights**: per-atom `{neighbours, weights, certified}`.
 - **voronoiFeatures**: per-atom `{q4, q6, q8}` from one Voronoi pass per order.
+
+### New-style CHILL
+
+- **classifyBonds**, **registerBondClassifier**, **bondClassifierNames**:
+  see Readers, Bond Rules, and Hydrogen Bonds below.
+- **getCorrelPlus** / **getCorrel**(`yCloud`, `nList`[, `isSlice`, `coordinationNumber`]).
+- **getIceTypePlus** / **getIceType**(`yCloud`, `nList`, `path`, `firstFrame`[, `isSlice`, `outputFileName`]):
+  classify and write; return state-name tables.
+- **getIceTypePlusNoPrint** / **getIceTypeNoPrint**(`yCloud`, `nList`[, `isSlice`]):
+  classify only; return state-name tables.
 
 ### Common Functions
 
@@ -101,6 +139,8 @@ The following `Lua` functions interface to the same `C++` functions in every wor
 
 ### Bulk Systems
 
+- **readFrameOnlyOneAllAtoms**: interfaces with \ref sinp::readLammpsTrj <br>Same argument shape as **readFrameOnlyOne** without an atom-type filter (every type is kept).
+
 - **readFrame**: interfaces with \ref sinp::readLammpsTrjO <br>The input variables are:
   + *trajectory* - The name of the lammps trajectory file to be read in, obtained from the _config.yml_ file.
   + *frame* - The current frame number whose information will be read in.
@@ -132,6 +172,10 @@ The following `Lua` functions interface to the same `C++` functions in every wor
    + *outDir* - The string to the output directory, in which files will be written out. Defined in _vars.lua_.
    + *isSlice* - This decides whether a slice will be created (true) or not (false). Defined in _vars.lua_. <br> This function returns the *resCloud* \ref molSys::PointCloud.
 
+- **averageQ6**: interfaces with \ref chill::getq6 <br>Returns the per-atom averaged $Q_6$ vector (`resCloud`, `nList`, `isSlice`).
+
+- **modifyChill**: interfaces with \ref chill::reclassifyWater <br>Reclassifies water from the $Q_6$ vector (`resCloud`, `avgQ6`). Returns `resCloud`.
+
 - **percentage_Ice**: interfaces with \ref chill::printIceType <br> This function is for the CHILL algorithm. <br>The input variables are:
    + *resCloud* - The \ref molSys::PointCloud, which has been passed to the `Lua` side.
    + *outDir* - The string to the output directory, in which files will be written out. Defined in _vars.lua_.
@@ -156,7 +200,37 @@ The following `Lua` functions interface to the same `C++` functions in every wor
   + *rings* - Row-ordered vector of vectors for rings of a single type. Registered on the `Lua` side. 
   + *nList* - Row-ordered neighbour list by index. Passed to the `Lua` side. 
   + *resCloud* - The input \ref molSys::PointCloud, which has been passed to the `Lua` side.
-  + *printCages* - Flag for printing the information of each cage in the frame (true) or not printing the coordinates/connectivity of each cage (false). Defined in _vars.lua_. 
+  + *printCages* - Flag for printing the information of each cage in the frame (true) or not printing the coordinates/connectivity of each cage (false). Defined in _vars.lua_.
+
+- **bulkRingNumberAnalysis**: interfaces with \ref ring::bulkPolygonRingAnalysis <br>The input variables are:
+  + *outDir* - Output directory.
+  + *rings* - Rings by index.
+  + *nList* - Neighbour list by index.
+  + *resCloud* - The input \ref molSys::PointCloud.
+  + *maxDepth* - Largest ring size searched.
+  + *firstFrame* - First frame of the run.
+
+- **bulkTopoUnitMatching**: interfaces with \ref tum3::topoUnitMatchingBulk <br>The input variables are:
+  + *outDir* - Output directory.
+  + *rings* - Rings by index.
+  + *nList* - Neighbour list by index.
+  + *resCloud* - The input \ref molSys::PointCloud.
+  + *firstFrame* - First frame of the run.
+  + *printClusters* - Write connected cage clusters.
+  + *onlyTetrahedral* - Restrict the search to tetrahedral cages.
+  + *templatePath* - Optional; defaults to `templates`.
+
+- **getPointCloudAtomsOfOneAtomType**: interfaces with \ref gen::getPointCloudOneAtomType <br>The input variables are:
+  + *resCloud* - Cloud containing mixed types.
+  + *outCloud* - Destination cloud for one type.
+  + *atomTypeI* - Type ID to keep.
+  + *isSlice* / *sliceLowerLimits* / *sliceUpperLimits* - Slice bounds.
+
+- **selectInSingleSlice**: interfaces with \ref gen::moleculesInSingleSlice <br>Marks every molecule that touches the slice.
+
+- **selectEdgeAtomsInRingsWithinSlice**: interfaces with \ref ring::getEdgeMoleculesInRings <br>Expands the slice to ring-edge molecules.
+
+- **selectAtomsInSliceWithRingEdgeAtoms**: interfaces with \ref ring::printSliceGetEdgeMoleculesInRings <br>Same expansion, then writes molecule IDs and a LAMMPS data file. 
 
 ## Readers, Bond Rules, and Hydrogen Bonds
 

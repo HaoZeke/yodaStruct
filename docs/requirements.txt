@@ -1,4 +1,5 @@
 sphinx>=8
 shibuya
-myst-parser
 sphinx-sitemap
+sphinx-design
+sphinxcontrib-mermaid
