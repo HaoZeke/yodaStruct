@@ -12,6 +12,7 @@ Lua and Fennel library for the [d-SEAMS](https://dseams.info) C++ engine
 This repository is a **library**. `require("dseams")` in Lua,
 `(require :dseams)` in Fennel. The engine CLI is `seams` in
 `seams-core`. Python is [`pydseams`](https://github.com/d-SEAMS/PydSEAMSlib).
+Neighbour search is [`linkcell`](https://github.com/d-SEAMS/linkcell).
 
 ```lua
 local dseams = require("dseams")
