@@ -2,10 +2,15 @@
 
 ## Unreleased
 
-`calcRDF3D` binds `rdf::partialRdf`. `calcCN` / `dseams.cn` bind
+## 2.4.1
+
+`subprojects/seams-core.wrap` stays `v2.4.0`. `calcRDF3D` binds
+`rdf::partialRdf`. `calcCN` / `dseams.cn` bind
 `rdf::coordinationNumber`. `neighListPair`, `parseSiteSpec`,
 `SiteTable`, `ionCloud`, `getHbondNetworkFromDonors`, and
-`donatedHydrogenBond` are on `dseams.core`.
+`donatedHydrogenBond` are on `dseams.core`. The Meson build writes
+a `lua.hpp` from the pkg-config 5.3/5.4 headers so sol does not
+pick a distro 5.5 `lua.hpp`.
 
 ## 2.4.0
 
