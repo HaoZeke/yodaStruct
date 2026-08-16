@@ -19,10 +19,7 @@ seams = subproject(
 )
 # Eigen/BLAS inject -I/usr/include. Mark those as system includes so
 # the Lua 5.3/5.4 -I wins over a distro lua.h in /usr/include.
-yds_dep = declare_dependency(
-    dependencies: seams.get_variable('yds_dep'),
-    include_type: 'system',
-)
+yds_dep = seams.get_variable('yds_dep').as_system()
 
 # Vendored sol does not support Lua 5.5 (LUA_ERRGCMM is gone).
 # conda-forge gcc also drops `-I/usr/include` from the distro lua
