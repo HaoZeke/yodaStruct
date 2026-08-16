@@ -1,7 +1,7 @@
 project(
   'luadseams',
   ['cpp', 'c'],
-  version: '2.3.0',
+  version: '2.3.1',
   default_options: ['warning_level=1', 'cpp_std=c++20'],
   meson_version: '>=1.3.0',
 )
