@@ -27,6 +27,7 @@ master_doc = "index"
 
 html_theme = "shibuya"
 html_static_path = ["_static"]
+html_favicon = "_static/logo/dseams-icon.svg"
 html_css_files = []  # sphinx-design ships its own CSS
 html_js_files = []
 html_title = "dseams"
@@ -47,6 +48,8 @@ mermaid_init_js = "mermaid.initialize({startOnLoad:true, theme:'neutral'});"
 html_theme_options = {
     "github_url": "https://github.com/d-SEAMS/yodaStruct",
     "accent_color": "teal",
+    "light_logo": "_static/logo/dseams-logo-light.svg",
+    "dark_logo": "_static/logo/dseams-logo-dark.svg",
     "dark_code": True,
     "globaltoc_expand_depth": 1,
     "toctree_collapse": True,

@@ -1,5 +1,9 @@
 # luadseams (`dseams`)
 
+<p align="center">
+  <img src="docs/source/_static/logo/dseams-icon.svg" alt="dseams" width="96">
+</p>
+
 [![built with nix](https://builtwithnix.org/badge.svg)](https://builtwithnix.org)
 
 Lua and Fennel library for the [d-SEAMS](https://dseams.info) C++ engine

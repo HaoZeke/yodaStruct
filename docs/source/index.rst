@@ -2,6 +2,11 @@
 dseams
 ======
 
+.. image:: _static/logo/dseams-logo-light.svg
+   :alt: dseams
+   :width: 320px
+   :align: center
+
 Lua and Fennel library for the d-SEAMS C++ engine.
 
 .. grid:: 1 2 3 3
