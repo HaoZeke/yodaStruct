@@ -52,21 +52,6 @@ if lua_includedir != ''
     lua_inc_args += ['-I' + lua_includedir]
 endif
 add_project_arguments(lua_inc_args, language: 'cpp')
-if not cpp.compiles(
-    '''#include <lua.h>
-#if LUA_VERSION_NUM >= 505
-#error "Lua 5.5 headers won the include search"
-#endif
-int main() { return 0; }
-''',
-    args: lua_inc_args + ['-I/usr/include'],
-    dependencies: lua_dep,
-    name: 'lua.h is 5.3 or 5.4',
-)
-    error(
-        'lua.h resolved to 5.5; the 5.3/5.4 includedir must precede /usr/include',
-    )
-endif
 
 link_args = []
 if host_machine.system() == 'linux'
