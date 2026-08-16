@@ -43,16 +43,17 @@ endif
 
 inc = include_directories('src/include/internal', 'src/include/external')
 
-# Eigen/BLAS often add -I/usr/include. That directory also holds a
-# distro Lua 5.5 lua.hpp, and the first match wins. Push the 5.3/5.4
-# includedir ahead of every other -I so sol sees LUA_VERSION_NUM 504.
-lua_inc_args = []
+# Eigen/BLAS add -I/usr/include, which also holds a distro Lua 5.5
+# lua.hpp. 5.3/5.4 packages ship lua.h. sol must use the C header,
+# and that -I must precede /usr/include.
+lua_inc_args = ['-DSOL_USE_LUA_HPP=0']
 lua_includedir = lua_dep.get_variable('includedir', default_value: '')
 if lua_includedir != ''
     lua_inc_args += ['-I' + lua_includedir]
 endif
+add_project_arguments(lua_inc_args, language: 'cpp')
 if not cpp.compiles(
-    '''#include <lua.hpp>
+    '''#include <lua.h>
 #if LUA_VERSION_NUM >= 505
 #error "Lua 5.5 headers won the include search"
 #endif
@@ -60,10 +61,10 @@ int main() { return 0; }
 ''',
     args: lua_inc_args + ['-I/usr/include'],
     dependencies: lua_dep,
-    name: 'lua.hpp is 5.3 or 5.4',
+    name: 'lua.h is 5.3 or 5.4',
 )
     error(
-        'lua.hpp resolved to 5.5; the 5.3/5.4 includedir must precede /usr/include',
+        'lua.h resolved to 5.5; the 5.3/5.4 includedir must precede /usr/include',
     )
 endif
 

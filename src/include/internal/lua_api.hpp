@@ -6,6 +6,12 @@
 #ifndef SEAMS_LUA_API_H_
 #define SEAMS_LUA_API_H_
 
+// sol's default lua.hpp search hits a distro 5.5 header when Eigen
+// adds -I/usr/include. 5.3/5.4 packages ship lua.h only.
+#ifndef SOL_USE_LUA_HPP
+#define SOL_USE_LUA_HPP 0
+#endif
+
 #include <mol_sys.hpp>
 #include <sol/sol.hpp>
 
