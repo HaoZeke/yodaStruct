@@ -58,8 +58,8 @@ if not cpp.compiles(
 #endif
 int main() { return 0; }
 ''',
-    args: lua_inc_args,
-    dependencies: [lua_dep, yds_dep],
+    args: lua_inc_args + ['-I/usr/include'],
+    dependencies: lua_dep,
     name: 'lua.hpp is 5.3 or 5.4',
 )
     error(
