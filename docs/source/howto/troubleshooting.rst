@@ -2,49 +2,61 @@
 Troubleshooting
 ===============
 
+
+.. contents::
+
+
+Troubleshooting
+---------------
+
 Common problems and their solutions.
 
 Installation Issues
-===================
+~~~~~~~~~~~~~~~~~~~
 
 Problem: module 'dseams' not found
-----------------------------------
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-**Cause:** ``package.path`` does not contain ``dseams.lua``.
+****Cause:**** ``package.path`` does not contain ``dseams.lua``.
 
-**Solution:**
+****Solution:****
 
-.. code-block:: bash
+.. code:: bash
 
-   # In-tree
-   export LUA_PATH="$PWD/lua/?.lua;;"
+    # In-tree
+    export LUA_PATH="$PWD/lua/?.lua;;"
 
-   # After meson install
-   export LUA_PATH="$PREFIX/share/luadseams/lua/?.lua;;"
+    # After meson install
+    export LUA_PATH="$PREFIX/share/luadseams/lua/?.lua;;"
 
-   # Nix
-   nix develop
+    # Nix
+    nix develop
+
+``require("dseams")`` also applies the engine twelve-factor table
+(``SEAMS_CONFIG`` or ``./seams.env``, then the environment). Installed
+Lua/Fennel roots are ``YODA_LUA_PATH`` / ``YODA_FENNEL_PATH``. Those
+keys do not replace ``LUA_PATH`` / ``LUA_CPATH`` for ``require``.
 
 Confirm the file exists at that path, then:
 
-.. code-block:: bash
+.. code:: bash
 
-   lua -e 'print(package.path)'
+    lua -e 'print(package.path)'
 
-Problem: module 'dseams_core' not found
----------------------------------------
+Problem: module 'dseams\ :sub:`core`\' not found
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-**Cause:** ``package.cpath`` does not contain ``dseams_core.so``.
+****Cause:**** ``package.cpath`` does not contain ``dseams_core.so``.
 
-**Solution:**
+****Solution:****
 
-.. code-block:: bash
+.. code:: bash
 
-   # In-tree meson build directory
-   export LUA_CPATH="$PWD/bbdir/?.so;;"
+    # In-tree meson build directory
+    export LUA_CPATH="$PWD/bbdir/?.so;;"
 
-   # After meson install (note: lib/?.so, not lib/lua/5.4/?.so)
-   export LUA_CPATH="$PREFIX/lib/?.so;;"
+    # After meson install (note: lib/?.so, not lib/lua/5.4/?.so)
+    export LUA_CPATH="$PREFIX/lib/?.so;;"
 
 The file name is ``dseams_core.so``, not ``libdseams_core.so``. A
 ``cpath`` pattern of ``$PREFIX/lib/lua/5.4/?.so`` misses
@@ -52,145 +64,163 @@ The file name is ``dseams_core.so``, not ``libdseams_core.so``. A
 symlink.
 
 Problem: yodaStruct: command not found
---------------------------------------
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-**Cause:** This tree builds no executable.
+****Cause:**** This tree builds no executable.
 
-**Solution:** Call ``require("dseams")`` from ``lua``, or call ``seams``
-in seams-core. See :doc:`../explanation/library-not-cli`.
+****Solution:**** Call ``require("dseams")`` from ``lua``, or call ``seams``
+in seams-core. See
+`The library, not a second CLI <../explanation/library-not-cli.rst>`_.
 
 Read Issues
-===========
+~~~~~~~~~~~
 
 Problem: empty cloud / nop=0
-----------------------------
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-**Cause:** Type filter does not match the dump, or the path does
+****Cause:**** Type filter does not match the dump, or the path does
 not resolve from the current working directory.
 
-**Solution:**
+****Solution:****
 
 1. Work from the repository root for shipped examples.
+
 2. Pass the oxygen type:
 
-   .. code-block:: lua
+.. code:: lua
 
-      local cloud = dseams.read("input/traj/exampleTraj.lammpstrj", {type = 2})
+    local cloud = dseams.read("input/traj/exampleTraj.lammpstrj", {type = 2})
 
-3. On a LAMMPS dump, if ``opts.type`` is nil, ``dseams.read`` tries
+1. On a LAMMPS dump, if ``opts.type`` is nil, ``dseams.read`` tries
    type 2 then type 1. An explicit wrong type still yields an
    empty cloud.
 
-Problem: chill_plus returns nothing useful / empty neighbour graph
-------------------------------------------------------------------
+Problem: chill\ :sub:`plus`\ returns nothing useful / empty neighbour graph
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-**Cause:** ``chill_plus`` and ``cages`` default ``opts.type`` to 1. A
+****Cause:**** ``chill_plus`` and ``cages`` default ``opts.type`` to 1. A
 cloud of type-2 oxygens plus a type-1 neighbour filter is an
 empty graph.
 
-**Solution:**
+****Solution:****
 
-.. code-block:: lua
+.. code:: lua
 
-   dseams.chill_plus(cloud, {cutoff = 3.5, type = 2})
-   dseams.cages(cloud, {type = 2})
+    dseams.chill_plus(cloud, {cutoff = 3.5, type = 2})
+    dseams.cages(cloud, {type = 2})
 
 Problem: readCon is not in this build (readcon-core missing)
-------------------------------------------------------------
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-**Cause:** seams-core was compiled without ``SEAMS_HAS_READCON``.
+****Cause:**** seams-core was compiled without ``SEAMS_HAS_READCON``.
 
-**Solution:** Use a LAMMPS dump or ``.xyz``, or rebuild seams-core
+****Solution:**** Use a LAMMPS dump or ``.xyz``, or rebuild seams-core
 with readcon. ``dseams.read`` on ``.con`` raises this error on
 purpose.
 
 Problem: readChemfiles is not in this build (chemfiles missing)
----------------------------------------------------------------
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-**Cause:** seams-core was compiled without ``SEAMS_HAS_CHEMFILES``.
+****Cause:**** seams-core was compiled without ``SEAMS_HAS_CHEMFILES``.
 
-**Solution:** Use a LAMMPS dump or ``.xyz``, or rebuild with
+****Solution:**** Use a LAMMPS dump or ``.xyz``, or rebuild with
 chemfiles. Suffixes ``.pdb``, ``.gro``, and ``.dcd`` take this path.
 
 Classification Issues
-=====================
+~~~~~~~~~~~~~~~~~~~~~
 
 Problem: almost every oxygen is water or unclassified
------------------------------------------------------
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-**Cause:** CHILL+ labels the four-neighbour shell. Confined water
+****Cause:**** CHILL+ labels the four-neighbour shell. Confined water
 and poorly coordinated oxygens land in ``water`` or
 ``unclassified``.
 
-**Solution:** Print the histogram and add the counts. They sum to
+****Solution:**** Print the histogram and add the counts. They sum to
 ``cloud.nop``. This tree does not pin a particular split. A
 ``water``-heavy result is a classification, not a crash.
 
 Problem: cages hc=0 ddc=0
--------------------------
+^^^^^^^^^^^^^^^^^^^^^^^^^
 
-**Cause:** Seeded affiliation found no accepted hexagonal cage or
+****Cause:**** Seeded affiliation found no accepted hexagonal cage or
 double-diamond cage. An empty strict (mutual) pass accepts
 nothing.
 
-**Solution:** Zero is valid. The shipped ``exampleTraj.lammpstrj``
+****Solution:**** Zero is valid. The shipped ``exampleTraj.lammpstrj``
 is confined water, not a bulk ice lattice. Do not expect HC / DDC
 counts to match the CHILL+ histogram.
 
 Fennel Issues
-=============
+~~~~~~~~~~~~~
 
 Problem: (require :dseams) loops or loads the wrapper as itself
----------------------------------------------------------------
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-**Cause:** ``lua/?.fnl`` is on ``fennel.path``, so ``(require :dseams)``
+****Cause:**** ``lua/?.fnl`` is on ``fennel.path``, so ``(require :dseams)``
 compiles ``dseams.fnl`` instead of loading ``dseams.lua``.
 
-**Solution:** Leave Fennel ``require`` falling through to Lua
+****Solution:**** Leave Fennel ``require`` falling through to Lua
 ``package.path``. Load kebab-case wrappers with ``fennel.dofile``
-under a name that is not ``dseams``. See :doc:`fennel`.
+under a name that is not ``dseams``. See `Fennel <fennel.rst>`_.
 
 Problem: readFrameOnlyOne is nil
---------------------------------
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-**Cause:** The script expects the 2020 driver globals.
+****Cause:**** The script expects the 2020 driver globals.
 
-**Solution:** Rewrite to ``(require :dseams)`` and call
+****Solution:**** Rewrite to ``(require :dseams)`` and call
 ``dseams.read`` / ``dseams.core.``...
 
 Common Error Messages
-=====================
+~~~~~~~~~~~~~~~~~~~~~
 
-=============================================  =======================  =========================================================
-Error                                          Cause                    Solution
-=============================================  =======================  =========================================================
-``module 'dseams' not found``                  ``LUA_PATH``             Point at ``lua/?.lua`` or ``share/luadseams/lua/?.lua``
-``module 'dseams_core' not found``             ``LUA_CPATH``            Point at the dir that holds ``dseams_core.so``
-``yodaStruct: command not found``              no executable            ``require("dseams")`` or ``seams``
-``empty cloud``                                type or cwd              ``{type = 2}``, repository root
-``readCon is not in this build``               no readcon               LAMMPS / XYZ, or rebuild
-``readChemfiles is not in this build``         no chemfiles             LAMMPS / XYZ, or rebuild
-=============================================  =======================  =========================================================
+.. table::
+
+    +----------------------------------------+---------------+---------------------------------------------------------+
+    | Error                                  | Cause         | Solution                                                |
+    +========================================+===============+=========================================================+
+    | ``module 'dseams' not found``          | ``LUA_PATH``  | Point at ``lua/?.lua`` or ``share/luadseams/lua/?.lua`` |
+    +----------------------------------------+---------------+---------------------------------------------------------+
+    | ``module 'dseams_core' not found``     | ``LUA_CPATH`` | Point at the dir that holds ``dseams_core.so``          |
+    +----------------------------------------+---------------+---------------------------------------------------------+
+    | ``yodaStruct: command not found``      | no executable | ``require("dseams")`` or ``seams``                      |
+    +----------------------------------------+---------------+---------------------------------------------------------+
+    | ``empty cloud``                        | type or cwd   | ``{type = 2}``, repository root                         |
+    +----------------------------------------+---------------+---------------------------------------------------------+
+    | ``readCon is not in this build``       | no readcon    | LAMMPS / XYZ, or rebuild                                |
+    +----------------------------------------+---------------+---------------------------------------------------------+
+    | ``readChemfiles is not in this build`` | no chemfiles  | LAMMPS / XYZ, or rebuild                                |
+    +----------------------------------------+---------------+---------------------------------------------------------+
 
 Getting Help
-============
+~~~~~~~~~~~~
 
 If these solutions do not help:
 
-1. Check :doc:`faq`
-2. Read :doc:`../reference/lua`
+1. Check `FAQ <faq.rst>`_
+
+2. Read `Lua surface <../reference/lua.rst>`_
+
 3. Open an issue on `yodaStruct <https://github.com/d-SEAMS/yodaStruct>`_
 
 Include:
 
 - meson / Nix revision
+
 - Lua version (``lua -v``)
+
 - The exact ``LUA_PATH`` and ``LUA_CPATH``
+
+- ``YODA_LUA_PATH`` / ``YODA_FENNEL_PATH`` / ``SEAMS_CONFIG`` if set
+
 - The script and the full error
 
 See Also
-========
+~~~~~~~~
 
-- :doc:`faq`
-- :doc:`install`
-- :doc:`../tutorials/read-and-classify`
+- `FAQ <faq.rst>`_
+
+- `Install the library <install.rst>`_
+
+- `Read a dump and classify <../tutorials/read-and-classify.rst>`_

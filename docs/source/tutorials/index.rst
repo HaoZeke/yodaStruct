@@ -2,32 +2,37 @@
 Tutorials
 =========
 
-Tutorials are learning-oriented. Follow them step by step to learn
-``require("dseams")``.
 
-Available Tutorials
-===================
+Tutorials are learning-oriented. The flagship path is
+``dseams.read`` to ``dseams.chill_plus`` to ``dseams.cages``.
 
-====================================  ===============================================================
-Tutorial                              Description
-====================================  ===============================================================
-:doc:`read-and-classify`              Load the shipped LAMMPS dump, run CHILL+, and flag HC / DDC cages
-====================================  ===============================================================
+Available tutorials
+-------------------
 
-What Makes a Good Tutorial?
-===========================
+.. table::
 
-Following `One Good Tutorial <https://onegoodtutorial.org/>`_ principles:
+    +-----------------------------------------------------+-------------------------------------------------------------------+
+    | Tutorial                                            | Description                                                       |
+    +=====================================================+===================================================================+
+    | `Read a dump and classify <read-and-classify.rst>`_ | Load the shipped LAMMPS dump, run CHILL+, and flag HC / DDC cages |
+    +-----------------------------------------------------+-------------------------------------------------------------------+
 
-- Clear learning objectives
-- Step-by-step instructions
-- Working code examples
-- Troubleshooting section
-- Summary of what you learned
+.. toctree::
+   :maxdepth: 1
 
-Getting Help
-============
+   read-and-classify
 
-- :doc:`../howto/index` :: Solve specific problems
-- :doc:`../reference/lua` :: API documentation
-- :doc:`../explanation/index` :: Understand concepts
+How-tos solve a goal you already have. Reference names the Lua
+table. Explanation is why this tree is a library.
+
+Getting help
+------------
+
+`How-to guides <../howto/index.rst>`_
+    solve a specific task
+
+`Lua surface <../reference/lua.rst>`_
+    live names
+
+`Explanation <../explanation/index.rst>`_
+    why there is no second CLI
