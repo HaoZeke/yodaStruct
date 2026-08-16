@@ -236,6 +236,10 @@ int calcRDF(std::string path, std::vector<double> &rdfValues,
             const Cloud &yCloud, double cutoff, double binwidth,
             int firstFrame, int finalFrame);
 
+/** Partial 3D RDF g_IJ(r). Returns `{r, g}` bin centres and values. */
+sol::table calcRDF3D(sol::this_state ts, const Cloud &yCloud, int typeI,
+                     int typeJ, double rmax, int nbins);
+
 /** Quasi-1D prism analysis. `atomID` is the first-frame ID. */
 int prismAnalysis(std::string path, const std::vector<std::vector<int>> &rings,
                   const std::vector<std::vector<int>> &nList, Cloud &cloud,

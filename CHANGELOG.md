@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+`calcRDF3D` binds `rdf::partialRdf`. It takes a cloud, two type
+IDs, `rmax`, and `nbins`, and returns `{r, g}` tables.
+
 ## 2.4.0
 
 `subprojects/seams-core.wrap` is `v2.4.0`. Lua still has

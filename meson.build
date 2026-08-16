@@ -72,14 +72,23 @@ install_data(
 
 lua_exe = find_program('lua', 'lua5.4', 'lua5.3', required: false)
 if lua_exe.found()
+  lua_test_env = {
+    'LUA_PATH': meson.project_source_root() / 'lua' / '?.lua;;',
+    'LUA_CPATH': meson.current_build_dir() / '?.so;;',
+  }
   test(
     'dseams_library_read',
     lua_exe,
     args: [meson.project_source_root() / 'example_lua/library/read.lua'],
-    env: {
-      'LUA_PATH': meson.project_source_root() / 'lua' / '?.lua;;',
-      'LUA_CPATH': meson.current_build_dir() / '?.so;;',
-    },
+    env: lua_test_env,
+    workdir: meson.project_source_root(),
+    timeout: 120,
+  )
+  test(
+    'dseams_library_rdf3d',
+    lua_exe,
+    args: [meson.project_source_root() / 'example_lua/library/rdf3d.lua'],
+    env: lua_test_env,
     workdir: meson.project_source_root(),
     timeout: 120,
   )

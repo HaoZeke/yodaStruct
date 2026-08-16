@@ -13,6 +13,7 @@
 #include <franzblau.hpp>
 #include <mol_sys.hpp>
 #include <neighbours.hpp>
+#include <rdf.hpp>
 #include <rdf2d.hpp>
 #include <ring.hpp>
 #include <seams_input.hpp>
@@ -536,6 +537,16 @@ int calcRDF(std::string path, std::vector<double> &rdfValues,
                                 binwidth, firstFrame, finalFrame);
 }
 
+sol::table calcRDF3D(sol::this_state ts, const Cloud &yCloud, int typeI,
+                     int typeJ, double rmax, int nbins) {
+  sol::state_view lua(ts);
+  const auto gr = rdf::partialRdf(yCloud, typeI, typeJ, rmax, nbins);
+  sol::table t = lua.create_table(0, 2);
+  t["r"] = sol::as_table(gr.r);
+  t["g"] = sol::as_table(gr.g);
+  return t;
+}
+
 int prismAnalysis(std::string path, const std::vector<std::vector<int>> &rings,
                   const std::vector<std::vector<int>> &nList, Cloud &cloud,
                   int maxDepth, int atomID, int firstFrame, int currentFrame,
@@ -621,6 +632,7 @@ int bulkTopoUnitMatching(std::string path, std::vector<std::vector<int>> rings,
 void registerTopology(sol::state_view lua, sol::table m) {
   m.set_function("ringAnalysis", ringAnalysis);
   m.set_function("calcRDF", calcRDF);
+  m.set_function("calcRDF3D", calcRDF3D);
   m.set_function("prismAnalysis", prismAnalysis);
   m.set_function("clusterAnalysis", clusterAnalysis);
   m.set_function("recenterCluster", recenterCluster);
