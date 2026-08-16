@@ -1,5 +1,5 @@
 PROJECT_NAME           = "dseams"
-PROJECT_NUMBER         = "v2.2.4"
+PROJECT_NUMBER         = "v2.2.5"
 PROJECT_BRIEF          = "Lua names on dseams.core"
 OUTPUT_DIRECTORY       = "."
 INPUT                  = ../../src/include/internal/lua_api.hpp
