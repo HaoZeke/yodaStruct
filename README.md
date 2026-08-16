@@ -48,6 +48,12 @@ lua example_lua/library/read.lua
 
 `require("yoda")` still resolves to `dseams`.
 
+`require("dseams")` applies the engine twelve-factor table
+(`SEAMS_CONFIG` or `./seams.env`, then the environment). Occupancy
+knobs (`LINKCELL_TPP`, `LINKCELL_BLOCK`, `SEAMS_RESIDENT`,
+`SEAMS_CELL`) are getenv at the kernel. The leftover `yodaStruct -c
+conf.yml` path is a script descriptor, not that table.
+
 Docs: `docs/orgmode/` (ox-rst) and `docs/source/` (Shibuya).
 
 # License
