@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+`calcRunningCN` binds `rdf::runningCN` (`{r, cn}`, `rhoJ = nJ / volume`).
+
 ## 2.4.1
 
 `subprojects/seams-core.wrap` stays `v2.4.0`. `calcRDF3D` binds

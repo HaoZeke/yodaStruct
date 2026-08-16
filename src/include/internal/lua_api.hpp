@@ -252,6 +252,11 @@ int calcRDF(std::string path, std::vector<double> &rdfValues,
 sol::table calcRDF3D(sol::this_state ts, const Cloud &yCloud, int typeI,
                      int typeJ, double rmax, int nbins);
 
+/** Running site-site CN from the same histogram. `rhoJ = nJ / volume`.
+ *  Returns `{r, cn}` bin centres and the integral at each bin outer edge. */
+sol::table calcRunningCN(sol::this_state ts, const Cloud &yCloud, int typeI,
+                         int typeJ, double rmax, int nbins);
+
 /** Site-site CN to `rCut` (default `rmax`). `rhoJ = nJ / volume`. */
 double calcCN(const Cloud &yCloud, int typeI, int typeJ, double rmax, int nbins,
               sol::optional<double> rCut);
