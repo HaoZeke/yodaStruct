@@ -1,14 +1,15 @@
 # Changelog
 
-## 2.2.3
+## 2.2.4
 
-`subprojects/seams-core.wrap` is `68367c0` (linked-cell k-nearest).
-`dseams.knn` is unchanged.
+`subprojects/seams-core.wrap` is `v2.2.4` (linked-cell k-nearest).
+`dseams.knn` is unchanged. The compiled-registration page is
+Doxygen of `lua_api.hpp`, not a hand list.
 
 ## 2.2.2
 
 Shibuya docs from `docs/orgmode/`. The Lua surface is documented
-there; `docs/luaFunctions.md` remains the registration list.
+there. The compiled-registration page is Doxygen of `lua_api.hpp`.
 
 ## 2.2.1
 

@@ -22,7 +22,7 @@ jobs:
             eigen
             libblas
             liblapack
-            lua
+            lua=5.4
             cmake
           cache-environment: true
       - name: Configure and build
