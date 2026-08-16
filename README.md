@@ -1,5 +1,9 @@
 # luadseams (`dseams`)
 
+<p align="center">
+  <img src="docs/source/_static/logo/dseams-icon.png" alt="dseams" width="96">
+</p>
+
 [![built with nix](https://builtwithnix.org/badge.svg)](https://builtwithnix.org)
 
 Lua and Fennel library for the [d-SEAMS](https://dseams.info) C++ engine
@@ -8,6 +12,7 @@ Lua and Fennel library for the [d-SEAMS](https://dseams.info) C++ engine
 This repository is a **library**. `require("dseams")` in Lua,
 `(require :dseams)` in Fennel. The engine CLI is `seams` in
 `seams-core`. Python is [`pydseams`](https://github.com/d-SEAMS/PydSEAMSlib).
+Neighbour search is [`linkcell`](https://github.com/d-SEAMS/linkcell).
 
 ```lua
 local dseams = require("dseams")

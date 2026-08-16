@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased
+
+The docs mark is the hexagonal ice cage with a primitive ring, as SVG.
+
 ## 2.2.5
 
 `subprojects/seams-core.wrap` is `v2.2.5` (linkcell v0.2.4).
