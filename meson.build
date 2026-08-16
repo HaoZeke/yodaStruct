@@ -92,4 +92,12 @@ if lua_exe.found()
     workdir: meson.project_source_root(),
     timeout: 120,
   )
+  test(
+    'dseams_library_runningcn',
+    lua_exe,
+    args: [meson.project_source_root() / 'example_lua/library/runningcn.lua'],
+    env: lua_test_env,
+    workdir: meson.project_source_root(),
+    timeout: 120,
+  )
 endif

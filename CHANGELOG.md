@@ -4,6 +4,8 @@
 
 `calcRDF3D` binds `rdf::partialRdf`. It takes a cloud, two type
 IDs, `rmax`, and `nbins`, and returns `{r, g}` tables.
+`calcRunningCN` binds `rdf::runningCN` on that histogram with
+`rhoJ = nJ / volume` and returns `{r, cn}`.
 
 ## 2.4.0
 

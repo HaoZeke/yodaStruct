@@ -240,6 +240,11 @@ int calcRDF(std::string path, std::vector<double> &rdfValues,
 sol::table calcRDF3D(sol::this_state ts, const Cloud &yCloud, int typeI,
                      int typeJ, double rmax, int nbins);
 
+/** Running site-site CN from the same histogram. `rhoJ = nJ / volume`.
+ *  Returns `{r, cn}` bin centres and the integral at each bin outer edge. */
+sol::table calcRunningCN(sol::this_state ts, const Cloud &yCloud, int typeI,
+                         int typeJ, double rmax, int nbins);
+
 /** Quasi-1D prism analysis. `atomID` is the first-frame ID. */
 int prismAnalysis(std::string path, const std::vector<std::vector<int>> &rings,
                   const std::vector<std::vector<int>> &nList, Cloud &cloud,

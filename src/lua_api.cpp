@@ -547,6 +547,19 @@ sol::table calcRDF3D(sol::this_state ts, const Cloud &yCloud, int typeI,
   return t;
 }
 
+sol::table calcRunningCN(sol::this_state ts, const Cloud &yCloud, int typeI,
+                         int typeJ, double rmax, int nbins) {
+  sol::state_view lua(ts);
+  const auto h = rdf::partialRdf(yCloud, typeI, typeJ, rmax, nbins);
+  const double rhoJ =
+      (h.volume > 0.0) ? static_cast<double>(h.nJ) / h.volume : 0.0;
+  const auto cn = rdf::runningCN(h, rhoJ);
+  sol::table t = lua.create_table(0, 2);
+  t["r"] = sol::as_table(h.r);
+  t["cn"] = sol::as_table(cn);
+  return t;
+}
+
 int prismAnalysis(std::string path, const std::vector<std::vector<int>> &rings,
                   const std::vector<std::vector<int>> &nList, Cloud &cloud,
                   int maxDepth, int atomID, int firstFrame, int currentFrame,
@@ -633,6 +646,7 @@ void registerTopology(sol::state_view lua, sol::table m) {
   m.set_function("ringAnalysis", ringAnalysis);
   m.set_function("calcRDF", calcRDF);
   m.set_function("calcRDF3D", calcRDF3D);
+  m.set_function("calcRunningCN", calcRunningCN);
   m.set_function("prismAnalysis", prismAnalysis);
   m.set_function("clusterAnalysis", clusterAnalysis);
   m.set_function("recenterCluster", recenterCluster);
