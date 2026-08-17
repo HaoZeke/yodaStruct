@@ -12,6 +12,7 @@ local function opts(t)
   return t or {}
 end
 
+-- No region. A shrinking slice is core.readLammpsTrjreduced.
 function dseams.read(path, o)
   o = opts(o)
   local frame = o.frame or 1

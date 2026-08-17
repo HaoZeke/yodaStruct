@@ -128,7 +128,16 @@ Suffix-dispatching loader. Returns a ``PointCloud``.
     +--------------------------------+--------------------+------------------------------------------------------------------------------------+
 
 ``opts.frame`` is the 1-based frame index (default 1). ``opts.type`` is
-the LAMMPS type ID to keep.
+the LAMMPS type ID to keep. There is no region. ``dseams.read`` calls
+``core.readLammpsTrjO``, which keeps every atom of that type.
+
+A dump slice that shrinks ``nop`` is
+``dseams.core.readLammpsTrjreduced(path, frame, type, true, lo, hi)``.
+``core.readLammpsTrjO`` takes the same five arguments after the path
+and only sets ``inSlice``. An axis with ``lo == hi`` is unconstrained,
+so ``{0,0,0}`` / ``{50,0,0}`` is ``x`` in ``[0, 50]``, ``y`` and ``z``
+open. The ``O`` in ``readLammpsTrjO`` is historical; the type argument
+is any LAMMPS type.
 
 ~neighbors~(cloud[, opts])
 --------------------------
