@@ -39,13 +39,15 @@ using Cloud = molSys::PointCloud<molSys::Point<double>, double>;
  *  @{
  */
 
-/** One LAMMPS dump frame, one atom type. */
+/** One LAMMPS dump frame, one atom type. isSlice sets inSlice; atoms stay.
+ *  The type argument is any LAMMPS type (the O is historical). */
 Cloud readLammpsTrjO(std::string filename, int targetFrame, int typeO,
                      sol::optional<bool> isSlice,
                      sol::optional<std::array<double, 3>> low,
                      sol::optional<std::array<double, 3>> high);
 
-/** One LAMMPS dump frame, dropping atoms outside the slice when asked. */
+/** One LAMMPS dump frame, dropping atoms outside the slice when asked.
+ *  nop is the kept count. An axis with lo == hi is unconstrained. */
 Cloud readLammpsTrjreduced(std::string filename, int targetFrame, int typeI,
                            sol::optional<bool> isSlice,
                            sol::optional<std::array<double, 3>> low,
