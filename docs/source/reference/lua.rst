@@ -33,6 +33,10 @@ Public names
     +--------------------+----------+----------------------------------------------------+
     | ``cn``             | function | site-site coordination number                      |
     +--------------------+----------+----------------------------------------------------+
+    | ``rdf``            | function | partial three-dimensional RDF                      |
+    +--------------------+----------+----------------------------------------------------+
+    | ``running_cn``     | function | running site-site coordination number              |
+    +--------------------+----------+----------------------------------------------------+
     | ``knn``            | function | k-nearest graph by atom ID                         |
     +--------------------+----------+----------------------------------------------------+
     | ``chill_plus``     | function | CHILL+ state names; no file                        |
@@ -40,6 +44,16 @@ Public names
     | ``chill``          | function | CHILL state names; no file                         |
     +--------------------+----------+----------------------------------------------------+
     | ``cages``          | function | seeded HC/DDC per-atom flags                       |
+    +--------------------+----------+----------------------------------------------------+
+    | ``hbonds``         | function | hydrogen-bond adjacency table                      |
+    +--------------------+----------+----------------------------------------------------+
+    | ``density``        | function | Cartesian number-density profile                   |
+    +--------------------+----------+----------------------------------------------------+
+    | ``site_table``     | function | parse a type-to-site mapping                       |
+    +--------------------+----------+----------------------------------------------------+
+    | ``pairs``          | function | mutual nearest cation-anion pairs                  |
+    +--------------------+----------+----------------------------------------------------+
+    | ``domain``         | function | largest mapped-site domain statistics              |
     +--------------------+----------+----------------------------------------------------+
     | ``core``           | table    | ``require("dseams_core")``; compiled registrations |
     +--------------------+----------+----------------------------------------------------+
@@ -94,15 +108,13 @@ stack). A freshly written Lua table is not accepted.
 
 .. table::
 
-    +-------------------+------------------------------------------------------------------------------------------------------------------------------+------------------+----------------------------------+
-    | style             | examples                                                                                                                     | nList / rings in | result                           |
-    +===================+==============================================================================================================================+==================+==================================+
-    | new               | ``neighListO``, ``neighListPair``, ``neighbourListByIndex``, ``kNearestNeighbourList``, ``ringNetwork``, ``cageAffiliation``, ``getCorrelPlus``, ``calcCN``, ``calcRDF3D``, ``calcRunningCN`` | Lua table        | Lua table (or void / name table) |
-    +-------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------+------------------+----------------------------------+
-    | new, userdata out | ``getHbondNetwork``, ``getHbondNetworkFromClouds``, ``getHbondNetworkFromDonors``                                                                                        | Lua table        | C++ vector userdata              |
-    +-------------------+------------------------------------------------------------------------------------------------------------------------------+------------------+----------------------------------+
-    | legacy            | ``neighborList``, ``bondNetworkByIndex``, ``getPrimitiveRings``, ``readFrame*``, ``chillPlus_*``, ``chill_*``                | userdata         | userdata                         |
-    +-------------------+------------------------------------------------------------------------------------------------------------------------------+------------------+----------------------------------+
+    +--------+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+------------------+----------------------------------+
+    | style  | examples                                                                                                                                                                                                                                                                                     | nList / rings in | result                           |
+    +========+==============================================================================================================================================================================================================================================================================================+==================+==================================+
+    | new    | ``neighListO``, ``neighListPair``, ``neighbourListByIndex``, ``kNearestNeighbourList``, ``ringNetwork``, ``cageAffiliation``, ``getCorrelPlus``, ``calcCN``, ``calcRDF3D``, ``calcRunningCN``, ``getHbondNetwork*``, ``densityByType``, ``densityByKind``, ``contactPairs``, ``domainStats`` | Lua table        | Lua table (or void / name table) |
+    +--------+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+------------------+----------------------------------+
+    | legacy | ``neighborList``, ``bondNetworkByIndex``, ``getPrimitiveRings``, ``readFrame*``, ``chillPlus_*``, ``chill_*``                                                                                                                                                                                | userdata         | userdata                         |
+    +--------+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+------------------+----------------------------------+
 
 ``sol2`` does not apply C++ default arguments on a raw bind. Wrapped
 names spell optionals in Lua (``sol::optional``). Legacy names need
@@ -115,29 +127,30 @@ Suffix-dispatching loader. Returns a ``PointCloud``.
 
 .. table::
 
-    +--------------------------------+--------------------+------------------------------------------------------------------------------------+
-    | suffix                         | backend            | notes                                                                              |
-    +================================+====================+====================================================================================+
-    | ``.xyz``                       | ``readXYZ``        | whole file; ``opts.frame`` unused                                                  |
-    +--------------------------------+--------------------+------------------------------------------------------------------------------------+
-    | ``.con``                       | ``readCon``        | errors if this build has no readcon                                                |
-    +--------------------------------+--------------------+------------------------------------------------------------------------------------+
-    | ``.pdb`` / ``.gro`` / ``.dcd`` | ``readChemfiles``  | errors if this build has no chemfiles; ``opts.type`` defaults to ``-1`` (keep all) |
-    +--------------------------------+--------------------+------------------------------------------------------------------------------------+
-    | other (LAMMPS dump)            | ``readLammpsTrjO`` | ``opts.frame`` defaults to 1. If ``opts.type`` is nil, tries type 2 then type 1    |
-    +--------------------------------+--------------------+------------------------------------------------------------------------------------+
+    +--------------------------------+-----------------------------------------+-----------------------------------------------------------------------------------------------------------+
+    | suffix                         | backend                                 | notes                                                                                                     |
+    +================================+=========================================+===========================================================================================================+
+    | ``.xyz``                       | ``readXYZ``                             | whole file; ``opts.frame`` unused                                                                         |
+    +--------------------------------+-----------------------------------------+-----------------------------------------------------------------------------------------------------------+
+    | ``.con``                       | ``readCon``                             | errors if this build has no readcon                                                                       |
+    +--------------------------------+-----------------------------------------+-----------------------------------------------------------------------------------------------------------+
+    | ``.pdb`` / ``.gro`` / ``.dcd`` | ``readChemfiles``                       | errors if this build has no chemfiles; ``opts.type`` defaults to ``-1`` (keep all)                        |
+    +--------------------------------+-----------------------------------------+-----------------------------------------------------------------------------------------------------------+
+    | other (LAMMPS dump)            | ``readLammpsTrj`` or ``readLammpsTrjO`` | ``opts.all = true`` keeps all atoms. Otherwise ``opts.type`` selects a type; nil tries type 2 then type 1 |
+    +--------------------------------+-----------------------------------------+-----------------------------------------------------------------------------------------------------------+
 
-``opts.frame`` is the 1-based frame index (default 1). ``opts.type`` is
-the LAMMPS type ID to keep. There is no region. ``dseams.read`` calls
-``core.readLammpsTrjO``, which keeps every atom of that type.
+``opts.frame`` is the 1-based frame index (default 1). ``opts.all = true``
+calls ``core.readLammpsTrj`` and keeps every atom. Otherwise
+``opts.type`` is the LAMMPS type ID to keep. There is no region in the
+high-level helper.
 
 A dump slice that shrinks ``nop`` is
 ``dseams.core.readLammpsTrjreduced(path, frame, type, true, lo, hi)``.
 ``core.readLammpsTrjO`` takes the same five arguments after the path
 and only sets ``inSlice``. An axis with ``lo == hi`` is unconstrained,
-so ``{0,0,0}`` / ``{50,0,0}`` is ``x`` in ``[0, 50]``, ``y`` and ``z``
-open. The ``O`` in ``readLammpsTrjO`` is historical; the type argument
-is any LAMMPS type.
+so ``{0,0,0}`` / ``{50,0,0}`` is ``x`` in ``[0, 50]``, ``y`` and ``z`` open.
+The ``O`` in ``readLammpsTrjO`` is historical; the type argument is any
+LAMMPS type.
 
 ~neighbors~(cloud[, opts])
 --------------------------
@@ -146,12 +159,11 @@ Cutoff neighbour list by atom ID. Calls
 ``core.neighListO(opts.cutoff or 3.5, cloud, opts.type or 1)``.
 Returns a Lua table of rows (self ID first).
 
-~neighbors_pair~(cloud[, opts])
--------------------------------
+Pair neighbours
+---------------
 
-I-J cutoff neighbour list. Calls
-``core.neighListPair(opts.cutoff or 3.5, cloud, opts.type_i or 1,
-opts.type_j or 2)``. Like-type pairs reuse ``neighListO``.
+``neighbors_pair(cloud[, opts])`` returns an I-J cutoff neighbour list. Calls
+``core.neighListPair(opts.cutoff or 3.5, cloud, opts.type_i or 1, opts.type_j or 2)``. Like-type pairs reuse ``neighListO``.
 
 ~cn~(cloud[, opts])
 -------------------
@@ -162,14 +174,21 @@ Site-site coordination number. Calls ``core.calcCN`` with
 ``floor(cutoff / 0.1)``). ``rhoJ`` is ``nJ / volume`` from the
 partial RDF.
 
-~core.calcRunningCN~(cloud, typeI, typeJ, rmax, bins)
------------------------------------------------------
+~rdf~(cloud[, opts])
+--------------------
 
-Running integral of ``g_IJ``. Returns ``{r, cn}`` with
-``rhoJ = nJ / volume``. There is no ``dseams.running_cn`` helper;
-call the compiled name on ``dseams.core``. Ice-score ``--family``,
-contact pairs, polar/apolar domains, and type-resolved ``rho(z)``
-are the ``seams`` CLI in seams-core 2.5.0.
+Partial three-dimensional radial distribution function. Calls
+``core.calcRDF3D`` with ``opts.type_i`` (default 1), ``opts.type_j``
+(default 2), ``opts.cutoff`` (default 12.0), and ``opts.bins`` (default
+``floor(cutoff / 0.05)``). Returns ``{r = {...}, g = {...}}``.
+
+Running coordination number
+---------------------------
+
+``running_cn(cloud[, opts])`` is the running integral of the partial
+``g_IJ``. Uses the same options and
+defaults as ``rdf`` and calls ``core.calcRunningCN``. Returns
+``{r = {...}, cn = {...}}``, with ``rhoJ = nJ / volume``.
 
 ~knn~(cloud[, opts])
 --------------------
@@ -206,6 +225,63 @@ Seeded HC/DDC membership. Builds mutual and union k-nearest graphs
 index list, keeps six-membered rings, and returns
 ``core.seededCageAffiliation(...)``: a table ``{hc = ..., ddc = ...}``
 of per-atom flags.
+
+~hbonds~(cloud[, opts])
+-----------------------
+
+Hydrogen-bond adjacency for the selected sites. The neighbour graph
+uses ``opts.cutoff`` (default 3.5) and ``opts.type`` (default 1).
+
+- With ``opts.path``, the helper reads hydrogens from that trajectory;
+  ``opts.frame`` defaults to 1 and ``opts.h_type`` defaults to 1.
+
+- With ``opts.h_cloud``, the helper uses the supplied hydrogen
+  ``PointCloud`` instead.
+
+- ``opts.dist`` and ``opts.angle`` use the engine defaults 2.42 and 30.0
+  when omitted.
+
+Returns a nested Lua table. Supplying neither ``path`` nor ``h_cloud`` is
+an error.
+
+~density~(cloud[, opts])
+------------------------
+
+Cartesian number density along ``opts.axis``: ``"x"``, ``"y"``, ``"z"``,
+or the corresponding zero-based index. The default axis is ``"z"``.
+``opts.bins`` defaults to the axis span divided into approximately 0.1
+length-unit bins.
+
+- Type mode uses ``opts.type`` (default 0) and returns
+  ``{centres, rho, axis, atom_type}``.
+
+- Site mode requires both ``opts.table`` and ``opts.kind`` and returns
+  ``{centres, rho, axis, site_kind}``.
+
+Site mapping table
+------------------
+
+``site_table(spec)`` parses a comma-separated mapping such as
+``"1=cationHead,2=anion,3=tail"``. The result is a ``SiteTable`` userdata
+accepted by ``density``, ``pairs``, and ``domain``. Site kinds are exposed
+on ``dseams.core.Kind`` (alias ``SiteKind``), including ``polar`` and
+``apolar``.
+
+~pairs~(cloud, opts)
+--------------------
+
+Requires ``opts.table``. Maps the cloud to ionic sites and returns
+mutual nearest unlike pairs as
+``{pairs, count, n_cation, n_anion}``. Each pair contains the original
+atom IDs.
+
+~domain~(cloud, opts)
+---------------------
+
+Requires ``opts.table`` and ``opts.kind``. The graph joins mapped sites
+within ``opts.cutoff`` (default 3.5). Returns
+``{site_kind, n, largest, percolation}``, where ``n`` is the selected site
+count and ``percolation = largest / n``.
 
 ``core``
 --------

@@ -54,8 +54,9 @@ Run it from the repository root:
 
 Fennel ``require`` falls through to Lua ``package.path``, so
 ``(require :dseams)`` returns the same table as ``require("dseams")``:
-``read``, ``neighbors``, ``knn``, ``chill_plus``, ``chill``, ``cages``, and
-``.core``. Names stay snake\ :sub:`case`\.
+``read``, ``neighbors``, ``neighbors_pair``, ``cn``, ``rdf``, ``running_cn``,
+``knn``, ``chill_plus``, ``chill``, ``cages``, ``hbonds``, ``density``,
+``site_table``, ``pairs``, ``domain``, and ``.core``. Names stay snake\ :sub:`case`\.
 
 Scripts that mention ``readFrameOnlyOne``, ``functionScript``, or
 ``trajectory`` as a global expect the 2020 driver. Rewrite them to
@@ -65,10 +66,11 @@ shape.
 ``lua/dseams.fnl``
 ------------------
 
-``lua/dseams.fnl`` wraps that table with kebab-case names
-(``chill-plus``) and re-exports ``.core``. Load it with ``fennel.dofile``
-under a name that is not ``dseams``, so the inner ``(require :dseams)``
-still hits the Lua module:
+``lua/dseams.fnl`` wraps that table with kebab-case names such as
+``neighbors-pair``, ``running-cn``, ``chill-plus``, and ``site-table``; it
+re-exports ``.core``. Load it with ``fennel.dofile`` under a name that is
+not ``dseams``, so the inner ``(require :dseams)`` still hits the Lua
+module:
 
 .. code:: fennel
 

@@ -113,9 +113,9 @@ Cutoff neighbour list by atom ID. Calls
 ~core.neighListO(opts.cutoff or 3.5, cloud, opts.type or 1)~.
 Returns a Lua table of rows (self ID first).
 
-* ~neighbors_pair~(cloud[, opts])
+* Pair neighbours
 
-I-J cutoff neighbour list. Calls
+~neighbors_pair(cloud[, opts])~ returns an I-J cutoff neighbour list. Calls
 ~core.neighListPair(opts.cutoff or 3.5, cloud, opts.type_i or 1,
 opts.type_j or 2)~. Like-type pairs reuse ~neighListO~.
 
@@ -134,9 +134,10 @@ Partial three-dimensional radial distribution function. Calls
 (default 2), ~opts.cutoff~ (default 12.0), and ~opts.bins~ (default
 ~floor(cutoff / 0.05)~). Returns ~{r = {...}, g = {...}}~.
 
-* ~running_cn~(cloud[, opts])
+* Running coordination number
 
-Running integral of the partial ~g_IJ~. Uses the same options and
+~running_cn(cloud[, opts])~ is the running integral of the partial
+~g_IJ~. Uses the same options and
 defaults as ~rdf~ and calls ~core.calcRunningCN~. Returns
 ~{r = {...}, cn = {...}}~, with ~rhoJ = nJ / volume~.
 
@@ -196,9 +197,9 @@ length-unit bins.
 - Site mode requires both ~opts.table~ and ~opts.kind~ and returns
   ~{centres, rho, axis, site_kind}~.
 
-* ~site_table~(spec)
+* Site mapping table
 
-Parses a comma-separated mapping such as
+~site_table(spec)~ parses a comma-separated mapping such as
 ~"1=cationHead,2=anion,3=tail"~. The result is a ~SiteTable~ userdata
 accepted by ~density~, ~pairs~, and ~domain~. Site kinds are exposed
 on ~dseams.core.Kind~ (alias ~SiteKind~), including ~polar~ and
