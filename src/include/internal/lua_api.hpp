@@ -9,6 +9,7 @@
 // The build writes lua.hpp (absolute pkg-config 5.3/5.4 headers)
 // so sol's #include <lua.hpp> does not pick a distro 5.5 header.
 #include <mol_sys.hpp>
+#include <site.hpp>
 #include <sol/sol.hpp>
 
 #include <array>
@@ -38,6 +39,9 @@ using Cloud = molSys::PointCloud<molSys::Point<double>, double>;
 /** @name I/O
  *  @{
  */
+
+/** One complete LAMMPS dump frame with every atom type. */
+Cloud readLammpsTrj(std::string filename, int targetFrame);
 
 /** One LAMMPS dump frame, one atom type. isSlice sets inSlice; atoms stay.
  *  The type argument is any LAMMPS type (the O is historical). */
@@ -264,6 +268,24 @@ sol::table calcRunningCN(sol::this_state ts, const Cloud &yCloud, int typeI,
 double calcCN(const Cloud &yCloud, int typeI, int typeJ, double rmax, int nbins,
               sol::optional<double> rCut);
 
+/** Type-resolved Cartesian number-density profile. */
+sol::table densityByType(sol::this_state ts, const Cloud &yCloud, int typeI,
+                         int nbin, int axis);
+
+/** Site-kind-resolved Cartesian number-density profile. */
+sol::table densityByKind(sol::this_state ts, const Cloud &yCloud,
+                         const site::Table &table, site::Kind kind, int nbin,
+                         int axis);
+
+/** Mutual nearest cation-anion pairs and ion counts. */
+sol::table contactPairs(sol::this_state ts, const Cloud &cloud,
+                        const site::Table &table);
+
+/** Largest cutoff-connected mapped site domain. */
+sol::table domainStats(sol::this_state ts, const Cloud &cloud,
+                       const site::Table &table, site::Kind kind,
+                       double cutoff);
+
 /** Quasi-1D prism analysis. `atomID` is the first-frame ID. */
 int prismAnalysis(std::string path, const std::vector<std::vector<int>> &rings,
                   const std::vector<std::vector<int>> &nList, Cloud &cloud,
@@ -369,6 +391,9 @@ void registerDescriptors(sol::state_view lua, sol::table m);
 
 //! Topological network criteria, clustering and selection analyses
 void registerTopology(sol::state_view lua, sol::table m);
+
+//! Site tables, ion COM clouds, contact pairs and connected domains
+void registerSite(sol::state_view lua, sol::table m);
 
 //! Every registration group above, into table m
 void registerAll(sol::state_view lua, sol::table m);

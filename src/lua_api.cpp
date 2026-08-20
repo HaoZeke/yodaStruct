@@ -10,6 +10,7 @@
 #include <bulkTUM.hpp>
 #include <cage_affiliation.hpp>
 #include <cluster.hpp>
+#include <density.hpp>
 #include <franzblau.hpp>
 #include <mol_sys.hpp>
 #include <neighbours.hpp>
@@ -68,6 +69,48 @@ std::vector<std::string> iceStateNames(const Cloud &yCloud) {
   return names;
 }
 
+//! Human-readable name of a mapped site kind
+const char *siteKindName(site::Kind kind) {
+  switch (kind) {
+  case site::Kind::unspecified:
+    return "unspecified";
+  case site::Kind::cationHead:
+    return "cationHead";
+  case site::Kind::anion:
+    return "anion";
+  case site::Kind::tail:
+    return "tail";
+  case site::Kind::donorH:
+    return "donorH";
+  case site::Kind::acceptor:
+    return "acceptor";
+  case site::Kind::polar:
+    return "polar";
+  case site::Kind::apolar:
+    return "apolar";
+  case site::Kind::waterO:
+    return "waterO";
+  case site::Kind::waterH:
+    return "waterH";
+  case site::Kind::solvent:
+    return "solvent";
+  }
+  return "unspecified";
+}
+
+//! Cloud-index pairs as a Lua array of two-element arrays
+sol::table packPairs(sol::state_view lua,
+                     const std::vector<std::pair<int, int>> &pairs) {
+  sol::table out = lua.create_table(static_cast<int>(pairs.size()), 0);
+  for (std::size_t i = 0; i < pairs.size(); ++i) {
+    sol::table row = lua.create_table(2, 0);
+    row[1] = pairs[i].first;
+    row[2] = pairs[i].second;
+    out[i + 1] = row;
+  }
+  return out;
+}
+
 //! Packs a SteinhardtQl result into a {ql = ..., qlBar = ...} Lua table
 sol::table packSteinhardt(sol::state_view lua, const chill::SteinhardtQl &q) {
   sol::table t = lua.create_table(0, 2);
@@ -79,6 +122,11 @@ sol::table packSteinhardt(sol::state_view lua, const chill::SteinhardtQl &q) {
 namespace luaApi {
 
 constexpr std::array<double, 3> kZeroBounds{0.0, 0.0, 0.0};
+
+Cloud readLammpsTrj(std::string filename, int targetFrame) {
+  Cloud scratch;
+  return sinp::readLammpsTrj(filename, targetFrame, scratch);
+}
 
 Cloud readLammpsTrjO(std::string filename, int targetFrame, int typeO,
                      sol::optional<bool> isSlice,
@@ -361,6 +409,7 @@ void registerIO(sol::state_view lua, sol::table m) {
       [](const Cloud &c) { return sol::as_table(c.box); }, "boxLow",
       [](const Cloud &c) { return sol::as_table(c.boxLow); }, "iceTypes",
       [](const Cloud &c) { return sol::as_table(iceStateNames(c)); });
+  m.set_function("readLammpsTrj", readLammpsTrj);
   m.set_function("readLammpsTrjO", readLammpsTrjO);
   m.set_function("readLammpsTrjreduced", readLammpsTrjreduced);
   m.set_function("readXYZ", readXYZ);
@@ -397,6 +446,12 @@ void registerNeighbours(sol::state_view lua, sol::table m) {
         kNearestNeighbourList(yCloud, k, candidateCutoff, typeI, mutual));
   });
   m.set_function("shellSeparation", shellSeparation);
+  m.set_function(
+      "mutualNearestUnlike",
+      [](sol::this_state ts, const Cloud &yCloud, int typeI, int typeJ) {
+        return packPairs(sol::state_view(ts),
+                         nneigh::mutualNearestUnlike(yCloud, typeI, typeJ));
+      });
   m.set_function("neighborList", nneigh::neighListO);
   m.set_function("bondNetworkByIndex", nneigh::neighbourListByIndex);
   m.set_function("getHbondNetwork", getHbondNetwork);
@@ -588,6 +643,82 @@ double calcCN(const Cloud &yCloud, int typeI, int typeJ, double rmax, int nbins,
   return rdf::coordinationNumber(h, rCut.value_or(rmax), rhoJ);
 }
 
+sol::table packDensity(sol::state_view lua, const site::DensityZ &profile,
+                       int axis, sol::optional<site::Kind> kind) {
+  sol::table out = lua.create_table(0, 5);
+  out["centres"] = sol::as_table(profile.z);
+  out["rho"] = sol::as_table(profile.rho);
+  out["axis"] = axis == 0 ? "x" : (axis == 1 ? "y" : "z");
+  if (kind) {
+    out["site_kind"] = siteKindName(*kind);
+  } else {
+    out["atom_type"] = profile.type;
+  }
+  return out;
+}
+
+sol::table densityByType(sol::this_state ts, const Cloud &yCloud, int typeI,
+                         int nbin, int axis) {
+  return packDensity(sol::state_view(ts),
+                     site::densityZ(yCloud, typeI, nbin, axis), axis,
+                     sol::nullopt);
+}
+
+sol::table densityByKind(sol::this_state ts, const Cloud &yCloud,
+                         const site::Table &table, site::Kind kind, int nbin,
+                         int axis) {
+  return packDensity(sol::state_view(ts),
+                     site::densityZ(yCloud, table, kind, nbin, axis), axis,
+                     kind);
+}
+
+sol::table contactPairs(sol::this_state ts, const Cloud &cloud,
+                        const site::Table &table) {
+  sol::state_view lua(ts);
+  const auto ions = site::ionCloud(cloud, table);
+  const auto pairs = nneigh::mutualNearestUnlike(ions, 1, 2);
+  int nCation = 0;
+  int nAnion = 0;
+  for (const auto &point : ions.pts) {
+    nCation += point.type == 1 ? 1 : 0;
+    nAnion += point.type == 2 ? 1 : 0;
+  }
+  sol::table out = lua.create_table(0, 4);
+  out["pairs"] = packPairs(lua, pairs);
+  out["count"] = static_cast<int>(pairs.size());
+  out["n_cation"] = nCation;
+  out["n_anion"] = nAnion;
+  return out;
+}
+
+sol::table domainStats(sol::this_state ts, const Cloud &cloud,
+                       const site::Table &table, site::Kind kind,
+                       double cutoff) {
+  std::vector<bool> mask(static_cast<std::size_t>(cloud.nop), false);
+  for (const int index : site::indicesOf(cloud, table, kind)) {
+    if (index >= 0 && index < cloud.nop) {
+      mask[static_cast<std::size_t>(index)] = true;
+    }
+  }
+  const auto byIndex = nneigh::getNewNeighbourListByIndex(cloud, cutoff);
+  std::vector<std::vector<int>> byId(byIndex.size());
+  for (std::size_t i = 0; i < byIndex.size(); ++i) {
+    byId[i].reserve(byIndex[i].size());
+    for (const int index : byIndex[i]) {
+      if (index >= 0 && index < cloud.nop) {
+        byId[i].push_back(cloud.pts[static_cast<std::size_t>(index)].atomID);
+      }
+    }
+  }
+  const auto domain = clump::largestDomain(cloud, byId, mask);
+  sol::table out = sol::state_view(ts).create_table(0, 4);
+  out["site_kind"] = siteKindName(kind);
+  out["n"] = domain.subset;
+  out["largest"] = domain.largest;
+  out["percolation"] = domain.percolation;
+  return out;
+}
+
 int prismAnalysis(std::string path, const std::vector<std::vector<int>> &rings,
                   const std::vector<std::vector<int>> &nList, Cloud &cloud,
                   int maxDepth, int atomID, int firstFrame, int currentFrame,
@@ -675,6 +806,8 @@ void registerTopology(sol::state_view lua, sol::table m) {
   m.set_function("calcRDF3D", calcRDF3D);
   m.set_function("calcRunningCN", calcRunningCN);
   m.set_function("calcCN", calcCN);
+  m.set_function("densityByType", densityByType);
+  m.set_function("densityByKind", densityByKind);
   m.set_function("prismAnalysis", prismAnalysis);
   m.set_function("clusterAnalysis", clusterAnalysis);
   m.set_function("recenterCluster", recenterCluster);
@@ -719,11 +852,18 @@ void registerSite(sol::state_view lua, sol::table m) {
         t.typeToKind[typeId] = k;
       },
       "ofType", &site::Table::ofType);
+  m["SiteKind"] = lua["SiteKind"];
+  m["Kind"] = lua["SiteKind"];
+  m["SiteFamily"] = lua["SiteFamily"];
+  m["Family"] = lua["SiteFamily"];
+  m["SiteTable"] = lua["SiteTable"];
   m.set_function("parseSiteSpec", [](const std::string &spec) {
     return site::parseSiteSpec(spec);
   });
   m.set_function("ionCloud", site::ionCloud);
   m.set_function("indicesOf", site::indicesOf);
+  m.set_function("contactPairs", contactPairs);
+  m.set_function("domainStats", domainStats);
 }
 
 void registerAll(sol::state_view lua, sol::table m) {

@@ -108,7 +108,7 @@ dseams_core = shared_module(
 )
 
 install_data(
-    ['lua/dseams.lua', 'lua/dseams.fnl', 'lua/yoda.lua'],
+    ['lua/dseams.lua', 'lua/dseams.fnl', 'lua/yoda.lua', 'lua/yoda.fnl'],
     install_dir: get_option('datadir') / 'luadseams' / 'lua',
 )
 install_data(
