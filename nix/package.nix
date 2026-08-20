@@ -15,7 +15,7 @@
 
 stdenv.mkDerivation {
   pname = "dseams";
-  version = "2.2.0";
+  version = "2.6.0";
 
   src = lib.fileset.toSource {
     root = ./..;
@@ -69,6 +69,15 @@ stdenv.mkDerivation {
     addToSearchPath LUA_PATH "$out/share/luadseams/lua/?.lua"
     addToSearchPath LUA_CPATH "$out/lib/?.so"
     EOF
+  '';
+
+  doInstallCheck = true;
+
+  installCheckPhase = ''
+    DSEAMS_INSTALL_ROOT="$out" \
+      LUA_PATH="$out/share/luadseams/lua/?.lua;;" \
+      LUA_CPATH="$out/lib/?.so;;" \
+      lua example_lua/library/installed.lua
   '';
 
   meta = {
