@@ -159,7 +159,7 @@ function dseams.density(cloud, o)
   if axis_index == nil or axis_index < 0 or axis_index > 2 then
     error('density axis must be "x", "y", "z", 0, 1, or 2', 2)
   end
-  local span = cloud.box[axis_index + 1] or 0.0
+  local span = cloud:box()[axis_index + 1] or 0.0
   local bins = o.bins or math.max(1, math.floor(span / 0.1 + 0.5))
   if bins < 1 then
     error("density bins must be positive", 2)
