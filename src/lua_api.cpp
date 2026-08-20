@@ -454,13 +454,33 @@ void registerNeighbours(sol::state_view lua, sol::table m) {
       });
   m.set_function("neighborList", nneigh::neighListO);
   m.set_function("bondNetworkByIndex", nneigh::neighbourListByIndex);
-  m.set_function("getHbondNetwork", getHbondNetwork);
-  m.set_function("getHbondNetworkFromClouds", getHbondNetworkFromClouds);
+  m.set_function("getHbondNetwork", [](std::string filename, Cloud &yCloud,
+                                       std::vector<std::vector<int>> nList,
+                                       int targetFrame, int Htype,
+                                       sol::optional<double> dist,
+                                       sol::optional<double> angle) {
+    return sol::as_nested(getHbondNetwork(filename, yCloud, nList, targetFrame,
+                                          Htype, dist, angle));
+  });
+  m.set_function(
+      "getHbondNetworkFromClouds",
+      [](Cloud &yCloud, Cloud &hCloud, std::vector<std::vector<int>> nList,
+         sol::optional<double> dist, sol::optional<double> angle) {
+        return sol::as_nested(
+            getHbondNetworkFromClouds(yCloud, hCloud, nList, dist, angle));
+      });
   m.set_function("neighListPair", [](double rcutoff, const Cloud &yCloud,
                                      int typeI, int typeJ) {
     return sol::as_nested(neighListPair(rcutoff, yCloud, typeI, typeJ));
   });
-  m.set_function("getHbondNetworkFromDonors", getHbondNetworkFromDonors);
+  m.set_function(
+      "getHbondNetworkFromDonors",
+      [](Cloud &yCloud, Cloud &hCloud, std::vector<std::vector<int>> nList,
+         std::vector<int> donorHs, sol::optional<double> dist,
+         sol::optional<double> angle) {
+        return sol::as_nested(getHbondNetworkFromDonors(yCloud, hCloud, nList,
+                                                        donorHs, dist, angle));
+      });
   m.set_function("donatedHydrogenBond", [](const Cloud &yCloud,
                                            const Cloud &hCloud, int acceptor,
                                            int donor, std::vector<int> donorHs,
