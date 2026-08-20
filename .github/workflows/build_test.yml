@@ -8,7 +8,12 @@ on:
       - main
 jobs:
   build_test:
-    runs-on: ubuntu-24.04
+    name: ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-24.04, macos-latest]
     steps:
       - uses: actions/checkout@v4
       - uses: mamba-org/setup-micromamba@v2
@@ -28,8 +33,15 @@ jobs:
       - name: Configure and build
         shell: bash -el {0}
         run: |
-          meson setup bbdir --wrap-mode=nofallback
+          meson setup bbdir --prefix=/usr --wrap-mode=nofallback
           meson compile -C bbdir
       - name: Tests
         shell: bash -el {0}
         run: meson test -C bbdir -v --print-errorlogs
+      - name: Test staged install
+        shell: bash -el {0}
+        run: |
+          DESTDIR="$PWD/stage" meson install -C bbdir
+          export LUA_PATH="$PWD/stage/usr/share/luadseams/lua/?.lua;;"
+          export LUA_CPATH="$PWD/stage/usr/lib/?.so;;"
+          lua example_lua/library/installed.lua
