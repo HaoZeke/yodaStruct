@@ -57,7 +57,11 @@ lua_lualib_h = ''
 lua_lauxlib_h = ''
 # Versioned subdirs first. includedir itself is often /usr/include,
 # which holds a distro 5.5 lua.h next to lua5.4/lua.h.
-foreach base : [lua_includedir / 'lua5.4', lua_includedir / 'lua5.3', lua_includedir]
+foreach base : [
+    lua_includedir / 'lua5.4',
+    lua_includedir / 'lua5.3',
+    lua_includedir,
+]
     cand = base / 'lua.h'
     if lua_h == '' and base != '' and fs.exists(cand)
         # 5.5 headers define LUA_VERSION_MINOR_N; 5.3/5.4 do not.
@@ -117,56 +121,62 @@ install_data(
 
 lua_exe = find_program('lua5.4', 'lua-5.4', 'lua5.3', 'lua', required: false)
 if lua_exe.found()
-  lua_test_env = {
-    'LUA_PATH': meson.project_source_root() / 'lua' / '?.lua;;',
-    'LUA_CPATH': meson.current_build_dir() / '?.so;;',
-  }
-  test(
-    'dseams_library_read',
-    lua_exe,
-    args: [meson.project_source_root() / 'example_lua/library/read.lua'],
-    env: lua_test_env,
-    workdir: meson.project_source_root(),
-    timeout: 120,
-  )
-  test(
-    'dseams_library_rdf3d',
-    lua_exe,
-    args: [meson.project_source_root() / 'example_lua/library/rdf3d.lua'],
-    env: lua_test_env,
-    workdir: meson.project_source_root(),
-    timeout: 120,
-  )
-  test(
-    'dseams_library_runningcn',
-    lua_exe,
-    args: [meson.project_source_root() / 'example_lua/library/runningcn.lua'],
-    env: lua_test_env,
-    workdir: meson.project_source_root(),
-    timeout: 120,
-  )
-  test(
-    'dseams_library_cn',
-    lua_exe,
-    args: [meson.project_source_root() / 'example_lua/library/cn.lua'],
-    env: lua_test_env,
-    workdir: meson.project_source_root(),
-    timeout: 120,
-  )
-  test(
-    'dseams_library_workflows',
-    lua_exe,
-    args: [meson.project_source_root() / 'example_lua/library/workflows.lua'],
-    env: lua_test_env,
-    workdir: meson.project_source_root(),
-    timeout: 120,
-  )
-  test(
-    'dseams_fennel_workflows',
-    lua_exe,
-    args: [meson.project_source_root() / 'example_lua/library/fennel_workflows.lua'],
-    env: lua_test_env,
-    workdir: meson.project_source_root(),
-    timeout: 120,
-  )
+    lua_test_env = {
+        'LUA_PATH': meson.project_source_root() / 'lua' / '?.lua;;',
+        'LUA_CPATH': meson.current_build_dir() / '?.so;;',
+    }
+    test(
+        'dseams_library_read',
+        lua_exe,
+        args: [meson.project_source_root() / 'example_lua/library/read.lua'],
+        env: lua_test_env,
+        workdir: meson.project_source_root(),
+        timeout: 120,
+    )
+    test(
+        'dseams_library_rdf3d',
+        lua_exe,
+        args: [meson.project_source_root() / 'example_lua/library/rdf3d.lua'],
+        env: lua_test_env,
+        workdir: meson.project_source_root(),
+        timeout: 120,
+    )
+    test(
+        'dseams_library_runningcn',
+        lua_exe,
+        args: [
+            meson.project_source_root() / 'example_lua/library/runningcn.lua',
+        ],
+        env: lua_test_env,
+        workdir: meson.project_source_root(),
+        timeout: 120,
+    )
+    test(
+        'dseams_library_cn',
+        lua_exe,
+        args: [meson.project_source_root() / 'example_lua/library/cn.lua'],
+        env: lua_test_env,
+        workdir: meson.project_source_root(),
+        timeout: 120,
+    )
+    test(
+        'dseams_library_workflows',
+        lua_exe,
+        args: [
+            meson.project_source_root() / 'example_lua/library/workflows.lua',
+        ],
+        env: lua_test_env,
+        workdir: meson.project_source_root(),
+        timeout: 120,
+    )
+    test(
+        'dseams_fennel_workflows',
+        lua_exe,
+        args: [
+            meson.project_source_root() / 'example_lua/library/fennel_workflows.lua',
+        ],
+        env: lua_test_env,
+        workdir: meson.project_source_root(),
+        timeout: 120,
+    )
 endif

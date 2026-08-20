@@ -15,11 +15,11 @@
 #include <neighbours.hpp>
 #include <rdf.hpp>
 #include <rdf2d.hpp>
-#include <site.hpp>
 #include <ring.hpp>
 #include <seams_input.hpp>
 #include <seams_output.hpp>
 #include <selection.hpp>
+#include <site.hpp>
 #include <structure_desc.hpp>
 #include <topo_bulk.hpp>
 #include <topo_one_dim.hpp>
@@ -85,10 +85,9 @@ Cloud readLammpsTrjO(std::string filename, int targetFrame, int typeO,
                      sol::optional<std::array<double, 3>> low,
                      sol::optional<std::array<double, 3>> high) {
   Cloud scratch;
-  return sinp::readLammpsTrjO(filename, targetFrame, scratch, typeO,
-                              isSlice.value_or(false),
-                              low.value_or(kZeroBounds),
-                              high.value_or(kZeroBounds));
+  return sinp::readLammpsTrjO(
+      filename, targetFrame, scratch, typeO, isSlice.value_or(false),
+      low.value_or(kZeroBounds), high.value_or(kZeroBounds));
 }
 
 Cloud readLammpsTrjreduced(std::string filename, int targetFrame, int typeI,
@@ -96,10 +95,9 @@ Cloud readLammpsTrjreduced(std::string filename, int targetFrame, int typeI,
                            sol::optional<std::array<double, 3>> low,
                            sol::optional<std::array<double, 3>> high) {
   Cloud scratch;
-  return sinp::readLammpsTrjreduced(filename, targetFrame, scratch, typeI,
-                                    isSlice.value_or(false),
-                                    low.value_or(kZeroBounds),
-                                    high.value_or(kZeroBounds));
+  return sinp::readLammpsTrjreduced(
+      filename, targetFrame, scratch, typeI, isSlice.value_or(false),
+      low.value_or(kZeroBounds), high.value_or(kZeroBounds));
 }
 
 Cloud readXYZ(const std::string &filename) { return sinp::readXYZ(filename); }
@@ -140,14 +138,14 @@ std::vector<std::vector<int>> getNewNeighbourListByIndex(const Cloud &yCloud,
   return nneigh::getNewNeighbourListByIndex(yCloud, cutoff);
 }
 
-std::vector<std::vector<int>> neighbourListByIndex(
-    const Cloud &yCloud, std::vector<std::vector<int>> nList) {
+std::vector<std::vector<int>>
+neighbourListByIndex(const Cloud &yCloud, std::vector<std::vector<int>> nList) {
   return nneigh::neighbourListByIndex(yCloud, nList);
 }
 
-std::vector<std::vector<int>> kNearestNeighbourList(
-    const Cloud &yCloud, int k, double candidateCutoff, int typeI,
-    sol::optional<bool> mutual) {
+std::vector<std::vector<int>>
+kNearestNeighbourList(const Cloud &yCloud, int k, double candidateCutoff,
+                      int typeI, sol::optional<bool> mutual) {
   return nneigh::kNearestNeighbourList(yCloud, k, candidateCutoff, typeI,
                                        mutual.value_or(true));
 }
@@ -157,10 +155,10 @@ std::tuple<double, double> shellSeparation(const Cloud &yCloud, int k,
   return nneigh::shellSeparation(yCloud, k, typeI);
 }
 
-std::vector<std::vector<int>> getHbondNetwork(
-    std::string filename, Cloud &yCloud, std::vector<std::vector<int>> nList,
-    int targetFrame, int Htype, sol::optional<double> dist,
-    sol::optional<double> angle) {
+std::vector<std::vector<int>>
+getHbondNetwork(std::string filename, Cloud &yCloud,
+                std::vector<std::vector<int>> nList, int targetFrame, int Htype,
+                sol::optional<double> dist, sol::optional<double> angle) {
   return bond::populateHbonds(filename, yCloud, nList, targetFrame, Htype,
                               dist.value_or(2.42), angle.value_or(30.0));
 }
@@ -168,9 +166,8 @@ std::vector<std::vector<int>> getHbondNetwork(
 std::vector<std::vector<int>> getHbondNetworkFromClouds(
     Cloud &yCloud, Cloud &hCloud, std::vector<std::vector<int>> nList,
     sol::optional<double> dist, sol::optional<double> angle) {
-  return bond::populateHbondsWithInputClouds(yCloud, hCloud, nList,
-                                             dist.value_or(2.42),
-                                             angle.value_or(30.0));
+  return bond::populateHbondsWithInputClouds(
+      yCloud, hCloud, nList, dist.value_or(2.42), angle.value_or(30.0));
 }
 
 std::vector<std::vector<int>> neighListPair(double rcutoff, const Cloud &yCloud,
@@ -178,10 +175,11 @@ std::vector<std::vector<int>> neighListPair(double rcutoff, const Cloud &yCloud,
   return nneigh::neighListPair(rcutoff, yCloud, typeI, typeJ);
 }
 
-std::vector<std::vector<int>> getHbondNetworkFromDonors(
-    Cloud &yCloud, Cloud &hCloud, std::vector<std::vector<int>> nList,
-    std::vector<int> donorHs, sol::optional<double> dist,
-    sol::optional<double> angle) {
+std::vector<std::vector<int>>
+getHbondNetworkFromDonors(Cloud &yCloud, Cloud &hCloud,
+                          std::vector<std::vector<int>> nList,
+                          std::vector<int> donorHs, sol::optional<double> dist,
+                          sol::optional<double> angle) {
   return bond::populateHbondsFromDonors(yCloud, hCloud, nList, donorHs,
                                         dist.value_or(2.42),
                                         angle.value_or(30.0));
@@ -255,19 +253,19 @@ void getCorrelPlus(Cloud &yCloud, std::vector<std::vector<int>> nList,
                        coordinationNumber.value_or(4));
 }
 
-std::vector<std::string> getIceTypePlus(
-    Cloud &yCloud, std::vector<std::vector<int>> nList, std::string path,
-    int firstFrame, sol::optional<bool> isSlice,
-    sol::optional<std::string> outputFileName) {
+std::vector<std::string>
+getIceTypePlus(Cloud &yCloud, std::vector<std::vector<int>> nList,
+               std::string path, int firstFrame, sol::optional<bool> isSlice,
+               sol::optional<std::string> outputFileName) {
   chill::getIceTypePlus(yCloud, nList, path, firstFrame,
                         isSlice.value_or(false),
                         outputFileName.value_or("chillPlus.txt"));
   return iceStateNames(yCloud);
 }
 
-std::vector<std::string> getIceTypePlusNoPrint(
-    Cloud &yCloud, std::vector<std::vector<int>> nList,
-    sol::optional<bool> isSlice) {
+std::vector<std::string>
+getIceTypePlusNoPrint(Cloud &yCloud, std::vector<std::vector<int>> nList,
+                      sol::optional<bool> isSlice) {
   chill::getIceTypePlusNoPrint(yCloud, nList, isSlice.value_or(false));
   return iceStateNames(yCloud);
 }
@@ -289,9 +287,9 @@ std::vector<std::string> getIceType(Cloud &yCloud,
   return iceStateNames(yCloud);
 }
 
-std::vector<std::string> getIceTypeNoPrint(
-    Cloud &yCloud, std::vector<std::vector<int>> nList,
-    sol::optional<bool> isSlice) {
+std::vector<std::string> getIceTypeNoPrint(Cloud &yCloud,
+                                           std::vector<std::vector<int>> nList,
+                                           sol::optional<bool> isSlice) {
   chill::getIceTypeNoPrint(yCloud, nList, isSlice.value_or(false));
   return iceStateNames(yCloud);
 }
@@ -344,9 +342,9 @@ std::vector<double> soapSpectrum(const Cloud &yCloud, int iatom,
   return chill::soapSpectrum(yCloud, iatom, nList, nMax, lMax, rcut);
 }
 
-std::vector<std::vector<double>> soapSpectrumAll(
-    const Cloud &yCloud, std::vector<std::vector<int>> nList, int nMax,
-    int lMax, double rcut) {
+std::vector<std::vector<double>>
+soapSpectrumAll(const Cloud &yCloud, std::vector<std::vector<int>> nList,
+                int nMax, int lMax, double rcut) {
   return chill::soapSpectrumAll(yCloud, nList, nMax, lMax, rcut);
 }
 
@@ -380,25 +378,24 @@ void registerIO(sol::state_view lua, sol::table m) {
 }
 
 void registerNeighbours(sol::state_view lua, sol::table m) {
-  m.set_function("neighListO", [](double rcutoff, const Cloud &yCloud,
-                                  int typeI) {
-    return sol::as_nested(neighListO(rcutoff, yCloud, typeI));
-  });
-  m.set_function("getNewNeighbourListByIndex",
-                 [](const Cloud &yCloud, double cutoff) {
-                   return sol::as_nested(
-                       getNewNeighbourListByIndex(yCloud, cutoff));
+  m.set_function("neighListO",
+                 [](double rcutoff, const Cloud &yCloud, int typeI) {
+                   return sol::as_nested(neighListO(rcutoff, yCloud, typeI));
                  });
+  m.set_function(
+      "getNewNeighbourListByIndex", [](const Cloud &yCloud, double cutoff) {
+        return sol::as_nested(getNewNeighbourListByIndex(yCloud, cutoff));
+      });
   m.set_function("neighbourListByIndex",
                  [](const Cloud &yCloud, std::vector<std::vector<int>> nList) {
                    return sol::as_nested(neighbourListByIndex(yCloud, nList));
                  });
-  m.set_function("kNearestNeighbourList",
-                 [](const Cloud &yCloud, int k, double candidateCutoff,
-                    int typeI, sol::optional<bool> mutual) {
-                   return sol::as_nested(kNearestNeighbourList(
-                       yCloud, k, candidateCutoff, typeI, mutual));
-                 });
+  m.set_function("kNearestNeighbourList", [](const Cloud &yCloud, int k,
+                                             double candidateCutoff, int typeI,
+                                             sol::optional<bool> mutual) {
+    return sol::as_nested(
+        kNearestNeighbourList(yCloud, k, candidateCutoff, typeI, mutual));
+  });
   m.set_function("shellSeparation", shellSeparation);
   m.set_function("neighborList", nneigh::neighListO);
   m.set_function("bondNetworkByIndex", nneigh::neighbourListByIndex);
@@ -409,14 +406,14 @@ void registerNeighbours(sol::state_view lua, sol::table m) {
     return sol::as_nested(neighListPair(rcutoff, yCloud, typeI, typeJ));
   });
   m.set_function("getHbondNetworkFromDonors", getHbondNetworkFromDonors);
-  m.set_function("donatedHydrogenBond",
-                 [](const Cloud &yCloud, const Cloud &hCloud, int acceptor,
-                    int donor, std::vector<int> donorHs,
-                    sol::optional<double> dist, sol::optional<double> angle) {
-                   return bond::donatedHydrogenBond(
-                       yCloud, hCloud, acceptor, donor, donorHs,
-                       dist.value_or(2.42), angle.value_or(30.0));
-                 });
+  m.set_function("donatedHydrogenBond", [](const Cloud &yCloud,
+                                           const Cloud &hCloud, int acceptor,
+                                           int donor, std::vector<int> donorHs,
+                                           sol::optional<double> dist,
+                                           sol::optional<double> angle) {
+    return bond::donatedHydrogenBond(yCloud, hCloud, acceptor, donor, donorHs,
+                                     dist.value_or(2.42), angle.value_or(30.0));
+  });
 }
 
 void registerRings(sol::state_view lua, sol::table m) {
@@ -457,9 +454,8 @@ void registerRings(sol::state_view lua, sol::table m) {
 void registerOrder(sol::state_view lua, sol::table m) {
   m.set_function("classifyBonds", classifyBonds);
   m.set_function("registerBondClassifier", registerBondClassifier);
-  m.set_function("bondClassifierNames", []() {
-    return sol::as_table(bondClassifierNames());
-  });
+  m.set_function("bondClassifierNames",
+                 []() { return sol::as_table(bondClassifierNames()); });
   m.set_function("getCorrelPlus", getCorrelPlus);
   m.set_function("getIceTypePlus", [](Cloud &yCloud,
                                       std::vector<std::vector<int>> nList,
@@ -475,12 +471,11 @@ void registerOrder(sol::state_view lua, sol::table m) {
                    return sol::as_table(
                        getIceTypePlusNoPrint(yCloud, nList, isSlice));
                  });
-  m.set_function("getIceTypeNoPrint",
-                 [](Cloud &yCloud, std::vector<std::vector<int>> nList,
-                    sol::optional<bool> isSlice) {
-                   return sol::as_table(
-                       getIceTypeNoPrint(yCloud, nList, isSlice));
-                 });
+  m.set_function("getIceTypeNoPrint", [](Cloud &yCloud,
+                                         std::vector<std::vector<int>> nList,
+                                         sol::optional<bool> isSlice) {
+    return sol::as_table(getIceTypeNoPrint(yCloud, nList, isSlice));
+  });
   m.set_function("getCorrel", getCorrel);
   m.set_function("getIceType", [](Cloud &yCloud,
                                   std::vector<std::vector<int>> nList,
@@ -495,59 +490,56 @@ void registerOrder(sol::state_view lua, sol::table m) {
   m.set_function("voronoiFacetWeights", voronoiFacetWeights);
   // Legacy spellings kept for the bulk example scripts
   m.set_function("chillPlus_cij",
-                   [](Cloud &c, const std::vector<std::vector<int>> &n,
-                      bool slice) -> Cloud & {
-                     chill::getCorrelPlus(c, n, slice);
-                     return c;
-                   });
+                 [](Cloud &c, const std::vector<std::vector<int>> &n,
+                    bool slice) -> Cloud & {
+                   chill::getCorrelPlus(c, n, slice);
+                   return c;
+                 });
   m.set_function("chillPlus_iceType",
-                   [](Cloud &c, const std::vector<std::vector<int>> &n,
-                      std::string path, int first, bool slice,
-                      std::string outName) -> Cloud & {
-                     chill::getIceTypePlus(c, n, path, first, slice, outName);
-                     return c;
-                   });
+                 [](Cloud &c, const std::vector<std::vector<int>> &n,
+                    std::string path, int first, bool slice,
+                    std::string outName) -> Cloud & {
+                   chill::getIceTypePlus(c, n, path, first, slice, outName);
+                   return c;
+                 });
   m.set_function("chill_cij",
-                   [](Cloud &c, const std::vector<std::vector<int>> &n,
-                      bool slice) -> Cloud & {
-                     chill::getCorrel(c, n, slice);
-                     return c;
-                   });
+                 [](Cloud &c, const std::vector<std::vector<int>> &n,
+                    bool slice) -> Cloud & {
+                   chill::getCorrel(c, n, slice);
+                   return c;
+                 });
   m.set_function("chill_iceType",
-                   [](Cloud &c, const std::vector<std::vector<int>> &n,
-                      std::string path, int first, bool slice,
-                      std::string outName) -> Cloud & {
-                     chill::getIceType(c, n, path, first, slice, outName);
-                     return c;
-                   });
+                 [](Cloud &c, const std::vector<std::vector<int>> &n,
+                    std::string path, int first, bool slice,
+                    std::string outName) -> Cloud & {
+                   chill::getIceType(c, n, path, first, slice, outName);
+                   return c;
+                 });
   m.set_function("averageQ6", chill::getq6);
   m.set_function("modifyChill",
-                   [](Cloud &c, std::vector<double> &q6) -> Cloud & {
-                     chill::reclassifyWater(c, q6);
-                     return c;
-                   });
+                 [](Cloud &c, std::vector<double> &q6) -> Cloud & {
+                   chill::reclassifyWater(c, q6);
+                   return c;
+                 });
   m.set_function("percentage_Ice", chill::printIceType);
 }
 
 void registerDescriptors(sol::state_view lua, sol::table m) {
   m.set_function("classifyTemplates", classifyTemplates);
-  m.set_function("soapSpectrum",
-                 [](const Cloud &yCloud, int iatom,
-                    std::vector<std::vector<int>> nList, int nMax, int lMax,
-                    double rcut) {
-                   return sol::as_table(
-                       soapSpectrum(yCloud, iatom, nList, nMax, lMax, rcut));
-                 });
-  m.set_function("soapSpectrumAll",
-                 [](const Cloud &yCloud, std::vector<std::vector<int>> nList,
-                    int nMax, int lMax, double rcut) {
-                   return sol::as_nested(
-                       soapSpectrumAll(yCloud, nList, nMax, lMax, rcut));
-                 });
-  m.set_function("voronoiFeatures", [](const Cloud &yCloud,
-                                       double candidateCutoff) {
-    return sol::as_nested(voronoiFeatures(yCloud, candidateCutoff));
+  m.set_function("soapSpectrum", [](const Cloud &yCloud, int iatom,
+                                    std::vector<std::vector<int>> nList,
+                                    int nMax, int lMax, double rcut) {
+    return sol::as_table(soapSpectrum(yCloud, iatom, nList, nMax, lMax, rcut));
   });
+  m.set_function("soapSpectrumAll", [](const Cloud &yCloud,
+                                       std::vector<std::vector<int>> nList,
+                                       int nMax, int lMax, double rcut) {
+    return sol::as_nested(soapSpectrumAll(yCloud, nList, nMax, lMax, rcut));
+  });
+  m.set_function(
+      "voronoiFeatures", [](const Cloud &yCloud, double candidateCutoff) {
+        return sol::as_nested(voronoiFeatures(yCloud, candidateCutoff));
+      });
 }
 
 int ringAnalysis(std::string path, std::vector<std::vector<int>> rings,
@@ -559,8 +551,8 @@ int ringAnalysis(std::string path, std::vector<std::vector<int>> rings,
 }
 
 int calcRDF(std::string path, std::vector<double> &rdfValues,
-            const Cloud &yCloud, double cutoff, double binwidth,
-            int firstFrame, int finalFrame) {
+            const Cloud &yCloud, double cutoff, double binwidth, int firstFrame,
+            int finalFrame) {
   return rdf2::rdf2Danalysis_AA(std::move(path), rdfValues, yCloud, cutoff,
                                 binwidth, firstFrame, finalFrame);
 }
@@ -672,10 +664,9 @@ int bulkTopoUnitMatching(std::string path, std::vector<std::vector<int>> rings,
                          int firstFrame, bool printClusters,
                          bool onlyTetrahedral,
                          sol::optional<std::string> templatePath) {
-  return tum3::topoUnitMatchingBulk(std::move(path), std::move(rings),
-                                    std::move(nList), yCloud, firstFrame,
-                                    printClusters, onlyTetrahedral,
-                                    templatePath.value_or("templates"));
+  return tum3::topoUnitMatchingBulk(
+      std::move(path), std::move(rings), std::move(nList), yCloud, firstFrame,
+      printClusters, onlyTetrahedral, templatePath.value_or("templates"));
 }
 
 void registerTopology(sol::state_view lua, sol::table m) {
@@ -724,7 +715,9 @@ void registerSite(sol::state_view lua, sol::table m) {
                               {"networkFormer", site::Family::networkFormer}});
   lua.new_usertype<site::Table>(
       "SiteTable", sol::constructors<site::Table()>(), "setType",
-      [](site::Table &t, int typeId, site::Kind k) { t.typeToKind[typeId] = k; },
+      [](site::Table &t, int typeId, site::Kind k) {
+        t.typeToKind[typeId] = k;
+      },
       "ofType", &site::Table::ofType);
   m.set_function("parseSiteSpec", [](const std::string &spec) {
     return site::parseSiteSpec(spec);

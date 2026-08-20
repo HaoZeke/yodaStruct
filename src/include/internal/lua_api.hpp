@@ -90,14 +90,15 @@ std::vector<std::vector<int>> getNewNeighbourListByIndex(const Cloud &yCloud,
                                                          double cutoff);
 
 /** Convert an ID-ordered list to cloud indices. */
-std::vector<std::vector<int>> neighbourListByIndex(
-    const Cloud &yCloud, std::vector<std::vector<int>> nList);
+std::vector<std::vector<int>>
+neighbourListByIndex(const Cloud &yCloud, std::vector<std::vector<int>> nList);
 
 /** Periodic k-nearest graph. `mutual` defaults to true (intersection).
  *  `false` is the union graph. */
-std::vector<std::vector<int>> kNearestNeighbourList(
-    const Cloud &yCloud, int k, double candidateCutoff, int typeI,
-    sol::optional<bool> mutual);
+std::vector<std::vector<int>> kNearestNeighbourList(const Cloud &yCloud, int k,
+                                                    double candidateCutoff,
+                                                    int typeI,
+                                                    sol::optional<bool> mutual);
 
 /** `{max d_k, min d_{k+1}}`. The cutoff graph equals the k-nearest
  *  graph when `max d_k <= rcut <= min d_{k+1}`. */
@@ -105,10 +106,10 @@ std::tuple<double, double> shellSeparation(const Cloud &yCloud, int k,
                                            int typeI);
 
 /** Hydrogen-bond network. Defaults 2.42 A and 30 deg. */
-std::vector<std::vector<int>> getHbondNetwork(
-    std::string filename, Cloud &yCloud, std::vector<std::vector<int>> nList,
-    int targetFrame, int Htype, sol::optional<double> dist,
-    sol::optional<double> angle);
+std::vector<std::vector<int>>
+getHbondNetwork(std::string filename, Cloud &yCloud,
+                std::vector<std::vector<int>> nList, int targetFrame, int Htype,
+                sol::optional<double> dist, sol::optional<double> angle);
 
 /** Hydrogen-bond network from an oxygen cloud and a hydrogen cloud. */
 std::vector<std::vector<int>> getHbondNetworkFromClouds(
@@ -120,10 +121,11 @@ std::vector<std::vector<int>> neighListPair(double rcutoff, const Cloud &yCloud,
                                             int typeI, int typeJ);
 
 /** Hydrogen-bond network from a flat list of hCloud indices. */
-std::vector<std::vector<int>> getHbondNetworkFromDonors(
-    Cloud &yCloud, Cloud &hCloud, std::vector<std::vector<int>> nList,
-    std::vector<int> donorHs, sol::optional<double> dist,
-    sol::optional<double> angle);
+std::vector<std::vector<int>>
+getHbondNetworkFromDonors(Cloud &yCloud, Cloud &hCloud,
+                          std::vector<std::vector<int>> nList,
+                          std::vector<int> donorHs, sol::optional<double> dist,
+                          sol::optional<double> angle);
 
 /** @} */
 
@@ -170,16 +172,15 @@ void getCorrelPlus(Cloud &yCloud, std::vector<std::vector<int>> nList,
                    sol::optional<int> coordinationNumber);
 
 /** CHILL+ ice types, write a file, return state names. */
-std::vector<std::string> getIceTypePlus(Cloud &yCloud,
-                                        std::vector<std::vector<int>> nList,
-                                        std::string path, int firstFrame,
-                                        sol::optional<bool> isSlice,
-                                        sol::optional<std::string> outputFileName);
+std::vector<std::string>
+getIceTypePlus(Cloud &yCloud, std::vector<std::vector<int>> nList,
+               std::string path, int firstFrame, sol::optional<bool> isSlice,
+               sol::optional<std::string> outputFileName);
 
 /** CHILL+ ice types, no file. */
-std::vector<std::string> getIceTypePlusNoPrint(
-    Cloud &yCloud, std::vector<std::vector<int>> nList,
-    sol::optional<bool> isSlice);
+std::vector<std::string>
+getIceTypePlusNoPrint(Cloud &yCloud, std::vector<std::vector<int>> nList,
+                      sol::optional<bool> isSlice);
 
 /** CHILL `c_ij`. */
 void getCorrel(Cloud &yCloud, std::vector<std::vector<int>> nList,
@@ -226,9 +227,9 @@ std::vector<double> soapSpectrum(const Cloud &yCloud, int iatom,
                                  int lMax, double rcut);
 
 /** SOAP of every particle. */
-std::vector<std::vector<double>> soapSpectrumAll(
-    const Cloud &yCloud, std::vector<std::vector<int>> nList, int nMax,
-    int lMax, double rcut);
+std::vector<std::vector<double>>
+soapSpectrumAll(const Cloud &yCloud, std::vector<std::vector<int>> nList,
+                int nMax, int lMax, double rcut);
 
 /** Per-atom `{q4, q6, q8}` from one Voronoi pass. */
 std::vector<std::vector<double>> voronoiFeatures(const Cloud &yCloud,
@@ -247,8 +248,8 @@ int ringAnalysis(std::string path, std::vector<std::vector<int>> rings,
 
 /** Quasi-2D RDF, same species. Accumulates into `rdfValues`. */
 int calcRDF(std::string path, std::vector<double> &rdfValues,
-            const Cloud &yCloud, double cutoff, double binwidth,
-            int firstFrame, int finalFrame);
+            const Cloud &yCloud, double cutoff, double binwidth, int firstFrame,
+            int finalFrame);
 
 /** Partial 3D RDF g_IJ(r). Returns `{r, g}` bin centres and values. */
 sol::table calcRDF3D(sol::this_state ts, const Cloud &yCloud, int typeI,
@@ -269,7 +270,8 @@ int prismAnalysis(std::string path, const std::vector<std::vector<int>> &rings,
                   int maxDepth, int atomID, int firstFrame, int currentFrame,
                   bool doShapeMatching);
 
-/** Largest ice cluster into `iceCloud`. `bopAnalysis` is `"q6"` or `"chill"`. */
+/** Largest ice cluster into `iceCloud`. `bopAnalysis` is `"q6"` or `"chill"`.
+ */
 int clusterAnalysis(std::string path, Cloud &iceCloud, Cloud &yCloud,
                     const std::vector<std::vector<int>> &nList,
                     std::vector<std::vector<int>> &iceNeighbourList,
@@ -280,9 +282,10 @@ int recenterCluster(Cloud &iceCloud,
                     const std::vector<std::vector<int>> &nList);
 
 /** Copy one atom type into `outCloud`. */
-Cloud getPointCloudAtomsOfOneAtomType(
-    Cloud &yCloud, Cloud &outCloud, int atomTypeI, bool isSlice,
-    std::array<double, 3> coordLow, std::array<double, 3> coordHigh);
+Cloud getPointCloudAtomsOfOneAtomType(Cloud &yCloud, Cloud &outCloud,
+                                      int atomTypeI, bool isSlice,
+                                      std::array<double, 3> coordLow,
+                                      std::array<double, 3> coordHigh);
 
 /** Mark molecules whose atoms fall in a single AABB slice. */
 void selectInSingleSlice(Cloud &yCloud, bool clearPreviousSliceSelection,
@@ -308,14 +311,14 @@ int bulkRingNumberAnalysis(std::string path,
                            Cloud &yCloud, int maxDepth, int firstFrame);
 
 /** Bulk DDC/HC topological network criterion. */
-int bulkTopologicalNetworkCriterion(
-    std::string path, const std::vector<std::vector<int>> &rings,
-    const std::vector<std::vector<int>> &nList, Cloud &yCloud, int firstFrame,
-    bool onlyTetrahedral);
+int bulkTopologicalNetworkCriterion(std::string path,
+                                    const std::vector<std::vector<int>> &rings,
+                                    const std::vector<std::vector<int>> &nList,
+                                    Cloud &yCloud, int firstFrame,
+                                    bool onlyTetrahedral);
 
 /** Topological unit matching. `templatePath` defaults to `"templates"`. */
-int bulkTopoUnitMatching(std::string path,
-                         std::vector<std::vector<int>> rings,
+int bulkTopoUnitMatching(std::string path, std::vector<std::vector<int>> rings,
                          std::vector<std::vector<int>> nList, Cloud &yCloud,
                          int firstFrame, bool printClusters,
                          bool onlyTetrahedral,
@@ -347,7 +350,7 @@ int bulkTopoUnitMatching(std::string path,
  *  @}
  */
 
-/** @} */  // end dseams_core
+/** @} */ // end dseams_core
 
 //! PointCloud usertype, trajectory readers and the file writers
 void registerIO(sol::state_view lua, sol::table m);
