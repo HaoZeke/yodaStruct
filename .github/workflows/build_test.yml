@@ -33,7 +33,7 @@ jobs:
       - name: Configure and build
         shell: bash -el {0}
         run: |
-          meson setup bbdir --prefix=/usr --wrap-mode=nofallback
+          meson setup bbdir --prefix=/usr --libdir=lib --wrap-mode=nofallback
           meson compile -C bbdir
       - name: Tests
         shell: bash -el {0}

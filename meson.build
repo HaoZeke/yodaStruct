@@ -100,6 +100,7 @@ dseams_core = shared_module(
     'dseams_core',
     files('src/lua_api.cpp', 'src/luaopen.cpp'),
     name_prefix: '',
+    name_suffix: 'so',
     dependencies: [lua_dep, yds_dep],
     include_directories: inc,
     cpp_args: lua_inc_args,
