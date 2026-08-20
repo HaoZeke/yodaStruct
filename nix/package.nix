@@ -48,6 +48,10 @@ stdenv.mkDerivation {
 
   mesonAutoFeatures = "disabled";
 
+  preConfigure = ''
+    export DSEAMS_SOURCE_DIR="$PWD"
+  '';
+
   postPatch = ''
     mkdir -p subprojects
     cp -r ${seams-core-src} subprojects/seams-core
@@ -74,6 +78,7 @@ stdenv.mkDerivation {
   doInstallCheck = true;
 
   installCheckPhase = ''
+    cd "$DSEAMS_SOURCE_DIR"
     DSEAMS_INSTALL_ROOT="$out" \
       LUA_PATH="$out/share/luadseams/lua/?.lua;;" \
       LUA_CPATH="$out/lib/?.so;;" \
