@@ -44,6 +44,17 @@ local hbonds = dseams.hbonds(
 )
 assert(type(hbonds) == "table" and #hbonds == water.nop, "H-bond shape mismatch")
 
+local ice = dseams.read("input/traj/mW_cubic.lammpstrj", {type = 1})
+dseams.chill(ice, {type = 1, cutoff = 3.5})
+local chill_plus = dseams.chill_plus(ice, {type = 1, cutoff = 3.5})
+local cubic = 0
+for _, label in ipairs(chill_plus) do
+  if label == "cubic" then
+    cubic = cubic + 1
+  end
+end
+assert(cubic == ice.nop, string.format("CHILL+ cubic count %d, want %d", cubic, ice.nop))
+
 local ok, message = pcall(function()
   dseams.read(path, {type = 9})
 end)
