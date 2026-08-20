@@ -1,7 +1,10 @@
 local lua_module = assert(package.searchpath("dseams", package.path))
 local core_module = assert(package.searchpath("dseams_core", package.cpath))
-assert(lua_module:match("/stage/"), "dseams.lua did not load from the staged install")
-assert(core_module:match("/stage/"), "dseams_core did not load from the staged install")
+local install_root = assert(os.getenv("DSEAMS_INSTALL_ROOT"))
+assert(lua_module:sub(1, #install_root) == install_root,
+       "dseams.lua did not load from the requested install root")
+assert(core_module:sub(1, #install_root) == install_root,
+       "dseams_core did not load from the requested install root")
 
 local dseams = require("dseams")
 local cloud = dseams.read("input/traj/tiny-ions.lammpstrj", {all = true})

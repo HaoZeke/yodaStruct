@@ -44,4 +44,5 @@ jobs:
           DESTDIR="$PWD/stage" meson install -C bbdir
           export LUA_PATH="$PWD/stage/usr/share/luadseams/lua/?.lua;;"
           export LUA_CPATH="$PWD/stage/usr/lib/?.so;;"
+          export DSEAMS_INSTALL_ROOT="$PWD/stage"
           lua example_lua/library/installed.lua
