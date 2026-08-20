@@ -11,7 +11,9 @@ Lua and Fennel library for the [d-SEAMS](https://dseams.info) C++ engine
 
 This repository is a **library**. `require("dseams")` in Lua,
 `(require :dseams)` in Fennel. The engine CLI is `seams` in
-`seams-core`. Python is [`pydseams`](https://github.com/d-SEAMS/PydSEAMSlib).
+`seams-core`. Python is the
+[`pydseamslib`](https://github.com/d-SEAMS/PydSEAMSlib) package
+(`import pydseams`).
 Neighbour search is [`linkcell`](https://github.com/d-SEAMS/linkcell).
 
 ```lua
@@ -28,6 +30,13 @@ print(dseams.chill_plus(cloud, {cutoff = 3.5}))
 
 `dseams.core` is the compiled registrations. Helpers stay in Lua, like
 `pydseams` helpers stay in Python.
+
+The public workflow surface covers all-atom and selected trajectory reads,
+RDF and running-CN profiles, CHILL/CHILL+, cages, hydrogen bonds, Cartesian
+density profiles, mutual ion pairs, and mapped-site domains. See the
+[Lua reference](https://d-seams.github.io/yodaStruct/reference/lua.html) for
+option tables and return values; the Fennel wrapper exposes the same workflows
+with kebab-case names.
 
 Build:
 
