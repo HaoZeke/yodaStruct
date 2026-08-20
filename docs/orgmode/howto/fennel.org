@@ -51,7 +51,8 @@ Fennel ~require~ falls through to Lua ~package.path~, so
 ~(require :dseams)~ returns the same table as ~require("dseams")~:
 ~read~, ~neighbors~, ~neighbors_pair~, ~cn~, ~rdf~, ~running_cn~,
 ~knn~, ~chill_plus~, ~chill~, ~cages~, ~hbonds~, ~density~,
-~site_table~, ~pairs~, ~domain~, and ~.core~. Names stay snake_case.
+~site_table~, ~pairs~, ~domain~, and ~.core~. Public Lua names use
+underscores.
 
 Scripts that mention ~readFrameOnlyOne~, ~functionScript~, or
 ~trajectory~ as a global expect the 2020 driver. Rewrite them to

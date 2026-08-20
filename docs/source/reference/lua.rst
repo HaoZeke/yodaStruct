@@ -203,10 +203,10 @@ k-nearest graph by atom ID. Calls ``core.kNearestNeighbourList``.
 
 - ``opts.mutual`` defaults to true; only the boolean ``false`` selects the union graph
 
-~chill\ :sub:`plus`\~(cloud[, opts])
-------------------------------------
+CHILL+
+------
 
-Builds ``neighbors(cloud, opts)``, runs
+``chill_plus(cloud[, opts])`` builds ``neighbors(cloud, opts)``, runs
 ``core.getCorrelPlus(cloud, nl, false)``, returns
 ``core.getIceTypePlusNoPrint(cloud, nl, false)`` (1-based array of
 state names). Does not write a file. Mutates ``cloud``.
