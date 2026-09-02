@@ -144,12 +144,12 @@ getHbondNetworkFromDonors(Cloud &yCloud, Cloud &hCloud,
 std::vector<std::vector<int>> ringNetwork(std::vector<std::vector<int>> nList,
                                           int maxDepth);
 
-/** Claim-free HC/DDC flags on six-rings. Returns `{hc, ddc}`. */
+/** Claim-free HC/DDC flags on six-rings. Returns `{hc = hc, ddc = ddc}`. */
 sol::table cageAffiliation(sol::this_state ts,
                            std::vector<std::vector<int>> rings,
                            std::vector<std::vector<int>> nList);
 
-/** Mutual-graph seeds, permissive-graph completion. Returns `{hc, ddc}`.
+/** Mutual-graph seeds, permissive-graph completion. Returns `{hc = hc, ddc = ddc}`.
  *
  *  The four ring and neighbour arguments are by-value vectors: a Lua
  *  table of tables and a container userdata both bind.
@@ -269,12 +269,12 @@ int calcRDF(std::string path, std::vector<double> &rdfValues,
             const Cloud &yCloud, double cutoff, double binwidth, int firstFrame,
             int finalFrame);
 
-/** Partial 3D RDF g_IJ(r). Returns `{r, g}` bin centres and values. */
+/** Partial 3D RDF g_IJ(r). Returns `{r = r, g = g}` bin centres and values. */
 sol::table calcRDF3D(sol::this_state ts, const Cloud &yCloud, int typeI,
                      int typeJ, double rmax, int nbins);
 
 /** Running site-site CN from the same histogram. `rhoJ = nJ / volume`.
- *  Returns `{r, cn}` bin centres and the integral at each bin outer edge. */
+ *  Returns `{r = r, cn = cn}` bin centres and the integral at each bin outer edge. */
 sol::table calcRunningCN(sol::this_state ts, const Cloud &yCloud, int typeI,
                          int typeJ, double rmax, int nbins);
 
@@ -370,7 +370,7 @@ int bulkTopoUnitMatching(std::string path, std::vector<std::vector<int>> rings,
  *  `PointCloud`: `nop`, `currentFrame`, `box()`, `boxLow()`, `iceTypes()`.
  *  `RingUpdater(maxDepth)`: `update(nList)`, `lastRecomputedSources`,
  *  `lastBallsRefreshed`.
- *  `AffiliationUpdater`: `update(rings, nList)` returns `{hc, ddc}`,
+ *  `AffiliationUpdater`: `update(rings, nList)` returns `{hc = hc, ddc = ddc}`,
  *  `lastReclassified`.
  *  @}
  */
