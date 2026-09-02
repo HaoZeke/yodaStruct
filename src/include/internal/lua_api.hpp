@@ -151,7 +151,8 @@ sol::table seededCageAffiliation(sol::this_state ts,
                                  std::vector<std::vector<int>> strictRings,
                                  std::vector<std::vector<int>> strictNList,
                                  std::vector<std::vector<int>> permRings,
-                                 std::vector<std::vector<int>> permNList);
+                                 std::vector<std::vector<int>> permNList,
+                                 sol::optional<bool> ringAdjacentCompletion);
 
 /** @} */
 
@@ -287,8 +288,8 @@ sol::table domainStats(sol::this_state ts, const Cloud &cloud,
                        double cutoff);
 
 /** Quasi-1D prism analysis. `atomID` is the first-frame ID. */
-int prismAnalysis(std::string path, const std::vector<std::vector<int>> &rings,
-                  const std::vector<std::vector<int>> &nList, Cloud &cloud,
+int prismAnalysis(std::string path, std::vector<std::vector<int>> rings,
+                  std::vector<std::vector<int>> nList, Cloud &cloud,
                   int maxDepth, int atomID, int firstFrame, int currentFrame,
                   bool doShapeMatching);
 
@@ -328,8 +329,8 @@ void selectAtomsInSliceWithRingEdgeAtoms(
 
 /** Bulk ring-number histogram, every size up to `maxDepth`. */
 int bulkRingNumberAnalysis(std::string path,
-                           const std::vector<std::vector<int>> &rings,
-                           const std::vector<std::vector<int>> &nList,
+                           std::vector<std::vector<int>> rings,
+                           std::vector<std::vector<int>> nList,
                            Cloud &yCloud, int maxDepth, int firstFrame);
 
 /** Bulk DDC/HC topological network criterion. */

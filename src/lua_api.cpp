@@ -253,10 +253,12 @@ sol::table seededCageAffiliation(sol::this_state ts,
                                  std::vector<std::vector<int>> strictRings,
                                  std::vector<std::vector<int>> strictNList,
                                  std::vector<std::vector<int>> permRings,
-                                 std::vector<std::vector<int>> permNList) {
+                                 std::vector<std::vector<int>> permNList,
+                                 sol::optional<bool> ringAdjacentCompletion) {
   sol::state_view lua(ts);
-  const auto a = ring::seededCageAffiliation(strictRings, strictNList,
-                                             permRings, permNList);
+  const auto a = ring::seededCageAffiliation(
+      strictRings, strictNList, permRings, permNList,
+      ringAdjacentCompletion.value_or(false));
   sol::table out = lua.create_table(0, 2);
   out["hc"] = sol::as_table(a.hc);
   out["ddc"] = sol::as_table(a.ddc);
@@ -452,8 +454,14 @@ void registerNeighbours(sol::state_view lua, sol::table m) {
         return packPairs(sol::state_view(ts),
                          nneigh::mutualNearestUnlike(yCloud, typeI, typeJ));
       });
+  // Legacy spellings. A Lua table (what every as_nested binding returns)
+  // and a container userdata both bind to a by-value vector; a reference
+  // parameter accepts only the userdata and reads a table as garbage
   m.set_function("neighborList", nneigh::neighListO);
-  m.set_function("bondNetworkByIndex", nneigh::neighbourListByIndex);
+  m.set_function("bondNetworkByIndex",
+                 [](const Cloud &yCloud, std::vector<std::vector<int>> nList) {
+                   return sol::as_nested(neighbourListByIndex(yCloud, nList));
+                 });
   m.set_function("getHbondNetwork", [](std::string filename, Cloud &yCloud,
                                        std::vector<std::vector<int>> nList,
                                        int targetFrame, int Htype,
@@ -503,8 +511,8 @@ void registerRings(sol::state_view lua, sol::table m) {
       },
       "lastRecomputedSources", &primitive::RingUpdater::lastRecomputedSources,
       "lastBallsRefreshed", &primitive::RingUpdater::lastBallsRefreshed);
-  // Legacy spelling, container-userdata semantics
-  m.set_function("getPrimitiveRings", primitive::ringNetwork);
+  // Legacy spelling; by-value so a table or a container userdata both bind
+  m.set_function("getPrimitiveRings", ringNetwork);
   // Order-free per-ring cage classification and its exact incremental form
   m.set_function("cageAffiliation", cageAffiliation);
   lua.new_usertype<ring::AffiliationUpdater>(
@@ -739,8 +747,8 @@ sol::table domainStats(sol::this_state ts, const Cloud &cloud,
   return out;
 }
 
-int prismAnalysis(std::string path, const std::vector<std::vector<int>> &rings,
-                  const std::vector<std::vector<int>> &nList, Cloud &cloud,
+int prismAnalysis(std::string path, std::vector<std::vector<int>> rings,
+                  std::vector<std::vector<int>> nList, Cloud &cloud,
                   int maxDepth, int atomID, int firstFrame, int currentFrame,
                   bool doShapeMatching) {
   return ring::prismAnalysis(std::move(path), rings, nList, cloud, maxDepth,
@@ -794,8 +802,8 @@ void selectAtomsInSliceWithRingEdgeAtoms(
 }
 
 int bulkRingNumberAnalysis(std::string path,
-                           const std::vector<std::vector<int>> &rings,
-                           const std::vector<std::vector<int>> &nList,
+                           std::vector<std::vector<int>> rings,
+                           std::vector<std::vector<int>> nList,
                            Cloud &yCloud, int maxDepth, int firstFrame) {
   return ring::bulkPolygonRingAnalysis(std::move(path), rings, nList, yCloud,
                                        maxDepth, firstFrame);
@@ -828,7 +836,7 @@ void registerTopology(sol::state_view lua, sol::table m) {
   m.set_function("calcCN", calcCN);
   m.set_function("densityByType", densityByType);
   m.set_function("densityByKind", densityByKind);
-  m.set_function("prismAnalysis", prismAnalysis);
+  m.set_function("prismAnalysis", &luaApi::prismAnalysis);
   m.set_function("clusterAnalysis", clusterAnalysis);
   m.set_function("recenterCluster", recenterCluster);
   m.set_function("getPointCloudAtomsOfOneAtomType",
@@ -838,7 +846,7 @@ void registerTopology(sol::state_view lua, sol::table m) {
                  selectEdgeAtomsInRingsWithinSlice);
   m.set_function("selectAtomsInSliceWithRingEdgeAtoms",
                  selectAtomsInSliceWithRingEdgeAtoms);
-  m.set_function("bulkRingNumberAnalysis", bulkRingNumberAnalysis);
+  m.set_function("bulkRingNumberAnalysis", &luaApi::bulkRingNumberAnalysis);
   m.set_function("bulkTopologicalNetworkCriterion",
                  bulkTopologicalNetworkCriterion);
   m.set_function("bulkTopoUnitMatching", bulkTopoUnitMatching);
