@@ -267,9 +267,11 @@ sol::table seededCageAffiliation(sol::this_state ts,
 }
 
 sol::table topologyFingerprint(sol::this_state ts, std::vector<std::vector<int>> rows,
-                               sol::optional<int> hops, sol::optional<int> maxRingSize) {
+                               sol::optional<int> hops, sol::optional<int> maxRingSize,
+                               sol::optional<std::vector<int>> colours) {
   sol::state_view lua(ts);
-  const auto fp = topo::fingerprint(rows, hops.value_or(2), maxRingSize.value_or(7));
+  const auto fp = topo::fingerprint(rows, hops.value_or(2), maxRingSize.value_or(7),
+                                    colours.value_or(std::vector<int>{}));
   sol::table out = lua.create_table(0, 6);
   out["key"] = fp.key;
   out["method"] = fp.method;
@@ -285,9 +287,10 @@ sol::table topologyFingerprint(sol::this_state ts, std::vector<std::vector<int>>
 }
 
 sol::table localTopologyKey(sol::this_state ts, std::vector<std::vector<int>> rows, int atom,
-                            sol::optional<int> hops) {
+                            sol::optional<int> hops, sol::optional<std::vector<int>> colours) {
   sol::state_view lua(ts);
-  const auto lk = topo::localKey(rows, atom, hops.value_or(2));
+  const auto lk = topo::localKey(rows, atom, hops.value_or(2),
+                                 colours.value_or(std::vector<int>{}));
   sol::table out = lua.create_table(0, 4);
   out["key"] = lk.key;
   out["method"] = lk.method;

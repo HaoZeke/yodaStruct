@@ -137,9 +137,14 @@ function dseams.cages(cloud, o)
 end
 
 -- Label-independent topology keys of a bonded graph given as rows by
--- index (core.neighbourListByIndex). o.hops (default 2), o.max_ring (7).
+-- index (core.neighbourListByIndex). o.hops (default 2), o.max_ring (7),
+-- o.colours an optional list of one integer class per row (atom type,
+-- species): vertices of different colours never match.
 function dseams.fingerprint(rows, o)
   o = opts(o)
+  if o.colours then
+    return core.topologyFingerprint(rows, o.hops or 2, o.max_ring or 7, o.colours)
+  end
   return core.topologyFingerprint(rows, o.hops or 2, o.max_ring or 7)
 end
 
