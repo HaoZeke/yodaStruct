@@ -3,10 +3,6 @@ require("dseams")
 =================
 
 
-..
-   # proseguard:off proselint.Uncomparables
-   # proseguard:off rgoswami.ReviewRegister
-
 ``require("dseams")`` loads ``lua/dseams.lua`` on ``dseams_core``.
 ``require("yoda")`` loads the same table.
 
@@ -168,6 +164,9 @@ signature requires.
 
 Suffix-dispatching loader. Returns a ``PointCloud``.
 
+..
+   # proseguard:off proselint.Uncomparables
+
 .. table::
 
     +--------------------------------+-----------------------------------------+-----------------------------------------------------------------------------------------------------------+
@@ -193,6 +192,9 @@ A dump slice that shrinks ``nop`` is
 and sets ``inSlice``. ``lo == hi`` leaves that direction open.
 ``{0,0,0}`` / ``{50,0,0}`` is ``x`` in ``[0, 50]``, with ``y`` and ``z`` open.
 The type argument is any LAMMPS type (the ``O`` is historical).
+
+..
+   # proseguard:on proselint.Uncomparables
 
 ~neighbors~(cloud[, opts])
 --------------------------
@@ -235,6 +237,9 @@ Shared options and defaults match ``rdf``. The call is
 ~knn~(cloud[, opts])
 --------------------
 
+..
+   # proseguard:off proselint.Uncomparables
+
 k-nearest graph by atom ID. Calls ``core.kNearestNeighbourList``.
 
 - ``opts.k`` defaults to 4
@@ -253,6 +258,9 @@ CHILL+
 ``core.getIceTypePlusNoPrint(cloud, nl, false)`` (1-based array of
 state names). Writes no file. Mutates ``cloud``.
 
+..
+   # proseguard:on proselint.Uncomparables
+
 ~chill~(cloud[, opts])
 ----------------------
 
@@ -261,6 +269,9 @@ Mutates ``cloud``. Writes no file.
 
 ~cages~(cloud[, opts])
 ----------------------
+
+..
+   # proseguard:off proselint.Uncomparables
 
 Seeded HC/DDC membership. Builds mutual and union k-nearest graphs
 (``opts.k`` 4, ``opts.cutoff`` 5.0, ``opts.type`` 1), converts each to an
@@ -306,6 +317,9 @@ repeats until a fixed point.
 argument. ``example_lua/library/topology.lua`` calls the compiled
 name with ``true``.
 
+..
+   # proseguard:on proselint.Uncomparables
+
 Worked example: the legacy ring chain
 -------------------------------------
 
@@ -318,6 +332,9 @@ table comes from ``dseams.neighbors``, then feeds
 Both paths agree on the ring count. ``prismAnalysis`` writes
 ``topoINT/nPrisms.dat``.
 
+..
+   # proseguard:off proselint.Uncomparables
+
 .. code:: lua
 
     local nList = dseams.neighbors(cloud, {cutoff = 3.5, type = 2})
@@ -325,6 +342,9 @@ Both paths agree on the ring count. ``prismAnalysis`` writes
     local byIndex = core.bondNetworkByIndex(cloud, hbn)
     local rings = core.getPrimitiveRings(byIndex, 6)
     core.prismAnalysis(out .. "/", rings, byIndex, cloud, 6, 1, 1, 1, false)
+
+..
+   # proseguard:on proselint.Uncomparables
 
 The meson test name is ``dseams_legacy_chain``. From a configured
 build directory:
@@ -354,6 +374,9 @@ Hands back a nested Lua table. Supplying neither ``path`` nor
 ~density~(cloud[, opts])
 ------------------------
 
+..
+   # proseguard:off rgoswami.ReviewRegister
+
 Cartesian number density along ``opts.axis``: ``"x"``, ``"y"``, ``"z"``,
 or the matching zero-based index. The default direction is ``"z"``.
 ``opts.bins`` defaults to that span divided into about 0.1
@@ -364,6 +387,9 @@ length-unit bins.
 
 - Site mode requires both ``opts.table`` and ``opts.kind`` and returns
   ``{centres, rho, axis, site_kind}``.
+
+..
+   # proseguard:on rgoswami.ReviewRegister
 
 Site mapping table
 ------------------

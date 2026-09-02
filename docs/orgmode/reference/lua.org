@@ -1,12 +1,6 @@
 #+TITLE: require("dseams")
 #+OPTIONS: toc:nil num:nil ^:nil
 
-#+begin_export rst
-..
-   # proseguard:off proselint.Uncomparables
-   # proseguard:off rgoswami.ReviewRegister
-#+end_export
-
 ~require("dseams")~ loads ~lua/dseams.lua~ on ~dseams_core~.
 ~require("yoda")~ loads the same table.
 
@@ -115,6 +109,11 @@ signature requires.
 
 Suffix-dispatching loader. Returns a ~PointCloud~.
 
+#+begin_export rst
+..
+   # proseguard:off proselint.Uncomparables
+#+end_export
+
 | suffix | backend | notes |
 |--------+---------+-------|
 | ~.xyz~ | ~readXYZ~ | the file; ~opts.frame~ unused |
@@ -133,6 +132,11 @@ A dump slice that shrinks ~nop~ is
 and sets ~inSlice~. ~lo == hi~ leaves that direction open.
 ~{0,0,0}~ / ~{50,0,0}~ is ~x~ in ~[0, 50]~, with ~y~ and ~z~ open.
 The type argument is any LAMMPS type (the ~O~ is historical).
+
+#+begin_export rst
+..
+   # proseguard:on proselint.Uncomparables
+#+end_export
 
 * ~neighbors~(cloud[, opts])
 
@@ -170,6 +174,11 @@ Shared options and defaults match ~rdf~. The call is
 
 * ~knn~(cloud[, opts])
 
+#+begin_export rst
+..
+   # proseguard:off proselint.Uncomparables
+#+end_export
+
 k-nearest graph by atom ID. Calls ~core.kNearestNeighbourList~.
 
 - ~opts.k~ defaults to 4
@@ -184,12 +193,22 @@ k-nearest graph by atom ID. Calls ~core.kNearestNeighbourList~.
 ~core.getIceTypePlusNoPrint(cloud, nl, false)~ (1-based array of
 state names). Writes no file. Mutates ~cloud~.
 
+#+begin_export rst
+..
+   # proseguard:on proselint.Uncomparables
+#+end_export
+
 * ~chill~(cloud[, opts])
 
 Same pipeline with ~core.getCorrel~ and ~core.getIceTypeNoPrint~.
 Mutates ~cloud~. Writes no file.
 
 * ~cages~(cloud[, opts])
+
+#+begin_export rst
+..
+   # proseguard:off proselint.Uncomparables
+#+end_export
 
 Seeded HC/DDC membership. Builds mutual and union k-nearest graphs
 (~opts.k~ 4, ~opts.cutoff~ 5.0, ~opts.type~ 1), converts each to an
@@ -234,6 +253,11 @@ local filled = core.seededCageAffiliation(six_s, idx_s, six_u, idx_u, true)
 argument. ~example_lua/library/topology.lua~ calls the compiled
 name with ~true~.
 
+#+begin_export rst
+..
+   # proseguard:on proselint.Uncomparables
+#+end_export
+
 * Worked example: the legacy ring chain
 
 ~legacy_chain.lua~ under ~example_lua/library/~ is the
@@ -245,6 +269,11 @@ table comes from ~dseams.neighbors~, then feeds
 Both paths agree on the ring count. ~prismAnalysis~ writes
 ~topoINT/nPrisms.dat~.
 
+#+begin_export rst
+..
+   # proseguard:off proselint.Uncomparables
+#+end_export
+
 #+begin_src lua
 local nList = dseams.neighbors(cloud, {cutoff = 3.5, type = 2})
 local hbn = core.getHbondNetwork(path, cloud, nList, 1, 1)
@@ -252,6 +281,11 @@ local byIndex = core.bondNetworkByIndex(cloud, hbn)
 local rings = core.getPrimitiveRings(byIndex, 6)
 core.prismAnalysis(out .. "/", rings, byIndex, cloud, 6, 1, 1, 1, false)
 #+end_src
+
+#+begin_export rst
+..
+   # proseguard:on proselint.Uncomparables
+#+end_export
 
 The meson test name is ~dseams_legacy_chain~. From a configured
 build directory:
@@ -277,6 +311,11 @@ Hands back a nested Lua table. Supplying neither ~path~ nor
 
 * ~density~(cloud[, opts])
 
+#+begin_export rst
+..
+   # proseguard:off rgoswami.ReviewRegister
+#+end_export
+
 Cartesian number density along ~opts.axis~: ~"x"~, ~"y"~, ~"z"~,
 or the matching zero-based index. The default direction is ~"z"~.
 ~opts.bins~ defaults to that span divided into about 0.1
@@ -286,6 +325,11 @@ length-unit bins.
   ~{centres, rho, axis, atom_type}~.
 - Site mode requires both ~opts.table~ and ~opts.kind~ and returns
   ~{centres, rho, axis, site_kind}~.
+
+#+begin_export rst
+..
+   # proseguard:on rgoswami.ReviewRegister
+#+end_export
 
 * Site mapping table
 
