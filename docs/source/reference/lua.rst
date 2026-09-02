@@ -3,10 +3,6 @@ require("dseams")
 =================
 
 
-..
-   # proseguard:off proselint.Uncomparables
-   # proseguard:off rgoswami.ReviewRegister
-
 ``require("dseams")`` loads ``lua/dseams.lua`` on ``dseams_core``.
 ``require("yoda")`` loads the same table.
 
@@ -179,16 +175,16 @@ Suffix-dispatching loader. Returns a ``PointCloud``.
     +--------------------------------+-----------------------------------------+-----------------------------------------------------------------------------------------------------------+
     | ``.pdb`` / ``.gro`` / ``.dcd`` | ``readChemfiles``                       | absent without chemfiles; ``opts.type`` defaults to ``-1`` (keep all)                                     |
     +--------------------------------+-----------------------------------------+-----------------------------------------------------------------------------------------------------------+
-    | other (LAMMPS dump)            | ``readLammpsTrj`` or ``readLammpsTrjO`` | ``opts.all = true`` keeps all atoms. Otherwise ``opts.type`` selects a type; nil tries type 2 then type 1 |
+    | other (LAMMPS dump)            | ``readLammpsTrj`` or ``readLammpsTrjO`` | Setting ``opts.all`` keeps all atoms. Otherwise ``opts.type`` selects a type; nil tries type 2 then type 1|
     +--------------------------------+-----------------------------------------+-----------------------------------------------------------------------------------------------------------+
 
-``opts.frame`` is the 1-based frame index (default 1). ``opts.all = true``
+``opts.frame`` is the 1-based frame index (default 1). :code:`opts.all = true`
 calls ``core.readLammpsTrj`` and keeps every atom. Otherwise
 ``opts.type`` is the LAMMPS type ID to keep. The helper has no
 region filter.
 
 A dump slice that shrinks ``nop`` is
-``dseams.core.readLammpsTrjreduced(path, frame, type, true, lo, hi)``.
+:code:`dseams.core.readLammpsTrjreduced(path, frame, type, true, lo, hi)`.
 ``core.readLammpsTrjO`` takes the same five arguments after the path
 and sets ``inSlice``. ``lo == hi`` leaves that direction open.
 ``{0,0,0}`` / ``{50,0,0}`` is ``x`` in ``[0, 50]``, with ``y`` and ``z`` open.
@@ -243,14 +239,14 @@ k-nearest graph by atom ID. Calls ``core.kNearestNeighbourList``.
 
 - ``opts.type`` defaults to 1
 
-- ``opts.mutual`` defaults to ``true``; the boolean ``false`` selects the union graph
+- ``opts.mutual`` defaults to :code:`true`; the boolean :code:`false` selects the union graph
 
 CHILL+
 ------
 
 ``chill_plus(cloud[, opts])`` builds ``neighbors(cloud, opts)``, runs
-``core.getCorrelPlus(cloud, nl, false)``, and returns
-``core.getIceTypePlusNoPrint(cloud, nl, false)`` (1-based array of
+:code:`core.getCorrelPlus(cloud, nl, false)`, and returns
+:code:`core.getIceTypePlusNoPrint(cloud, nl, false)` (1-based array of
 state names). Writes no file. Mutates ``cloud``.
 
 ~chill~(cloud[, opts])
@@ -268,15 +264,21 @@ index list, keeps six-membered rings, and calls
 ``core.seededCageAffiliation``. Hands back a table ``{hc = hc, ddc = ddc}``
 of per-atom flags.
 
-``opts.complete`` is the fifth argument of
-``seededCageAffiliation``. The default is ``false``. ``true`` runs the
+:code:`opts.complete` is the fifth argument of
+``seededCageAffiliation``. The default is :code:`false`. :code:`true` runs the
 engine ring-adjacent walk: the last vertex of a six-ring whose
 other vertices already carry an HC or DDC label.
+
+..
+   # proseguard:off proselint.Uncomparables
 
 .. code:: lua
 
     local aff = dseams.cages(cloud, {type = 2})
     local filled = dseams.cages(cloud, {type = 2, complete = true})
+
+..
+   # proseguard:on proselint.Uncomparables
 
 ~seededCageAffiliation~(strictRings, strictNList, permRings, permNList[, flag])
 -------------------------------------------------------------------------------
@@ -290,21 +292,27 @@ value from the seeded call. A nested Lua table and a container
 userdata both bind.
 
 The fifth argument is ``ringAdjacentCompletion``, a boolean that
-defaults to ``false`` when the call drops it. Pass ``true`` and the
+defaults to :code:`false` when the call drops it. Pass :code:`true` and the
 accepted labels go through ``ring::ringAdjacentCompletion`` on the
 permissive six-rings. HC flags and DDC flags run as two walks. The
 walk is the all-but-one rule: a six-ring whose vertices all carry
 that cage label but one fills the last vertex, and the walk
 repeats until a fixed point.
 
+..
+   # proseguard:off proselint.Uncomparables
+
 .. code:: lua
 
     local aff = core.seededCageAffiliation(six_s, idx_s, six_u, idx_u)
     local filled = core.seededCageAffiliation(six_s, idx_s, six_u, idx_u, true)
 
-``dseams.cages`` passes ``opts.complete or false`` as that fifth
+..
+   # proseguard:on proselint.Uncomparables
+
+``dseams.cages`` passes :code:`opts.complete or false` as that fifth
 argument. ``example_lua/library/topology.lua`` calls the compiled
-name with ``true``.
+name with :code:`true`.
 
 Worked example: the legacy ring chain
 -------------------------------------
@@ -318,6 +326,9 @@ table comes from ``dseams.neighbors``, then feeds
 Both paths agree on the ring count. ``prismAnalysis`` writes
 ``topoINT/nPrisms.dat``.
 
+..
+   # proseguard:off proselint.Uncomparables
+
 .. code:: lua
 
     local nList = dseams.neighbors(cloud, {cutoff = 3.5, type = 2})
@@ -325,6 +336,9 @@ Both paths agree on the ring count. ``prismAnalysis`` writes
     local byIndex = core.bondNetworkByIndex(cloud, hbn)
     local rings = core.getPrimitiveRings(byIndex, 6)
     core.prismAnalysis(out .. "/", rings, byIndex, cloud, 6, 1, 1, 1, false)
+
+..
+   # proseguard:on proselint.Uncomparables
 
 The meson test name is ``dseams_legacy_chain``. From a configured
 build directory:
@@ -354,16 +368,16 @@ Hands back a nested Lua table. Supplying neither ``path`` nor
 ~density~(cloud[, opts])
 ------------------------
 
-Cartesian number density along ``opts.axis``: ``"x"``, ``"y"``, ``"z"``,
+Cartesian number density along :code:`opts.axis`: ``"x"``, ``"y"``, ``"z"``,
 or the matching zero-based index. The default direction is ``"z"``.
 ``opts.bins`` defaults to that span divided into about 0.1
 length-unit bins.
 
 - Type mode uses ``opts.type`` (default 0) and returns
-  ``{centres, rho, axis, atom_type}``.
+  :code:`{centres, rho, axis, atom_type}`.
 
 - Site mode requires both ``opts.table`` and ``opts.kind`` and returns
-  ``{centres, rho, axis, site_kind}``.
+  :code:`{centres, rho, axis, site_kind}`.
 
 Site mapping table
 ------------------

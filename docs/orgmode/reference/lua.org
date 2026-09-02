@@ -1,12 +1,6 @@
 #+TITLE: require("dseams")
 #+OPTIONS: toc:nil num:nil ^:nil
 
-#+begin_export rst
-..
-   # proseguard:off proselint.Uncomparables
-   # proseguard:off rgoswami.ReviewRegister
-#+end_export
-
 ~require("dseams")~ loads ~lua/dseams.lua~ on ~dseams_core~.
 ~require("yoda")~ loads the same table.
 
