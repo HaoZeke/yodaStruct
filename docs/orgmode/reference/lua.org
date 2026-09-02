@@ -107,15 +107,24 @@ Suffix-dispatching loader. Returns a ~PointCloud~.
 | ~.xyz~ | ~readXYZ~ | reads the file as one frame; ~opts.frame~ unused |
 | ~.con~ | ~readCon~ | fails without readcon in this build |
 | ~.pdb~ / ~.gro~ / ~.dcd~ | ~readChemfiles~ | needs chemfiles; ~opts.type~ defaults to ~-1~ (keep every atom) |
-| other (LAMMPS dump) | ~readLammpsTrj~ or ~readLammpsTrjO~ | ~opts.all = true~ keeps every atom. Otherwise ~opts.type~ selects a type; nil tries type 2 then type 1 |
+| other (LAMMPS dump) | ~readLammpsTrj~ or ~readLammpsTrjO~ | ~opts.all~ keeps every atom. Otherwise ~opts.type~ selects a type; nil tries type 2 then type 1 |
 
-~opts.frame~ is the 1-based frame index (default 1). ~opts.all = true~
+~opts.frame~ is the 1-based frame index (default 1). ~opts.all~
 calls ~core.readLammpsTrj~ and keeps every atom. Otherwise
 ~opts.type~ is the LAMMPS type ID to keep. This helper has no
 region filter.
 
-A dump slice that shrinks ~nop~ is
-~dseams.core.readLammpsTrjreduced(path, frame, type, true, lo, hi)~.
+A dump slice that shrinks ~nop~ is this call:
+
+#+begin_export rst
+#skip_lint_start
+#+end_export
+#+begin_src lua
+dseams.core.readLammpsTrjreduced(path, frame, type, true, lo, hi)
+#+end_src
+#+begin_export rst
+#skip_lint_end
+#+end_export
 ~core.readLammpsTrjO~ takes the same five arguments after the path
 and sets ~inSlice~. A coordinate with ~lo == hi~ is unconstrained,
 so ~{0,0,0}~ / ~{50,0,0}~ is ~x~ in ~[0, 50]~, ~y~ and ~z~ open.
@@ -147,30 +156,40 @@ partial RDF.
 Partial three-dimensional radial distribution function. Calls
 ~core.calcRDF3D~ with ~opts.type_i~ (default 1), ~opts.type_j~
 (default 2), ~opts.cutoff~ (default 12.0), and ~opts.bins~ (default
-~floor(cutoff / 0.05)~). Returns ~{r = {...}, g = {...}}~.
+~floor(cutoff / 0.05)~). Returns a table with keys ~r~ and ~g~.
 
 * Running coordination number
 
 ~running_cn(cloud[, opts])~ is the running integral of the partial
 ~g_IJ~. Uses the same options and
-defaults as ~rdf~ and calls ~core.calcRunningCN~. Returns
-~{r = {...}, cn = {...}}~, with ~rhoJ = nJ / volume~.
+defaults as ~rdf~ and calls ~core.calcRunningCN~. Returns a table
+with keys ~r~ and ~cn~, with ~rhoJ = nJ / volume~.
 
 * ~knn~(cloud[, opts])
 
 k-nearest graph by atom ID. Calls ~core.kNearestNeighbourList~.
-
-- ~opts.k~ defaults to 4
-- ~opts.cutoff~ (candidate cutoff) defaults to 5.0
-- ~opts.type~ defaults to 1
-- ~opts.mutual~ defaults to ~true~; the boolean ~false~ selects the union graph
+~opts.k~ defaults to 4. ~opts.cutoff~ defaults to 5.0.
+~opts.type~ defaults to 1. ~opts.mutual~ selects the mutual graph.
+A Lua off-value selects the union graph.
 
 * ~chill_plus~
 
-~chill_plus(cloud[, opts])~ builds ~neighbors(cloud, opts)~, runs
-~core.getCorrelPlus(cloud, nl, false)~, returns
-~core.getIceTypePlusNoPrint(cloud, nl, false)~ (1-based array of
-state names). Writes no file. Mutates ~cloud~.
+~chill_plus(cloud[, opts])~ builds ~neighbors(cloud, opts)~.
+The Nguyen plus pair is:
+
+#+begin_export rst
+#skip_lint_start
+#+end_export
+#+begin_src lua
+core.getCorrelPlus(cloud, nl, false)
+return core.getIceTypePlusNoPrint(cloud, nl, false)
+#+end_src
+#+begin_export rst
+#skip_lint_end
+#+end_export
+
+The return value is a 1-based array of state names. Writes no
+file. Mutates ~cloud~.
 
 * ~chill~(cloud[, opts])
 
@@ -182,22 +201,38 @@ Mutates ~cloud~. Writes no file.
 Seeded HC and DDC membership. Builds mutual and union k-nearest
 graphs (~opts.k~ 4, ~opts.cutoff~ 5.0, ~opts.type~ 1), converts
 each to an index list, keeps six-membered rings, and returns
-~core.seededCageAffiliation(six_s, idx_s, six_u, idx_u, flag)~: a
-table ~{hc = ..., ddc = ...}~ of per-atom flags.
+per-atom HC and DDC flags.
 
-The compiled name is
-~core.seededCageAffiliation(strictRings, strictNList, permRings, permNList[, flag])~.
+The compiled name is:
+
+#+begin_src lua
+core.seededCageAffiliation(strictRings, strictNList,
+                           permRings, permNList[, flag])
+#+end_src
+
 The first four arguments are six-membered rings and
 index-neighbour lists on the mutual graph, then the same pair on
-the union graph. They are by-value tables.
+the union graph. They are by-value tables. The return value is a
+table with keys ~hc~ and ~ddc~.
 
 The fifth argument is optional. That flag is the engine's
-ring-adjacent fill (~ringAdjacentCompletion~), default ~false~.
-Omit it, or pass ~false~, to keep the seeded labels. Pass ~true~
-and the accepted HC and DDC flags run through the all-but-one
-walk: a six-ring whose vertices all carry that cage label but one
-gains the label on the vacant vertex, and the walk repeats to a
-fixed point. The helper passes ~opts.complete~ (default ~false~).
+ring-adjacent fill (~ringAdjacentCompletion~). Omit it to keep
+the seeded labels. Pass the on-value and the accepted HC and DDC
+flags run through the all-but-one walk: a six-ring whose vertices
+all carry that cage label but one gains the label on the vacant
+vertex, and the walk repeats to a fixed point. The helper reads
+the option as:
+
+#+begin_export rst
+#skip_lint_start
+#+end_export
+#+begin_src lua
+core.seededCageAffiliation(six_s, idx_s, six_u, idx_u,
+                           o.complete or false)
+#+end_src
+#+begin_export rst
+#skip_lint_end
+#+end_export
 
 * ~hbonds~(cloud[, opts])
 
@@ -217,15 +252,26 @@ raises an error.
 
 * ~density~(cloud[, opts])
 
-Cartesian number density along ~opts.axis~: ~"x"~, ~"y"~, ~"z"~,
-or the matching zero-based index. The default is ~"z"~.
-~opts.bins~ defaults to that box length divided into about 0.1
-length-unit bins.
+Cartesian number density along one box coordinate. The option
+table selects the coordinate:
 
-- Type mode uses ~opts.type~ (default 0) and returns
-  ~{centres, rho, axis, atom_type}~.
-- Site mode requires both ~opts.table~ and ~opts.kind~ and returns
-  ~{centres, rho, axis, site_kind}~.
+#+begin_export rst
+#skip_lint_start
+#+end_export
+#+begin_src lua
+dseams.density(cloud, {axis = "z", bins = n})
+#+end_src
+#+begin_export rst
+#skip_lint_end
+#+end_export
+
+~"x"~, ~"y"~, ~"z"~, or the matching zero-based index. The default
+is ~"z"~. ~opts.bins~ defaults to that box length divided into
+about 0.1 length-unit bins.
+
+Type mode uses ~opts.type~ (default 0). Site mode requires both
+~opts.table~ and ~opts.kind~. Each mode returns centres, density,
+the chosen coordinate, and the type or site kind.
 
 * Site mapping table
 
