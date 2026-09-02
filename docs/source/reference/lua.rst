@@ -300,6 +300,70 @@ certificate=}``. Named ``hc`` and ``ddc`` use the TUM finders.
     local sod = dseams.cages_by_signature(cloud, "sodalite", {type = 1})
     print(#sod, sod[1] and #sod[1].vertices)
 
+~guest_occupancy~(cloud, cages, guests[, opts])
+-----------------------------------------------
+
+Guests (methane, THF, ions; zero-based cloud indices) placed in cages
+given as vertex index lists, each guest to the nearest periodic cage
+centroid within ``opts.radius`` (default 4.0). Hands back
+``{guestsPerCage=, cageOfGuest=, centreDistance=, occupied=,
+multiply=, free=}``; ``cageOfGuest`` is zero-based and ``-1`` for a
+free guest. ``core.periodicCentroid(cloud, atoms)`` is the centroid
+with every atom unwrapped to its minimum image about the first.
+
+~fingerprint~(rows[, opts])
+---------------------------
+
+Label-independent topology keys of the bonded graph given as index
+rows (``core.neighbourListByIndex``). ``opts.hops`` (default 2),
+``opts.max_ring`` (default 7) and ``opts.colours`` (one integer class
+per row, so species never match across types). Hands back ``{key=,
+method=, atomKeys=, classes=, ringCensus=, hops=}``; ``method`` is
+``nauty`` when the engine links nauty, else ``wl``.
+
+~topology_library~(rows, label[, opts])
+---------------------------------------
+
+The frame's distinct keys as a key library text under ``label``;
+``opts.library`` extends an existing text. Same ``opts`` as
+``fingerprint``.
+
+~classify_topology~(rows, library[, opts])
+------------------------------------------
+
+Names every atom by a key library text, or by a Lua sequence of
+library texts built at different hop counts: then the deepest library
+that holds an atom's key names it and ``opts.hops`` is ignored. Hands
+back ``{labels=, counts=, depth=, matched=}``; unmatched atoms carry
+``""`` under ``counts.unmatched`` and depth ``0``.
+
+.. code:: lua
+
+    local lib2 = dseams.topology_library(rows, "Ic", {hops = 2})
+    local lib3 = dseams.topology_library(rows, "Ic", {hops = 3})
+    local named = dseams.classify_topology(rows, { lib3, lib2 })
+    print(named.matched, named.depth[1])
+
+~ion_environment~(cloud, ice, ions[, opts])
+-------------------------------------------
+
+Ions read against a per-atom ice flag list (1-based booleans) by their
+first water shell: ``ice`` when every shell molecule is labelled,
+``liquid`` when none is, ``front`` otherwise. ``ions`` are zero-based
+cloud indices, ``opts.type`` the water type (default 1),
+``opts.cutoff`` the shell radius (default 3.5). Hands back ``{ion=,
+shell=, iceFraction=, state=, members=, nIce=, nFront=, nLiquid=}``;
+``members[i]`` lists ion ``i``'s shell.
+
+~shell_ring_census~(rings, shell[, opts])
+-----------------------------------------
+
+Rings (zero-based index lists, as ``core.ringNetwork`` returns them)
+with a vertex in ``shell``, counted by size up to ``opts.max_ring``
+(default 7): ``census[s + 1]`` is the number of rings of size ``s``.
+With ``env.members[i]`` as the shell this is the hydration-shell ring
+census of ion ``i``.
+
 ~seededCageAffiliation~(strictRings, strictNList, permRings, permNList[, ringAdjacentCompletion])
 -------------------------------------------------------------------------------------------------
 
