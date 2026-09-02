@@ -218,15 +218,15 @@ std::vector<std::string> getIceTypeNoPrint(Cloud &yCloud,
                                            std::vector<std::vector<int>> nList,
                                            sol::optional<bool> isSlice);
 
-/** `{ql, qlBar}` from a neighbour list. */
+/** `{ql = ql, qlBar = qlBar}` from a neighbour list. */
 sol::table steinhardtQl(sol::this_state ts, const Cloud &yCloud,
                         std::vector<std::vector<int>> nList, int orderL);
 
-/** `{ql, qlBar}` from a Voronoi neighbour list. */
+/** `{ql = ql, qlBar = qlBar}` from a Voronoi neighbour list. */
 sol::table steinhardtQlVoronoi(sol::this_state ts, const Cloud &yCloud,
                                double candidateCutoff, int orderL);
 
-/** Per-atom `{neighbours, weights, certified}`. */
+/** Per-atom `{neighbours = neighbours, weights = weights, certified = certified}`. */
 sol::table voronoiFacetWeights(sol::this_state ts, const Cloud &yCloud,
                                double candidateCutoff);
 
