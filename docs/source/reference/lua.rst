@@ -284,8 +284,8 @@ other vertices already carry an HC or DDC label.
     local aff = dseams.cages(cloud, {type = 2})
     local filled = dseams.cages(cloud, {type = 2, complete = true})
 
-~seededCageAffiliation~(strictRings, strictNList, permRings, permNList[, flag])
--------------------------------------------------------------------------------
+~seededCageAffiliation~(strictRings, strictNList, permRings, permNList[, ringAdjacentCompletion])
+-------------------------------------------------------------------------------------------------
 
 Compiled name on ``dseams.core``. Mutual-graph seeds, permissive-graph
 fill. Hands back ``{hc = hc, ddc = ddc}``, each a 1-based array of
