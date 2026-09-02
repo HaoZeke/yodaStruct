@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.8.1 (2026-09-02)
+
+- Engine wrap and flake input pinned at seams-core v2.8.0; the 2.8.0 tag carried an empty revision.
+
 ## 2.8.0 (2026-09-02)
 
 - `topologyFingerprint`, `localTopologyKey`, `topologyLibrary`,
