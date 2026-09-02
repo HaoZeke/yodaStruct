@@ -284,6 +284,22 @@ other vertices already carry an HC or DDC label.
     local aff = dseams.cages(cloud, {type = 2})
     local filled = dseams.cages(cloud, {type = 2, complete = true})
 
+~cages_by_signature~(cloud, spec[, opts])
+----------------------------------------
+
+Closed polyhedra whose faces match a ring-size census. ``spec`` is a
+comma list (``4:6,6:8``) or a named table entry (``sodalite``,
+``alpha``, ``512``, ``51262``, ``hc``, ``ddc``). Builds the cutoff
+neighbour graph (``opts.cutoff``, ``opts.type``), primitive rings up
+to ``opts.max_ring`` (default 8), and calls ``core.findBySignature``.
+Hands back an array of tables ``{signature=, faces=, vertices=,
+certificate=}``. Named ``hc`` and ``ddc`` use the TUM finders.
+
+.. code:: lua
+
+    local sod = dseams.cages_by_signature(cloud, "sodalite", {type = 1})
+    print(#sod, sod[1] and #sod[1].vertices)
+
 ~seededCageAffiliation~(strictRings, strictNList, permRings, permNList[, ringAdjacentCompletion])
 -------------------------------------------------------------------------------------------------
 

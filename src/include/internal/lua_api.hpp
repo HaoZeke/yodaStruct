@@ -149,6 +149,14 @@ sol::table cageAffiliation(sol::this_state ts,
                            std::vector<std::vector<int>> rings,
                            std::vector<std::vector<int>> nList);
 
+/** Closed polyhedra matching a ring-size census or named table entry.
+ *  `spec` is `4:6,6:8` or `sodalite|alpha|512|51262|hc|ddc`.
+ *  Returns an array of `{signature=, faces=, vertices=, certificate=}`. */
+sol::table findBySignature(sol::this_state ts,
+                           std::vector<std::vector<int>> rings,
+                           std::vector<std::vector<int>> nList,
+                           std::string spec);
+
 /** Mutual-graph seeds, permissive-graph completion. Returns `{hc = hc, ddc = ddc}`.
  *
  *  The four ring and neighbour arguments are by-value vectors: a Lua

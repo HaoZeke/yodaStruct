@@ -12,6 +12,7 @@
 #include <cluster.hpp>
 #include <density.hpp>
 #include <franzblau.hpp>
+#include <cage_enum.hpp>
 #include <mol_sys.hpp>
 #include <neighbours.hpp>
 #include <rdf.hpp>
@@ -247,6 +248,25 @@ sol::table cageAffiliation(sol::this_state ts,
   sol::table out = lua.create_table(0, 2);
   out["hc"] = sol::as_table(a.hc);
   out["ddc"] = sol::as_table(a.ddc);
+  return out;
+}
+
+sol::table findBySignature(sol::this_state ts,
+                           std::vector<std::vector<int>> rings,
+                           std::vector<std::vector<int>> nList,
+                           std::string spec) {
+  sol::state_view lua(ts);
+  const auto sig = cage::Signature::parse(spec);
+  const auto found = cage::findBySignature(rings, nList, sig);
+  sol::table out = lua.create_table(static_cast<int>(found.size()), 0);
+  for (size_t i = 0; i < found.size(); ++i) {
+    sol::table row = lua.create_table(0, 4);
+    row["signature"] = found[i].signature.str();
+    row["faces"] = sol::as_table(found[i].faces);
+    row["vertices"] = sol::as_table(found[i].vertices);
+    row["certificate"] = found[i].certificate;
+    out[i + 1] = row;
+  }
   return out;
 }
 
@@ -644,6 +664,7 @@ void registerRings(sol::state_view lua, sol::table m) {
   m.set_function("getPrimitiveRings", ringNetwork);
   // Order-free per-ring cage classification and its exact incremental form
   m.set_function("cageAffiliation", cageAffiliation);
+  m.set_function("findBySignature", findBySignature);
   lua.new_usertype<ring::AffiliationUpdater>(
       "AffiliationUpdater", sol::constructors<ring::AffiliationUpdater()>(),
       "update",

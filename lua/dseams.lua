@@ -136,6 +136,17 @@ function dseams.cages(cloud, o)
   return core.seededCageAffiliation(six_s, idx_s, six_u, idx_u, o.complete or false)
 end
 
+-- Closed polyhedra matching a ring-size census. spec is "4:6,6:8" or a
+-- named table entry (sodalite|alpha|512|51262|hc|ddc). o.cutoff, o.type
+-- as in neighbors; o.max_ring is the Franzblau depth (default 8).
+function dseams.cages_by_signature(cloud, spec, o)
+  o = opts(o)
+  local nl = dseams.neighbors(cloud, o)
+  local idx = core.neighbourListByIndex(cloud, nl)
+  local rings = core.ringNetwork(idx, o.max_ring or 8)
+  return core.findBySignature(rings, idx, spec)
+end
+
 -- Label-independent topology keys of a bonded graph given as rows by
 -- index (core.neighbourListByIndex). o.hops (default 2), o.max_ring (7),
 -- o.colours an optional list of one integer class per row (atom type,

@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- `dseams.cages_by_signature` and `core.findBySignature`: closed
+  polyhedra from a ring-size census (`sodalite`, `4:6,6:8`; named
+  `hc` / `ddc` through the TUM finders). Engine wrap and flake input
+  follow seams-core `884bed86`.
 - `classifyTopology` and `dseams.classify_topology` take a sequence of
   library texts at different hop counts and name each atom by the deepest
   that knows it; the result carries `depth`.
