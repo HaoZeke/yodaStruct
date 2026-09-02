@@ -222,14 +222,14 @@ partial RDF.
 Partial three-dimensional radial distribution function. Calls
 ``core.calcRDF3D`` with ``opts.type_i`` (default 1), ``opts.type_j``
 (default 2), ``opts.cutoff`` (default 12.0), and ``opts.bins`` (default
-``floor(cutoff / 0.05)``). Hands back ``{r, g}``.
+``floor(cutoff / 0.05)``). Hands back ``{r = r, g = g}``.
 
 Running coordination number
 ---------------------------
 
 ``running_cn(cloud[, opts])`` integrates the partial ``g_IJ``.
 Shared options and defaults match ``rdf``. The call is
-``core.calcRunningCN``. Hands back ``{r, cn}``, with
+``core.calcRunningCN``. Hands back ``{r = r, cn = cn}``, with
 ``rhoJ = nJ / volume``.
 
 ~knn~(cloud[, opts])
@@ -265,8 +265,8 @@ Mutates ``cloud``. Writes no file.
 Seeded HC/DDC membership. Builds mutual and union k-nearest graphs
 (``opts.k`` 4, ``opts.cutoff`` 5.0, ``opts.type`` 1), converts each to an
 index list, keeps six-membered rings, and calls
-``core.seededCageAffiliation``. Hands back a table ``{hc, ddc}`` of
-per-atom flags.
+``core.seededCageAffiliation``. Hands back a table ``{hc = hc, ddc = ddc}``
+of per-atom flags.
 
 ``opts.complete`` is the fifth argument of
 ``seededCageAffiliation``. The default is ``false``. ``true`` runs the
@@ -282,8 +282,8 @@ other vertices already carry an HC or DDC label.
 -------------------------------------------------------------------------------
 
 Compiled name on ``dseams.core``. Mutual-graph seeds, permissive-graph
-fill. Hands back ``{hc, ddc}``, each a 1-based array of per-atom
-flags of length ``cloud.nop``.
+fill. Hands back ``{hc = hc, ddc = ddc}``, each a 1-based array of
+per-atom flags of length ``cloud.nop``.
 
 Those per-atom flags take four ring and neighbour arguments by
 value from the seeded call. A nested Lua table and a container
