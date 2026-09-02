@@ -1,6 +1,10 @@
 # Changelog
 
-## Unreleased
+## 2.9.0 (2026-09-02)
+
+- `cages_by_signature` on the compiled and library API: closed polyhedra by
+  ring-size census.
+- Engine pinned at seams-core v2.9.0.
 
 - `dseams.cages_by_signature` and `core.findBySignature`: closed
   polyhedra from a ring-size census (`sodalite`, `4:6,6:8`; named
@@ -42,7 +46,7 @@
   binding; `example_lua/library/legacy_chain.lua` exercises the chain.
 - Engine pinned at seams-core v2.7.0.
 
-## Unreleased
+## 2.9.0 (2026-09-02)
 
 `dseams.read` has no region and calls `readLammpsTrjO` (keeps every
 atom of the type, sets `inSlice`). A dump slice that shrinks `nop`
