@@ -23,6 +23,7 @@
 #include <site.hpp>
 #include <structure_desc.hpp>
 #include <topo_bulk.hpp>
+#include <topo_fingerprint.hpp>
 #include <topo_one_dim.hpp>
 #include <topo_two_dim.hpp>
 #include <voronoi_qlm.hpp>
@@ -262,6 +263,60 @@ sol::table seededCageAffiliation(sol::this_state ts,
   sol::table out = lua.create_table(0, 2);
   out["hc"] = sol::as_table(a.hc);
   out["ddc"] = sol::as_table(a.ddc);
+  return out;
+}
+
+sol::table topologyFingerprint(sol::this_state ts, std::vector<std::vector<int>> rows,
+                               sol::optional<int> hops, sol::optional<int> maxRingSize) {
+  sol::state_view lua(ts);
+  const auto fp = topo::fingerprint(rows, hops.value_or(2), maxRingSize.value_or(7));
+  sol::table out = lua.create_table(0, 6);
+  out["key"] = fp.key;
+  out["method"] = fp.method;
+  out["hops"] = fp.hops;
+  out["atomKeys"] = sol::as_table(fp.atomKeys);
+  sol::table classes = lua.create_table();
+  for (const auto &kv : fp.classes) {
+    classes[kv.first] = kv.second;
+  }
+  out["classes"] = classes;
+  out["ringCensus"] = sol::as_table(fp.ringCensus);
+  return out;
+}
+
+sol::table localTopologyKey(sol::this_state ts, std::vector<std::vector<int>> rows, int atom,
+                            sol::optional<int> hops) {
+  sol::state_view lua(ts);
+  const auto lk = topo::localKey(rows, atom, hops.value_or(2));
+  sol::table out = lua.create_table(0, 4);
+  out["key"] = lk.key;
+  out["method"] = lk.method;
+  out["vertices"] = lk.vertices;
+  out["edges"] = lk.edges;
+  return out;
+}
+
+sol::table ionEnvironment(sol::this_state ts, const Cloud &cloud, std::vector<bool> iceFlag,
+                          std::vector<int> ionIndices, sol::optional<int> waterType,
+                          sol::optional<double> cutoff) {
+  sol::state_view lua(ts);
+  const auto env = site::ionEnvironment(cloud, iceFlag, ionIndices, waterType.value_or(1),
+                                        cutoff.value_or(3.5));
+  sol::table out = lua.create_table(0, 7);
+  out["ion"] = sol::as_table(env.ion);
+  out["shell"] = sol::as_table(env.shell);
+  out["iceFraction"] = sol::as_table(env.iceFraction);
+  std::vector<std::string> states;
+  states.reserve(env.state.size());
+  for (const auto st : env.state) {
+    states.push_back(st == site::IonState::ice ? "ice"
+                     : st == site::IonState::front ? "front"
+                                                   : "liquid");
+  }
+  out["state"] = sol::as_table(states);
+  out["nIce"] = env.nIce;
+  out["nFront"] = env.nFront;
+  out["nLiquid"] = env.nLiquid;
   return out;
 }
 
@@ -532,6 +587,9 @@ void registerRings(sol::state_view lua, sol::table m) {
   // Seeded (hysteresis) affiliation: strict-graph seeds, permissive-graph
   // completion, component-gated acceptance
   m.set_function("seededCageAffiliation", seededCageAffiliation);
+  m.set_function("topologyFingerprint", topologyFingerprint);
+  m.set_function("localTopologyKey", localTopologyKey);
+  m.set_function("ionEnvironment", ionEnvironment);
 }
 
 void registerOrder(sol::state_view lua, sol::table m) {

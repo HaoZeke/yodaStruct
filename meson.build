@@ -181,6 +181,16 @@ if lua_exe.found()
         timeout: 120,
     )
     test(
+        'dseams_topology',
+        lua_exe,
+        args: [
+            meson.project_source_root() / 'example_lua/library/topology.lua',
+        ],
+        env: lua_test_env,
+        workdir: meson.project_source_root(),
+        timeout: 120,
+    )
+    test(
         'dseams_fennel_workflows',
         lua_exe,
         args: [
