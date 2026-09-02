@@ -317,9 +317,9 @@ or the matching zero-based index. The default direction is ~"z"~.
 length-unit bins.
 
 - Type mode uses ~opts.type~ (default 0) and returns
-  ~{centres, rho, axis, atom_type}~.
+  ~{centres = centres, rho = rho, axis = axis, atom_type = atom_type}~.
 - Site mode requires both ~opts.table~ and ~opts.kind~ and returns
-  ~{centres, rho, axis, site_kind}~.
+  ~{centres = centres, rho = rho, axis = axis, site_kind = site_kind}~.
 
 #+begin_export rst
 ..
@@ -338,15 +338,15 @@ and ~apolar~.
 
 Requires ~opts.table~. Maps the cloud to ionic sites and returns
 mutual nearest unlike pairs as
-~{pairs, count, n_cation, n_anion}~. Each pair contains the original
-atom IDs.
+~{pairs = pairs, count = count, n_cation = n_cation, n_anion = n_anion}~.
+Each pair contains the original atom IDs.
 
 * ~domain~(cloud, opts)
 
 Requires ~opts.table~ and ~opts.kind~. The graph joins mapped sites
 within ~opts.cutoff~ (default 3.5). Hands back
-~{site_kind, n, largest, percolation}~, where ~n~ is the selected site
-count and ~percolation = largest / n~.
+~{site_kind = site_kind, n = n, largest = largest, percolation = percolation}~.
+~n~ is the selected site count and ~percolation = largest / n~.
 
 * ~core~
 
