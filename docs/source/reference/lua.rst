@@ -7,15 +7,12 @@ require("dseams")
 ``require("yoda")`` loads the same table.
 
 Cage flags are hexagonal cage (HC) and double-diamond cage (DDC).
-The chill bond-order classifier (CHILL) and CHILL+ write state
+The chill bond-order classifier (CHILL) and CHILL+ return state
 names. Pair correlation here means a radial distribution function (RDF).
 
 Fennel call shape lives in `Fennel <../howto/fennel.rst>`_.
 Compiled names on ``dseams.core`` live in
 `Compiled registrations <lua-functions.rst>`_.
-
-Aim of this page: the public helpers, the by-value binds, and
-the fifth parameter of ``seededCageAffiliation``.
 
 Public names
 ------------
@@ -125,9 +122,9 @@ stack.
 table. A raw bind of a C++ vector hands back container userdata.
 Both shapes accept ``#`` and ``ipairs``.
 
-Contrast with a C++ reference parameter: that bind accepts
-userdata and treats a fresh Lua table as garbage. The nested-table
-getters below take the list by value, so both shapes bind.
+A C++ reference parameter accepts userdata and treats a fresh
+Lua table as garbage. The nested-table getters below take the
+list by value, so both shapes bind.
 
 ``bondNetworkByIndex``
     neighbour list in; Lua table out.
@@ -143,8 +140,6 @@ getters below take the list by value, so both shapes bind.
 
 A Lua table from ``dseams.neighbors`` or ``getHbondNetwork`` feeds
 those names directly. ``neighborList`` userdata binds the same way.
-Own the chain from
-``example_lua/library/legacy_chain.lua``.
 
 New-style names (``neighListO``, ``ringNetwork``,
 ``seededCageAffiliation``, ``getHbondNetwork*``, and the rest on
