@@ -1,5 +1,15 @@
 # Changelog
 
+## Unreleased
+
+- `classifyTopology` and `dseams.classify_topology` take a sequence of
+  library texts at different hop counts and name each atom by the deepest
+  that knows it; the result carries `depth`.
+- `guestOccupancy`, `periodicCentroid` and `dseams.guest_occupancy`: guests
+  placed in enumerated cages by the periodic centroid of each cage.
+- Engine pinned past v2.8.0 for `topo::matchLibraries` and
+  `site::guestOccupancy`.
+
 ## 2.8.1 (2026-09-02)
 
 - Engine wrap and flake input pinned at seams-core v2.8.0; the 2.8.0 tag carried an empty revision.

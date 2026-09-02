@@ -72,5 +72,18 @@ assert(lib:find("# method") == 1, "library header")
 local named = dseams.classify_topology(rows, lib, {hops = 2})
 assert(named.matched == cloud.nop, "every atom of the frame the library came from is named")
 assert(named.counts["Ic"] == cloud.nop, "all Ic")
+-- libraries at three and two hops: the deeper one names every atom, so
+-- every depth reads 3 and the shallower one is never needed
+local lib3 = dseams.topology_library(rows, "Ic", {hops = 3})
+local both = dseams.classify_topology(rows, { lib, lib3 })
+assert(both.matched == cloud.nop, "fallback matching names every atom")
+for i = 1, cloud.nop do assert(both.depth[i] == 3, "deepest library wins") end
+-- a guest at the periodic centroid of the first four lattice sites is in that "cage"
+local cage = { 0, 1, 2, 3 }
+local c = core.periodicCentroid(cloud, cage)
+assert(#c == 3, "centroid has three components")
+local occ = dseams.guest_occupancy(cloud, { cage }, { 0 }, {radius = 10.0})
+assert(occ.occupied == 1 and occ.free == 0, "the vertex atom itself lies within the radius")
+assert(occ.cageOfGuest[1] == 0, "zero-based cage index")
 
 print(string.format("topology.lua ok: key=%s classes=%d method=%s ion=%s", fp.key, nclasses, fp.method, env.state[1]))

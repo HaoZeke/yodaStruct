@@ -314,23 +314,60 @@ std::string topologyLibrary(std::vector<std::vector<int>> rows, std::string labe
   return topo::writeLibrary(lib);
 }
 
+// `library` is one library text, or a Lua sequence of library texts built
+// at different hop counts; then the deepest library that holds an atom's
+// key names it and `hops` is ignored.
 sol::table classifyTopology(sol::this_state ts, std::vector<std::vector<int>> rows,
-                            std::string library, sol::optional<int> hops,
+                            sol::object library, sol::optional<int> hops,
                             sol::optional<int> maxRingSize,
                             sol::optional<std::vector<int>> colours) {
   sol::state_view lua(ts);
-  const auto fp = topo::fingerprint(rows, hops.value_or(2), maxRingSize.value_or(7),
-                                    colours.value_or(std::vector<int>{}));
-  const auto match = topo::matchLibrary(fp, topo::readLibrary(library));
-  sol::table out = lua.create_table(0, 3);
+  const auto cols = colours.value_or(std::vector<int>{});
+  topo::LibraryMatch match;
+  if (library.is<std::string>()) {
+    const auto fp = topo::fingerprint(rows, hops.value_or(2), maxRingSize.value_or(7), cols);
+    match = topo::matchLibrary(fp, topo::readLibrary(library.as<std::string>()));
+  } else if (library.is<sol::table>()) {
+    std::vector<topo::KeyLibrary> libs;
+    for (const auto &kv : library.as<sol::table>()) {
+      libs.push_back(topo::readLibrary(kv.second.as<std::string>()));
+    }
+    match = topo::matchLibraries(rows, libs, maxRingSize.value_or(7), cols);
+  } else {
+    throw std::invalid_argument("classifyTopology wants a library text or a table of them");
+  }
+  sol::table out = lua.create_table(0, 4);
   out["labels"] = sol::as_table(match.labels);
   sol::table counts = lua.create_table();
   for (const auto &kv : match.counts) {
     counts[kv.first.empty() ? std::string("unmatched") : kv.first] = kv.second;
   }
   out["counts"] = counts;
+  out["depth"] = sol::as_table(match.depth);
   out["matched"] = match.matched;
   return out;
+}
+
+// Guests placed in enumerated cages (vertex index lists) by the periodic
+// centroid of each cage.
+sol::table guestOccupancy(sol::this_state ts, const Cloud &cloud,
+                          std::vector<std::vector<int>> cages, std::vector<int> guests,
+                          double radius) {
+  sol::state_view lua(ts);
+  const auto occ = site::guestOccupancy(cloud, cages, guests, radius);
+  sol::table out = lua.create_table(0, 6);
+  out["guestsPerCage"] = sol::as_table(occ.guestsPerCage);
+  out["cageOfGuest"] = sol::as_table(occ.cageOfGuest);
+  out["centreDistance"] = sol::as_table(occ.centreDistance);
+  out["occupied"] = occ.occupied;
+  out["multiply"] = occ.multiply;
+  out["free"] = occ.free;
+  return out;
+}
+
+std::vector<double> periodicCentroid(const Cloud &cloud, std::vector<int> atoms) {
+  const auto c = site::periodicCentroid(cloud, atoms);
+  return {c[0], c[1], c[2]};
 }
 
 sol::table ionEnvironment(sol::this_state ts, const Cloud &cloud, std::vector<bool> iceFlag,
@@ -629,6 +666,8 @@ void registerRings(sol::state_view lua, sol::table m) {
   m.set_function("ionEnvironment", ionEnvironment);
   m.set_function("topologyLibrary", topologyLibrary);
   m.set_function("classifyTopology", classifyTopology);
+  m.set_function("guestOccupancy", guestOccupancy);
+  m.set_function("periodicCentroid", periodicCentroid);
 }
 
 void registerOrder(sol::state_view lua, sol::table m) {

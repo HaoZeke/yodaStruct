@@ -155,10 +155,21 @@ function dseams.topology_library(rows, label, o)
   return core.topologyLibrary(rows, label, o.hops or 2, o.max_ring or 7, o.colours, o.library)
 end
 
--- Name every atom by a key library text: {labels=, counts=, matched=}.
+-- Name every atom by a key library text, or by a sequence of library texts
+-- built at different hop counts (the deepest that knows an atom names it):
+-- {labels=, counts=, depth=, matched=}.
 function dseams.classify_topology(rows, library, o)
   o = opts(o)
   return core.classifyTopology(rows, library, o.hops or 2, o.max_ring or 7, o.colours)
+end
+
+-- Guests (methane, THF, ions; zero-based cloud indices) placed in cages
+-- given as vertex index lists, by the nearest periodic centroid within
+-- o.radius (default 4.0): {guestsPerCage=, cageOfGuest=, centreDistance=,
+-- occupied=, multiply=, free=}. cageOfGuest is zero-based, -1 when free.
+function dseams.guest_occupancy(cloud, cages, guests, o)
+  o = opts(o)
+  return core.guestOccupancy(cloud, cages, guests, o.radius or 4.0)
 end
 
 -- Ions read against a per-atom ice flag list: o.type is the water type
