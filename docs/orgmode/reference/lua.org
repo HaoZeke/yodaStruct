@@ -132,8 +132,7 @@ A dump slice that shrinks ~nop~ is
 ~core.readLammpsTrjO~ takes the same five arguments after the path
 and sets ~inSlice~. ~lo == hi~ leaves that direction open.
 ~{0,0,0}~ / ~{50,0,0}~ is ~x~ in ~[0, 50]~, with ~y~ and ~z~ open.
-The ~O~ in ~readLammpsTrjO~ is unused; the type argument is any
-LAMMPS type.
+The type argument is any LAMMPS type (the ~O~ is historical).
 
 * ~neighbors~(cloud[, opts])
 
