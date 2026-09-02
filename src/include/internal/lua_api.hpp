@@ -21,8 +21,10 @@
  *  @brief Lua names on `dseams.core`, documented for Doxygen.
  *
  *  Each function here is registered by `luaApi::registerAll`. New-style
- *  names take and return plain Lua tables. Legacy names keep
- *  container-userdata semantics so older scripts keep running.
+ *  names take and return plain Lua tables. Nested-table getters
+ *  (`bondNetworkByIndex`, `getPrimitiveRings`, `prismAnalysis`,
+ *  `bulkRingNumberAnalysis`) take those tables by value. Readers and
+ *  ice-type writers bind container userdata.
  */
 
 namespace luaApi {
@@ -146,7 +148,10 @@ sol::table cageAffiliation(sol::this_state ts,
                            std::vector<std::vector<int>> rings,
                            std::vector<std::vector<int>> nList);
 
-/** Mutual seeds, union completion. Returns `{hc, ddc}`. */
+/** Mutual seeds, union completion. Returns `{hc, ddc}`.
+ *  Optional fifth argument `ringAdjacentCompletion` (default false):
+ *  fill the last vertex of a six-ring whose other five vertices
+ *  already carry that cage label, then repeat to a fixed point. */
 sol::table seededCageAffiliation(sol::this_state ts,
                                  std::vector<std::vector<int>> strictRings,
                                  std::vector<std::vector<int>> strictNList,
@@ -363,8 +368,9 @@ int bulkTopoUnitMatching(std::string path, std::vector<std::vector<int>> rings,
 /** @name Legacy workflow names
  *  @{
  *
- *  Same C++ functions as the new-style names, with container-userdata
- *  argument semantics so older scripts keep running.
+ *  Same C++ functions as the new-style names. Nested-table getters
+ *  take neighbour and ring lists by value. Readers and ice-type
+ *  writers bind container userdata.
  *
  *  Readers: `readFrameOnlyOne`, `readFrameOnlyOneAllAtoms`, `readFrame`.
  *  Neighbours: `neighborList`, `bondNetworkByIndex`, `getPrimitiveRings`.
