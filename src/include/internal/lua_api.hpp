@@ -20,9 +20,11 @@
 /** @file lua_api.hpp
  *  @brief Lua names on `dseams.core`, documented for Doxygen.
  *
- *  Each function here is registered by `luaApi::registerAll`. New-style
- *  names take and return plain Lua tables. Legacy names keep
- *  container-userdata semantics so older scripts keep running.
+ *  Each function here is registered by `luaApi::registerAll`. Names
+ *  that take a neighbour list or a ring list take that container by
+ *  value, so a Lua table of tables and a container userdata both
+ *  bind. `sol::as_nested` / `sol::as_table` wrappers return Lua
+ *  tables. A raw bind of a C++ vector returns container userdata.
  */
 
 namespace luaApi {
@@ -137,7 +139,8 @@ getHbondNetworkFromDonors(Cloud &yCloud, Cloud &hCloud,
  *  @{
  */
 
-/** Primitive rings, hop-bounded. */
+/** Primitive rings, hop-bounded. `nList` binds by value.
+ *  `getPrimitiveRings` is the same function. */
 std::vector<std::vector<int>> ringNetwork(std::vector<std::vector<int>> nList,
                                           int maxDepth);
 
@@ -146,7 +149,17 @@ sol::table cageAffiliation(sol::this_state ts,
                            std::vector<std::vector<int>> rings,
                            std::vector<std::vector<int>> nList);
 
-/** Mutual seeds, union completion. Returns `{hc, ddc}`. */
+/** Mutual-graph seeds, permissive-graph completion. Returns `{hc, ddc}`.
+ *
+ *  The four ring and neighbour arguments are by-value vectors: a Lua
+ *  table of tables and a container userdata both bind.
+ *
+ *  The fifth argument `ringAdjacentCompletion` is optional and
+ *  defaults to false. When true, the accepted labels pass through
+ *  `ring::ringAdjacentCompletion` on the permissive six-rings. HC
+ *  and DDC complete on separate flag vectors. `dseams.cages` passes
+ *  `opts.complete`.
+ */
 sol::table seededCageAffiliation(sol::this_state ts,
                                  std::vector<std::vector<int>> strictRings,
                                  std::vector<std::vector<int>> strictNList,
@@ -287,7 +300,8 @@ sol::table domainStats(sol::this_state ts, const Cloud &cloud,
                        const site::Table &table, site::Kind kind,
                        double cutoff);
 
-/** Quasi-1D prism analysis. `atomID` is the first-frame ID. */
+/** Quasi-1D prism analysis. `atomID` is the first-frame ID.
+ *  `rings` and `nList` bind by value (Lua table or userdata). */
 int prismAnalysis(std::string path, std::vector<std::vector<int>> rings,
                   std::vector<std::vector<int>> nList, Cloud &cloud,
                   int maxDepth, int atomID, int firstFrame, int currentFrame,
@@ -327,7 +341,8 @@ void selectAtomsInSliceWithRingEdgeAtoms(
     Cloud &yCloud, std::array<double, 3> coordLow,
     std::array<double, 3> coordHigh, bool identicalCloud);
 
-/** Bulk ring-number histogram, every size up to `maxDepth`. */
+/** Bulk ring-number histogram, every size up to `maxDepth`.
+ *  `rings` and `nList` bind by value (Lua table or userdata). */
 int bulkRingNumberAnalysis(std::string path,
                            std::vector<std::vector<int>> rings,
                            std::vector<std::vector<int>> nList,
@@ -363,8 +378,12 @@ int bulkTopoUnitMatching(std::string path, std::vector<std::vector<int>> rings,
 /** @name Legacy workflow names
  *  @{
  *
- *  Same C++ functions as the new-style names, with container-userdata
- *  argument semantics so older scripts keep running.
+ *  Spellings used by the workflow scripts under `example_lua/`.
+ *  Nested-table arguments bind by value: `bondNetworkByIndex`,
+ *  `getPrimitiveRings`, `prismAnalysis`, and
+ *  `bulkRingNumberAnalysis` accept a Lua table or a container
+ *  userdata. The worked example is
+ *  `example_lua/library/legacy_chain.lua`.
  *
  *  Readers: `readFrameOnlyOne`, `readFrameOnlyOneAllAtoms`, `readFrame`.
  *  Neighbours: `neighborList`, `bondNetworkByIndex`, `getPrimitiveRings`.

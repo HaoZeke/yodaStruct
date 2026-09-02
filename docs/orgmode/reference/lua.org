@@ -1,12 +1,25 @@
 #+TITLE: require("dseams")
-#+OPTIONS: toc:nil num:nil
+#+OPTIONS: toc:nil num:nil ^:nil
 
-Public table from ~require("dseams")~ (~lua/dseams.lua~ on
-~dseams_core~). ~require("yoda")~ is the same table.
+#+begin_export rst
+..
+   # proseguard:off proselint.Uncomparables
+   # proseguard:off rgoswami.ReviewRegister
+#+end_export
 
-Fennel call shape is in [[file:../howto/fennel.org][Fennel]].
-Compiled names on ~dseams.core~ are in
+~require("dseams")~ loads ~lua/dseams.lua~ on ~dseams_core~.
+~require("yoda")~ loads the same table.
+
+Cage flags are hexagonal cage (HC) and double-diamond cage (DDC).
+The chill bond-order classifier (CHILL) and CHILL+ write state
+names. Pair correlation here means a radial distribution function (RDF).
+
+Fennel call shape lives in [[file:../howto/fennel.org][Fennel]].
+Compiled names on ~dseams.core~ live in
 [[file:lua-functions.org][Compiled registrations]].
+
+Aim of this page: the public helpers, the by-value binds, and
+the fifth parameter of ~seededCageAffiliation~.
 
 * Public names
 
@@ -17,71 +30,86 @@ local types = dseams.chill_plus(cloud, {cutoff = 3.5, type = 2})
 local nl = dseams.core.neighListO(3.5, cloud, 2)
 #+end_src
 
-| name | kind | role |
-|------+------+------|
-| ~read~ | function | suffix-dispatching loader |
-| ~neighbors~ | function | cutoff neighbour list by atom ID |
-| ~neighbors_pair~ | function | I-J cutoff neighbour list |
-| ~cn~ | function | site-site coordination number |
-| ~rdf~ | function | partial three-dimensional RDF |
-| ~running_cn~ | function | running site-site coordination number |
-| ~knn~ | function | k-nearest graph by atom ID |
-| ~chill_plus~ | function | CHILL+ state names; no file |
-| ~chill~ | function | CHILL state names; no file |
-| ~cages~ | function | seeded HC/DDC per-atom flags |
-| ~hbonds~ | function | hydrogen-bond adjacency table |
-| ~density~ | function | Cartesian number-density profile |
-| ~site_table~ | function | parse a type-to-site mapping |
-| ~pairs~ | function | mutual nearest cation-anion pairs |
-| ~domain~ | function | largest mapped-site domain statistics |
-| ~core~ | table | ~require("dseams_core")~; compiled registrations |
+- ~read~ :: suffix-dispatching loader.
+- ~neighbors~ :: cutoff neighbour list by atom ID.
+- ~neighbors_pair~ :: I-J cutoff neighbour list.
+- ~cn~ :: site-site coordination number.
+- ~rdf~ :: partial three-dimensional RDF.
+- ~running_cn~ :: running integral of that pair correlation.
+- ~knn~ :: k-nearest graph by atom ID.
+- ~chill_plus~ :: CHILL+ state names, no output file.
+- ~chill~ :: CHILL labels, no dump on disk.
+- ~cages~ :: seeded HC/DDC per-atom flags.
+- ~hbonds~ :: hydrogen-bond adjacency table.
+- ~density~ :: Cartesian number-density profile.
+- ~site_table~ :: parse a type-to-site mapping.
+- ~pairs~ :: mutual nearest cation-anion pairs.
+- ~domain~ :: largest mapped-site domain statistics.
+- ~core~ :: ~require("dseams_core")~; compiled registrations.
 
-These names are the public surface. Locals in ~lua/dseams.lua~
-(~suffix~, ~opts~) are not exported. Option tables may be omitted.
-Defaults are those of ~lua/dseams.lua~.
+These names form the public surface. Locals in ~lua/dseams.lua~
+(~suffix~, ~opts~) stay private. Callers may drop the option
+table. Defaults match ~lua/dseams.lua~.
 
 The engine CLI injects compiled names as globals. Library scripts
-call them on ~dseams.core~.
+call those names on ~dseams.core~.
 
 * Calling conventions
 
 ** PointCloud userdata
 
-Readers return a ~PointCloud~ userdata, not a table. The usertype is
-registered on the Lua state when ~dseams_core~ loads, so
-~PointCloud.new()~ is a global after ~require~. Workflow scripts pass
-that scratch object into the legacy readers.
+Readers return a ~PointCloud~ userdata. Loading ~dseams_core~
+registers the usertype, so ~PointCloud.new()~ is a global after
+~require~. Workflow scripts pass that scratch object into the
+legacy readers.
+PointCloud userdata fields:
+- ~nop~ :: particle count.
+- ~currentFrame~ :: frame index just read.
+- ~box()~ :: box lengths, 3-number table.
+- ~boxLow()~ :: box origin, 3-number table.
+- ~iceTypes()~ :: per-particle state name strings.
 
-| member | kind | meaning |
-|--------+------+---------|
-| ~nop~ | field | particle count |
-| ~currentFrame~ | field | frame index just read |
-| ~box()~ | method | box lengths, 3-number table |
-| ~boxLow()~ | method | box origin, 3-number table |
-| ~iceTypes()~ | method | per-particle state name strings |
-
-Ice-state strings: ~cubic~, ~hexagonal~, ~water~, ~interfacial~,
-~clathrate~, ~interClathrate~, ~reCubic~, ~reHex~, ~unclassified~.
+~iceTypes()~ yields one of ~cubic~, ~hexagonal~, ~water~,
+~interfacial~, ~clathrate~, ~interClathrate~, ~reCubic~, ~reHex~,
+~unclassified~.
 
 ** Tables vs userdata
 
-New-style compiled names take neighbour lists and ring lists *by
-value*. sol2 builds a C++ container from a plain Lua table of
-tables. Those names return ~sol::as_nested~ or ~sol::as_table~, so
-the result is a Lua table.
+Compiled names that take a neighbour list or a ring list take that
+container *by value*. sol2 builds a C++ ~vector<vector<int>>~ from
+either a nested Lua table or a container userdata already on the
+stack.
 
-Legacy names take C++ container *references*. They bind only
-container userdata (the object another C++ bind already put on the
-stack). A freshly written Lua table is not accepted.
+~sol::as_nested~ and ~sol::as_table~ wrappers hand back a Lua
+table. A raw bind of a C++ vector hands back container userdata.
+Both shapes accept ~#~ and ~ipairs~.
 
-| style | examples | nList / rings in | result |
-|-------+----------+------------------+--------|
-| new | ~neighListO~, ~neighListPair~, ~neighbourListByIndex~, ~kNearestNeighbourList~, ~ringNetwork~, ~cageAffiliation~, ~getCorrelPlus~, ~calcCN~, ~calcRDF3D~, ~calcRunningCN~, ~getHbondNetwork*~, ~densityByType~, ~densityByKind~, ~contactPairs~, ~domainStats~ | Lua table | Lua table (or void / name table) |
-| legacy | ~neighborList~, ~bondNetworkByIndex~, ~getPrimitiveRings~, ~readFrame*~, ~chillPlus_*~, ~chill_*~ | userdata | userdata |
+Contrast with a C++ reference parameter: that bind accepts
+userdata and treats a fresh Lua table as garbage. The nested-table
+getters below take the list by value, so both shapes bind.
 
-~sol2~ does not apply C++ default arguments on a raw bind. Wrapped
-names spell optionals in Lua (~sol::optional~). Legacy names need
-every argument the bound C++ signature requires.
+- ~bondNetworkByIndex~ :: neighbour list in; Lua table out.
+- ~getPrimitiveRings~ :: neighbour list in; container userdata out.
+- ~prismAnalysis~ :: rings plus nList in; integer out.
+- ~bulkRingNumberAnalysis~ :: ring list plus nList in; writes a histogram.
+
+A Lua table from ~dseams.neighbors~ or ~getHbondNetwork~ feeds
+those names directly. ~neighborList~ userdata binds the same way.
+Own the chain from
+~example_lua/library/legacy_chain.lua~.
+
+New-style names (~neighListO~, ~ringNetwork~,
+~seededCageAffiliation~, ~getHbondNetwork*~, and the rest on
+~dseams.core~) take a table or userdata and hand back a Lua table.
+~readFrame*~, ~chillPlus_*~, and ~chill_*~ stay userdata in and
+userdata out.
+
+~neighborList~ is the spelling of ~neighListO~ that returns
+container userdata. That spelling takes a cutoff, a ~PointCloud~,
+and a type. Those compiled names skip C++ default arguments on a
+raw bind. Wrapped names spell optionals in Lua (~sol::optional~).
+Names without a Lua wrapper need every argument the bound C++
+signature requires.
 
 * ~read~(path[, opts])
 
@@ -89,29 +117,29 @@ Suffix-dispatching loader. Returns a ~PointCloud~.
 
 | suffix | backend | notes |
 |--------+---------+-------|
-| ~.xyz~ | ~readXYZ~ | whole file; ~opts.frame~ unused |
-| ~.con~ | ~readCon~ | errors if this build has no readcon |
-| ~.pdb~ / ~.gro~ / ~.dcd~ | ~readChemfiles~ | errors if this build has no chemfiles; ~opts.type~ defaults to ~-1~ (keep all) |
+| ~.xyz~ | ~readXYZ~ | the file; ~opts.frame~ unused |
+| ~.con~ | ~readCon~ | missing unless this tree compiled readcon |
+| ~.pdb~ / ~.gro~ / ~.dcd~ | ~readChemfiles~ | absent without chemfiles; ~opts.type~ defaults to ~-1~ (keep all) |
 | other (LAMMPS dump) | ~readLammpsTrj~ or ~readLammpsTrjO~ | ~opts.all = true~ keeps all atoms. Otherwise ~opts.type~ selects a type; nil tries type 2 then type 1 |
 
 ~opts.frame~ is the 1-based frame index (default 1). ~opts.all = true~
 calls ~core.readLammpsTrj~ and keeps every atom. Otherwise
-~opts.type~ is the LAMMPS type ID to keep. There is no region in the
-high-level helper.
+~opts.type~ is the LAMMPS type ID to keep. The helper has no
+region filter.
 
 A dump slice that shrinks ~nop~ is
 ~dseams.core.readLammpsTrjreduced(path, frame, type, true, lo, hi)~.
 ~core.readLammpsTrjO~ takes the same five arguments after the path
-and only sets ~inSlice~. An axis with ~lo == hi~ is unconstrained,
-so ~{0,0,0}~ / ~{50,0,0}~ is ~x~ in ~[0, 50]~, ~y~ and ~z~ open.
-The ~O~ in ~readLammpsTrjO~ is historical; the type argument is any
+and sets ~inSlice~. ~lo == hi~ leaves that direction open.
+~{0,0,0}~ / ~{50,0,0}~ is ~x~ in ~[0, 50]~, with ~y~ and ~z~ open.
+The ~O~ in ~readLammpsTrjO~ is unused; the type argument is any
 LAMMPS type.
 
 * ~neighbors~(cloud[, opts])
 
 Cutoff neighbour list by atom ID. Calls
 ~core.neighListO(opts.cutoff or 3.5, cloud, opts.type or 1)~.
-Returns a Lua table of rows (self ID first).
+Hands back a Lua table of rows (self ID first).
 
 * Pair neighbours
 
@@ -132,14 +160,14 @@ partial RDF.
 Partial three-dimensional radial distribution function. Calls
 ~core.calcRDF3D~ with ~opts.type_i~ (default 1), ~opts.type_j~
 (default 2), ~opts.cutoff~ (default 12.0), and ~opts.bins~ (default
-~floor(cutoff / 0.05)~). Returns ~{r = {...}, g = {...}}~.
+~floor(cutoff / 0.05)~). Hands back ~{r, g}~.
 
 * Running coordination number
 
-~running_cn(cloud[, opts])~ is the running integral of the partial
-~g_IJ~. Uses the same options and
-defaults as ~rdf~ and calls ~core.calcRunningCN~. Returns
-~{r = {...}, cn = {...}}~, with ~rhoJ = nJ / volume~.
+~running_cn(cloud[, opts])~ integrates the partial ~g_IJ~.
+Shared options and defaults match ~rdf~. The call is
+~core.calcRunningCN~. Hands back ~{r, cn}~, with
+~rhoJ = nJ / volume~.
 
 * ~knn~(cloud[, opts])
 
@@ -148,27 +176,90 @@ k-nearest graph by atom ID. Calls ~core.kNearestNeighbourList~.
 - ~opts.k~ defaults to 4
 - ~opts.cutoff~ (candidate cutoff) defaults to 5.0
 - ~opts.type~ defaults to 1
-- ~opts.mutual~ defaults to true; only the boolean ~false~ selects the union graph
+- ~opts.mutual~ defaults to ~true~; the boolean ~false~ selects the union graph
 
 * CHILL+
 
 ~chill_plus(cloud[, opts])~ builds ~neighbors(cloud, opts)~, runs
-~core.getCorrelPlus(cloud, nl, false)~, returns
+~core.getCorrelPlus(cloud, nl, false)~, and returns
 ~core.getIceTypePlusNoPrint(cloud, nl, false)~ (1-based array of
-state names). Does not write a file. Mutates ~cloud~.
+state names). Writes no file. Mutates ~cloud~.
 
 * ~chill~(cloud[, opts])
 
 Same pipeline with ~core.getCorrel~ and ~core.getIceTypeNoPrint~.
-Mutates ~cloud~. Does not write a file.
+Mutates ~cloud~. Writes no file.
 
 * ~cages~(cloud[, opts])
 
 Seeded HC/DDC membership. Builds mutual and union k-nearest graphs
 (~opts.k~ 4, ~opts.cutoff~ 5.0, ~opts.type~ 1), converts each to an
-index list, keeps six-membered rings, and returns
-~core.seededCageAffiliation(...)~: a table ~{hc = ..., ddc = ...}~
-of per-atom flags.
+index list, keeps six-membered rings, and calls
+~core.seededCageAffiliation~. Hands back a table ~{hc, ddc}~ of
+per-atom flags.
+
+~opts.complete~ is the fifth argument of
+~seededCageAffiliation~. The default is ~false~. ~true~ runs the
+engine ring-adjacent walk: the last vertex of a six-ring whose
+other vertices already carry an HC or DDC label.
+
+#+begin_src lua
+local aff = dseams.cages(cloud, {type = 2})
+local filled = dseams.cages(cloud, {type = 2, complete = true})
+#+end_src
+
+* ~seededCageAffiliation~(strictRings, strictNList, permRings, permNList[, flag])
+
+Compiled name on ~dseams.core~. Mutual-graph seeds, permissive-graph
+fill. Hands back ~{hc, ddc}~, each a 1-based array of per-atom
+flags of length ~cloud.nop~.
+
+Those per-atom flags take four ring and neighbour arguments by
+value from the seeded call. A nested Lua table and a container
+userdata both bind.
+
+The fifth argument is ~ringAdjacentCompletion~, a boolean that
+defaults to ~false~ when the call drops it. Pass ~true~ and the
+accepted labels go through ~ring::ringAdjacentCompletion~ on the
+permissive six-rings. HC flags and DDC flags run as two walks. The
+walk is the all-but-one rule: a six-ring whose vertices all carry
+that cage label but one fills the last vertex, and the walk
+repeats until a fixed point.
+
+#+begin_src lua
+local aff = core.seededCageAffiliation(six_s, idx_s, six_u, idx_u)
+local filled = core.seededCageAffiliation(six_s, idx_s, six_u, idx_u, true)
+#+end_src
+
+~dseams.cages~ passes ~opts.complete or false~ as that fifth
+argument. ~example_lua/library/topology.lua~ calls the compiled
+name with ~true~.
+
+* Worked example: the legacy ring chain
+
+~legacy_chain.lua~ under ~example_lua/library/~ is the
+worked example for the by-value getters. The script reads
+~input/traj/exampleTraj.lammpstrj~ (oxygen type 2). A neighbour
+table comes from ~dseams.neighbors~, then feeds
+~getHbondNetwork~, ~bondNetworkByIndex~, ~getPrimitiveRings~, and
+~prismAnalysis~. ~neighborList~ userdata binds those names too.
+Both paths agree on the ring count. ~prismAnalysis~ writes
+~topoINT/nPrisms.dat~.
+
+#+begin_src lua
+local nList = dseams.neighbors(cloud, {cutoff = 3.5, type = 2})
+local hbn = core.getHbondNetwork(path, cloud, nList, 1, 1)
+local byIndex = core.bondNetworkByIndex(cloud, hbn)
+local rings = core.getPrimitiveRings(byIndex, 6)
+core.prismAnalysis(out .. "/", rings, byIndex, cloud, 6, 1, 1, 1, false)
+#+end_src
+
+The meson test name is ~dseams_legacy_chain~. From a configured
+build directory:
+
+#+begin_src bash
+meson test -C bbdir dseams_legacy_chain
+#+end_src
 
 * ~hbonds~(cloud[, opts])
 
@@ -180,16 +271,16 @@ uses ~opts.cutoff~ (default 3.5) and ~opts.type~ (default 1).
 - With ~opts.h_cloud~, the helper uses the supplied hydrogen
   ~PointCloud~ instead.
 - ~opts.dist~ and ~opts.angle~ use the engine defaults 2.42 and 30.0
-  when omitted.
+  when dropped.
 
-Returns a nested Lua table. Supplying neither ~path~ nor ~h_cloud~ is
-an error.
+Hands back a nested Lua table. Supplying neither ~path~ nor
+~h_cloud~ is an error.
 
 * ~density~(cloud[, opts])
 
 Cartesian number density along ~opts.axis~: ~"x"~, ~"y"~, ~"z"~,
-or the corresponding zero-based index. The default axis is ~"z"~.
-~opts.bins~ defaults to the axis span divided into approximately 0.1
+or the matching zero-based index. The default direction is ~"z"~.
+~opts.bins~ defaults to that span divided into about 0.1
 length-unit bins.
 
 - Type mode uses ~opts.type~ (default 0) and returns
@@ -200,10 +291,10 @@ length-unit bins.
 * Site mapping table
 
 ~site_table(spec)~ parses a comma-separated mapping such as
-~"1=cationHead,2=anion,3=tail"~. The result is a ~SiteTable~ userdata
-accepted by ~density~, ~pairs~, and ~domain~. Site kinds are exposed
-on ~dseams.core.Kind~ (alias ~SiteKind~), including ~polar~ and
-~apolar~.
+~"1=cationHead,2=anion,3=tail"~. That call yields a ~SiteTable~
+userdata accepted by ~density~, ~pairs~, and ~domain~. Site kinds
+live on ~dseams.core.Kind~ (alias ~SiteKind~), including ~polar~
+and ~apolar~.
 
 * ~pairs~(cloud, opts)
 
@@ -215,18 +306,18 @@ atom IDs.
 * ~domain~(cloud, opts)
 
 Requires ~opts.table~ and ~opts.kind~. The graph joins mapped sites
-within ~opts.cutoff~ (default 3.5). Returns
+within ~opts.cutoff~ (default 3.5). Hands back
 ~{site_kind, n, largest, percolation}~, where ~n~ is the selected site
 count and ~percolation = largest / n~.
 
 * ~core~
 
-The table returned by ~require("dseams_core")~. Every name from
+~require("dseams_core")~ returns this table. Every name from
 ~luaApi::registerAll~ (~src/lua_api.cpp~) lives here.
 
-Usertypes (~PointCloud~, ~RingUpdater~, ~AffiliationUpdater~) are
-registered on the Lua state, not on this table.
-~RingUpdater.new(6)~ works after ~require~.
+Usertypes (~PointCloud~, ~RingUpdater~, ~AffiliationUpdater~) live
+on the Lua state, off this table. ~RingUpdater.new(6)~ works after
+~require~.
 
-Signatures for every compiled name are in
+Signatures for every compiled name live in
 [[file:lua-functions.org][Compiled registrations]].
