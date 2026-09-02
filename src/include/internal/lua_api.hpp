@@ -151,7 +151,8 @@ sol::table seededCageAffiliation(sol::this_state ts,
                                  std::vector<std::vector<int>> strictRings,
                                  std::vector<std::vector<int>> strictNList,
                                  std::vector<std::vector<int>> permRings,
-                                 std::vector<std::vector<int>> permNList);
+                                 std::vector<std::vector<int>> permNList,
+                                 sol::optional<bool> ringAdjacentCompletion);
 
 /** @} */
 

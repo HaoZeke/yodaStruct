@@ -253,10 +253,12 @@ sol::table seededCageAffiliation(sol::this_state ts,
                                  std::vector<std::vector<int>> strictRings,
                                  std::vector<std::vector<int>> strictNList,
                                  std::vector<std::vector<int>> permRings,
-                                 std::vector<std::vector<int>> permNList) {
+                                 std::vector<std::vector<int>> permNList,
+                                 sol::optional<bool> ringAdjacentCompletion) {
   sol::state_view lua(ts);
-  const auto a = ring::seededCageAffiliation(strictRings, strictNList,
-                                             permRings, permNList);
+  const auto a = ring::seededCageAffiliation(
+      strictRings, strictNList, permRings, permNList,
+      ringAdjacentCompletion.value_or(false));
   sol::table out = lua.create_table(0, 2);
   out["hc"] = sol::as_table(a.hc);
   out["ddc"] = sol::as_table(a.ddc);
