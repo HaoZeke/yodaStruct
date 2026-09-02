@@ -1,5 +1,16 @@
 # Changelog
 
+## 2.8.0 (2026-09-02)
+
+- `topologyFingerprint`, `localTopologyKey`, `topologyLibrary`,
+  `classifyTopology` and `ionEnvironment` on the compiled surface;
+  `dseams.fingerprint`, `dseams.topology_library`, `dseams.classify_topology`,
+  `dseams.ion_environment` and `dseams.cages({complete = true})` in the
+  library API; `example_lua/library/topology.lua` as a meson test.
+- Lua API reference rewritten for the by-value getters, the completion
+  argument and named keys on every table.
+- Engine pinned at seams-core v2.8.0 with readcon-core v0.14.10.
+
 ## 2.7.0 (2026-09-02)
 
 - `seededCageAffiliation` takes an optional fifth argument that turns on
