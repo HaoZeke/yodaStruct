@@ -148,6 +148,19 @@ function dseams.fingerprint(rows, o)
   return core.topologyFingerprint(rows, o.hops or 2, o.max_ring or 7)
 end
 
+-- Key library text from a frame's rows under a label (o.hops, o.max_ring,
+-- o.colours as in fingerprint; o.library an existing library text to extend).
+function dseams.topology_library(rows, label, o)
+  o = opts(o)
+  return core.topologyLibrary(rows, label, o.hops or 2, o.max_ring or 7, o.colours, o.library)
+end
+
+-- Name every atom by a key library text: {labels=, counts=, matched=}.
+function dseams.classify_topology(rows, library, o)
+  o = opts(o)
+  return core.classifyTopology(rows, library, o.hops or 2, o.max_ring or 7, o.colours)
+end
+
 -- Ions read against a per-atom ice flag list: o.type is the water type
 -- (default 1), o.cutoff the first shell radius (default 3.5).
 function dseams.ion_environment(cloud, ice, ions, o)

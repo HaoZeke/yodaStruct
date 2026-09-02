@@ -64,4 +64,13 @@ local env = dseams.ion_environment(cloud, ice, { 0 }, {type = 1, cutoff = 3.5})
 assert(env.nIce + env.nFront + env.nLiquid == 1, "one ion")
 assert(env.shell[1] == 4, "four water neighbours at a lattice site, got " .. tostring(env.shell[1]))
 assert(env.state[1] == "ice", "an ion at a lattice site of a labelled lattice is in ice: " .. env.state[1])
+-- a key library from the pure lattice names the doped lattice's far atoms
+local pure_rows = {}
+for i, row in ipairs(rows) do pure_rows[i] = row end
+local lib = dseams.topology_library(rows, "Ic", {hops = 2})
+assert(lib:find("# method") == 1, "library header")
+local named = dseams.classify_topology(rows, lib, {hops = 2})
+assert(named.matched == cloud.nop, "every atom of the frame the library came from is named")
+assert(named.counts["Ic"] == cloud.nop, "all Ic")
+
 print(string.format("topology.lua ok: key=%s classes=%d method=%s ion=%s", fp.key, nclasses, fp.method, env.state[1]))

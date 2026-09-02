@@ -299,6 +299,40 @@ sol::table localTopologyKey(sol::this_state ts, std::vector<std::vector<int>> ro
   return out;
 }
 
+// Key libraries travel as their text form so Lua holds a string.
+std::string topologyLibrary(std::vector<std::vector<int>> rows, std::string label,
+                            sol::optional<int> hops, sol::optional<int> maxRingSize,
+                            sol::optional<std::vector<int>> colours,
+                            sol::optional<std::string> existing) {
+  topo::KeyLibrary lib;
+  if (existing && !existing->empty()) {
+    lib = topo::readLibrary(*existing);
+  }
+  const auto fp = topo::fingerprint(rows, hops.value_or(2), maxRingSize.value_or(7),
+                                    colours.value_or(std::vector<int>{}));
+  topo::addToLibrary(lib, fp, label);
+  return topo::writeLibrary(lib);
+}
+
+sol::table classifyTopology(sol::this_state ts, std::vector<std::vector<int>> rows,
+                            std::string library, sol::optional<int> hops,
+                            sol::optional<int> maxRingSize,
+                            sol::optional<std::vector<int>> colours) {
+  sol::state_view lua(ts);
+  const auto fp = topo::fingerprint(rows, hops.value_or(2), maxRingSize.value_or(7),
+                                    colours.value_or(std::vector<int>{}));
+  const auto match = topo::matchLibrary(fp, topo::readLibrary(library));
+  sol::table out = lua.create_table(0, 3);
+  out["labels"] = sol::as_table(match.labels);
+  sol::table counts = lua.create_table();
+  for (const auto &kv : match.counts) {
+    counts[kv.first.empty() ? std::string("unmatched") : kv.first] = kv.second;
+  }
+  out["counts"] = counts;
+  out["matched"] = match.matched;
+  return out;
+}
+
 sol::table ionEnvironment(sol::this_state ts, const Cloud &cloud, std::vector<bool> iceFlag,
                           std::vector<int> ionIndices, sol::optional<int> waterType,
                           sol::optional<double> cutoff) {
@@ -593,6 +627,8 @@ void registerRings(sol::state_view lua, sol::table m) {
   m.set_function("topologyFingerprint", topologyFingerprint);
   m.set_function("localTopologyKey", localTopologyKey);
   m.set_function("ionEnvironment", ionEnvironment);
+  m.set_function("topologyLibrary", topologyLibrary);
+  m.set_function("classifyTopology", classifyTopology);
 }
 
 void registerOrder(sol::state_view lua, sol::table m) {
