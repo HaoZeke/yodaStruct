@@ -129,13 +129,15 @@ region filter.
 
 A dump slice that shrinks ``nop`` is this call:
 
-#skip_lint_start
+..
+   #skip_lint_start
 
 .. code:: lua
 
     dseams.core.readLammpsTrjreduced(path, frame, type, true, lo, hi)
 
-#skip_lint_end
+..
+   #skip_lint_end
 
 ``core.readLammpsTrjO`` takes the same five arguments after the path
 and sets ``inSlice``. A coordinate with ``lo == hi`` is unconstrained,
@@ -195,14 +197,16 @@ A Lua off-value selects the union graph.
 ``chill_plus(cloud[, opts])`` builds ``neighbors(cloud, opts)``.
 The Nguyen plus pair is:
 
-#skip_lint_start
+..
+   #skip_lint_start
 
 .. code:: lua
 
     core.getCorrelPlus(cloud, nl, false)
     return core.getIceTypePlusNoPrint(cloud, nl, false)
 
-#skip_lint_end
+..
+   #skip_lint_end
 
 The return value is a 1-based array of state names. Writes no
 file. Mutates ``cloud``.
@@ -241,14 +245,16 @@ all carry that cage label but one gains the label on the vacant
 vertex, and the walk repeats to a fixed point. The helper reads
 the option as:
 
-#skip_lint_start
+..
+   #skip_lint_start
 
 .. code:: lua
 
     core.seededCageAffiliation(six_s, idx_s, six_u, idx_u,
                                o.complete or false)
 
-#skip_lint_end
+..
+   #skip_lint_end
 
 ~hbonds~(cloud[, opts])
 -----------------------
@@ -275,13 +281,15 @@ raises an error.
 Cartesian number density along one box coordinate. The option
 table selects the coordinate:
 
-#skip_lint_start
+..
+   #skip_lint_start
 
 .. code:: lua
 
     dseams.density(cloud, {axis = "z", bins = n})
 
-#skip_lint_end
+..
+   #skip_lint_end
 
 ``"x"``, ``"y"``, ``"z"``, or the matching zero-based index. The default
 is ``"z"``. ``opts.bins`` defaults to that box length divided into
