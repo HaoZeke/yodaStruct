@@ -834,7 +834,7 @@ void registerTopology(sol::state_view lua, sol::table m) {
   m.set_function("calcCN", calcCN);
   m.set_function("densityByType", densityByType);
   m.set_function("densityByKind", densityByKind);
-  m.set_function("prismAnalysis", prismAnalysis);
+  m.set_function("prismAnalysis", &luaApi::prismAnalysis);
   m.set_function("clusterAnalysis", clusterAnalysis);
   m.set_function("recenterCluster", recenterCluster);
   m.set_function("getPointCloudAtomsOfOneAtomType",
@@ -844,7 +844,7 @@ void registerTopology(sol::state_view lua, sol::table m) {
                  selectEdgeAtomsInRingsWithinSlice);
   m.set_function("selectAtomsInSliceWithRingEdgeAtoms",
                  selectAtomsInSliceWithRingEdgeAtoms);
-  m.set_function("bulkRingNumberAnalysis", bulkRingNumberAnalysis);
+  m.set_function("bulkRingNumberAnalysis", &luaApi::bulkRingNumberAnalysis);
   m.set_function("bulkTopologicalNetworkCriterion",
                  bulkTopologicalNetworkCriterion);
   m.set_function("bulkTopoUnitMatching", bulkTopoUnitMatching);
