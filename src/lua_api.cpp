@@ -385,6 +385,11 @@ sol::table guestOccupancy(sol::this_state ts, const Cloud &cloud,
   return out;
 }
 
+std::vector<int> shellRingCensus(std::vector<std::vector<int>> rings, std::vector<int> shell,
+                                 sol::optional<int> maxRingSize) {
+  return site::shellRingCensus(rings, shell, maxRingSize.value_or(7));
+}
+
 std::vector<double> periodicCentroid(const Cloud &cloud, std::vector<int> atoms) {
   const auto c = site::periodicCentroid(cloud, atoms);
   return {c[0], c[1], c[2]};
@@ -408,6 +413,11 @@ sol::table ionEnvironment(sol::this_state ts, const Cloud &cloud, std::vector<bo
                                                    : "liquid");
   }
   out["state"] = sol::as_table(states);
+  sol::table members = lua.create_table();
+  for (std::size_t i = 0; i < env.members.size(); i++) {
+    members[i + 1] = sol::as_table(env.members[i]);
+  }
+  out["members"] = members;
   out["nIce"] = env.nIce;
   out["nFront"] = env.nFront;
   out["nLiquid"] = env.nLiquid;
@@ -689,6 +699,7 @@ void registerRings(sol::state_view lua, sol::table m) {
   m.set_function("classifyTopology", classifyTopology);
   m.set_function("guestOccupancy", guestOccupancy);
   m.set_function("periodicCentroid", periodicCentroid);
+  m.set_function("shellRingCensus", shellRingCensus);
 }
 
 void registerOrder(sol::state_view lua, sol::table m) {

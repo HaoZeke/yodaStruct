@@ -190,6 +190,14 @@ function dseams.ion_environment(cloud, ice, ions, o)
   return core.ionEnvironment(cloud, ice, ions, o.type or 1, o.cutoff or 3.5)
 end
 
+-- Rings (zero-based index lists) with a vertex in an ion's first shell
+-- (env.members[i]), counted by size up to o.max_ring (default 7):
+-- census[s + 1] is the number of rings of size s.
+function dseams.shell_ring_census(rings, shell, o)
+  o = opts(o)
+  return core.shellRingCensus(rings, shell, o.max_ring or 7)
+end
+
 function dseams.hbonds(cloud, o)
   o = opts(o)
   local nl = dseams.neighbors(cloud, o)

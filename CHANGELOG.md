@@ -11,8 +11,10 @@
   that knows it; the result carries `depth`.
 - `guestOccupancy`, `periodicCentroid` and `dseams.guest_occupancy`: guests
   placed in enumerated cages by the periodic centroid of each cage.
-- Engine pinned past v2.8.0 for `topo::matchLibraries` and
-  `site::guestOccupancy`.
+- `ionEnvironment` lists each ion's shell `members`; `shellRingCensus` and
+  `dseams.shell_ring_census` count the rings through a shell by size.
+- Engine pinned past v2.8.0 for `topo::matchLibraries`,
+  `site::guestOccupancy` and `site::shellRingCensus`.
 
 ## 2.8.1 (2026-09-02)
 

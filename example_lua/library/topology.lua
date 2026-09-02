@@ -64,6 +64,10 @@ local env = dseams.ion_environment(cloud, ice, { 0 }, {type = 1, cutoff = 3.5})
 assert(env.nIce + env.nFront + env.nLiquid == 1, "one ion")
 assert(env.shell[1] == 4, "four water neighbours at a lattice site, got " .. tostring(env.shell[1]))
 assert(env.state[1] == "ice", "an ion at a lattice site of a labelled lattice is in ice: " .. env.state[1])
+assert(#env.members[1] == 4, "the shell members are listed")
+local shell_rings = dseams.shell_ring_census(core.ringNetwork(strict, 6), env.members[1], {max_ring = 6})
+assert(#shell_rings == 7, "census runs 0..max_ring")
+assert(shell_rings[7] > 0, "six-rings pass through the ion's shell")
 -- a key library from the pure lattice names the doped lattice's far atoms
 local pure_rows = {}
 for i, row in ipairs(rows) do pure_rows[i] = row end
