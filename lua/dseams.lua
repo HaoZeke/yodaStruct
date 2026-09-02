@@ -133,7 +133,21 @@ function dseams.cages(cloud, o)
       six_u[#six_u + 1] = ring
     end
   end
-  return core.seededCageAffiliation(six_s, idx_s, six_u, idx_u)
+  return core.seededCageAffiliation(six_s, idx_s, six_u, idx_u, o.complete or false)
+end
+
+-- Label-independent topology keys of a bonded graph given as rows by
+-- index (core.neighbourListByIndex). o.hops (default 2), o.max_ring (7).
+function dseams.fingerprint(rows, o)
+  o = opts(o)
+  return core.topologyFingerprint(rows, o.hops or 2, o.max_ring or 7)
+end
+
+-- Ions read against a per-atom ice flag list: o.type is the water type
+-- (default 1), o.cutoff the first shell radius (default 3.5).
+function dseams.ion_environment(cloud, ice, ions, o)
+  o = opts(o)
+  return core.ionEnvironment(cloud, ice, ions, o.type or 1, o.cutoff or 3.5)
 end
 
 function dseams.hbonds(cloud, o)

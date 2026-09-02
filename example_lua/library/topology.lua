@@ -2,6 +2,7 @@
 -- library API: a cubic-diamond lattice written as a LAMMPS dump with one
 -- site turned into an ion (type 3), read back with every atom.
 local dseams = require("dseams")
+local core = dseams.core
 
 local bond = 2.75
 local a = 4.0 * bond / math.sqrt(3.0)
@@ -32,34 +33,34 @@ for idx, p in ipairs(positions) do
 end
 fh:close()
 
-local cloud = dseams.readLammpsTrj(path, 1)
+local cloud = core.readLammpsTrj(path, 1)
 os.remove(path)
 assert(cloud.nop == #positions, "every atom read")
 
 -- water-only graph and its rows by index
-local nlist = dseams.neighListO(3.5, cloud, 1)
-local rows = dseams.neighbourListByIndex(cloud, nlist)
-local fp = dseams.topologyFingerprint(rows, 2, 7)
+local nlist = core.neighListO(3.5, cloud, 1)
+local rows = core.neighbourListByIndex(cloud, nlist)
+local fp = dseams.fingerprint(rows, {hops = 2})
 assert(fp.method == "nauty" or fp.method == "wl", fp.method)
 local nclasses = 0
 for _ in pairs(fp.classes) do nclasses = nclasses + 1 end
 assert(nclasses >= 2, "a vacancy makes more than one class: " .. nclasses)
-local lk = dseams.localTopologyKey(rows, 40, 2)
+local lk = core.localTopologyKey(rows, 40, 2)
 assert(lk.vertices > 0 and #lk.key == 16, "local key")
 
 -- seeded cages on the water, then the ion against them
-local strict = dseams.neighbourListByIndex(cloud, dseams.kNearestNeighbourList(cloud, 4, 5.0, 1, true))
-local union = dseams.neighbourListByIndex(cloud, dseams.kNearestNeighbourList(cloud, 4, 5.0, 1, false))
+local strict = core.neighbourListByIndex(cloud, core.kNearestNeighbourList(cloud, 4, 5.0, 1, true))
+local union = core.neighbourListByIndex(cloud, core.kNearestNeighbourList(cloud, 4, 5.0, 1, false))
 local function six(rings)
   local out = {}
   for _, r in ipairs(rings) do if #r == 6 then out[#out + 1] = r end end
   return out
 end
-local aff = dseams.seededCageAffiliation(six(dseams.ringNetwork(strict, 6)), strict,
-                                         six(dseams.ringNetwork(union, 6)), union, true)
+local aff = core.seededCageAffiliation(six(core.ringNetwork(strict, 6)), strict,
+                                         six(core.ringNetwork(union, 6)), union, true)
 local ice = {}
 for i = 1, cloud.nop do ice[i] = (aff.hc[i] or aff.ddc[i]) and true or false end
-local env = dseams.ionEnvironment(cloud, ice, { 0 }, 1, 3.5)
+local env = dseams.ion_environment(cloud, ice, { 0 }, {type = 1, cutoff = 3.5})
 assert(env.nIce + env.nFront + env.nLiquid == 1, "one ion")
 assert(env.shell[1] == 4, "four water neighbours at a lattice site, got " .. tostring(env.shell[1]))
 assert(env.state[1] == "ice", "an ion at a lattice site of a labelled lattice is in ice: " .. env.state[1])
