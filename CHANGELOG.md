@@ -1,5 +1,16 @@
 # Changelog
 
+## 2.7.0 (2026-09-02)
+
+- `seededCageAffiliation` takes an optional fifth argument that turns on
+  the engine's ring completion (fill the last vertex of a six-ring whose
+  other vertices carry a label).
+- Nested-table getters (`bondNetworkByIndex`, `getPrimitiveRings`,
+  `prismAnalysis`, `bulkRingNumberAnalysis`) take their arguments by value,
+  so Lua tables passed straight from the helpers no longer crash the
+  binding; `example_lua/library/legacy_chain.lua` exercises the chain.
+- Engine pinned at seams-core v2.7.0.
+
 ## Unreleased
 
 `dseams.read` has no region and calls `readLammpsTrjO` (keeps every
