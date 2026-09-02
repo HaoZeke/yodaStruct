@@ -173,8 +173,9 @@ sol::table seededCageAffiliation(sol::this_state ts,
  *  @{
  */
 
-/** Classify bonds with a named rule or a `{staggeredMax, eclipsedMin,
- *  eclipsedMax, coordinationNumber}` table. */
+/** Classify bonds with a named rule or a `{staggeredMax = staggeredMax,
+ *  eclipsedMin = eclipsedMin, eclipsedMax = eclipsedMax,
+ *  coordinationNumber = coordinationNumber}` table. */
 void classifyBonds(Cloud &yCloud, std::vector<std::vector<int>> nList,
                    const sol::object &ruleSpec, sol::optional<bool> isSlice);
 
