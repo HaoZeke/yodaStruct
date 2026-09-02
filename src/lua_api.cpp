@@ -452,8 +452,14 @@ void registerNeighbours(sol::state_view lua, sol::table m) {
         return packPairs(sol::state_view(ts),
                          nneigh::mutualNearestUnlike(yCloud, typeI, typeJ));
       });
+  // Legacy spellings. A Lua table (what every as_nested binding returns)
+  // and a container userdata both bind to a by-value vector; a reference
+  // parameter accepts only the userdata and reads a table as garbage
   m.set_function("neighborList", nneigh::neighListO);
-  m.set_function("bondNetworkByIndex", nneigh::neighbourListByIndex);
+  m.set_function("bondNetworkByIndex",
+                 [](const Cloud &yCloud, std::vector<std::vector<int>> nList) {
+                   return sol::as_nested(neighbourListByIndex(yCloud, nList));
+                 });
   m.set_function("getHbondNetwork", [](std::string filename, Cloud &yCloud,
                                        std::vector<std::vector<int>> nList,
                                        int targetFrame, int Htype,
@@ -503,8 +509,8 @@ void registerRings(sol::state_view lua, sol::table m) {
       },
       "lastRecomputedSources", &primitive::RingUpdater::lastRecomputedSources,
       "lastBallsRefreshed", &primitive::RingUpdater::lastBallsRefreshed);
-  // Legacy spelling, container-userdata semantics
-  m.set_function("getPrimitiveRings", primitive::ringNetwork);
+  // Legacy spelling; by-value so a table or a container userdata both bind
+  m.set_function("getPrimitiveRings", ringNetwork);
   // Order-free per-ring cage classification and its exact incremental form
   m.set_function("cageAffiliation", cageAffiliation);
   lua.new_usertype<ring::AffiliationUpdater>(
@@ -739,8 +745,8 @@ sol::table domainStats(sol::this_state ts, const Cloud &cloud,
   return out;
 }
 
-int prismAnalysis(std::string path, const std::vector<std::vector<int>> &rings,
-                  const std::vector<std::vector<int>> &nList, Cloud &cloud,
+int prismAnalysis(std::string path, std::vector<std::vector<int>> rings,
+                  std::vector<std::vector<int>> nList, Cloud &cloud,
                   int maxDepth, int atomID, int firstFrame, int currentFrame,
                   bool doShapeMatching) {
   return ring::prismAnalysis(std::move(path), rings, nList, cloud, maxDepth,
@@ -794,8 +800,8 @@ void selectAtomsInSliceWithRingEdgeAtoms(
 }
 
 int bulkRingNumberAnalysis(std::string path,
-                           const std::vector<std::vector<int>> &rings,
-                           const std::vector<std::vector<int>> &nList,
+                           std::vector<std::vector<int>> rings,
+                           std::vector<std::vector<int>> nList,
                            Cloud &yCloud, int maxDepth, int firstFrame) {
   return ring::bulkPolygonRingAnalysis(std::move(path), rings, nList, yCloud,
                                        maxDepth, firstFrame);
