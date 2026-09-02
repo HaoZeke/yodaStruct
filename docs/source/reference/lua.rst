@@ -291,8 +291,9 @@ Compiled name on ``dseams.core``. Mutual-graph seeds, permissive-graph
 fill. Hands back ``{hc = hc, ddc = ddc}``, each a 1-based array of
 per-atom flags of length ``cloud.nop``.
 
-Those per-atom flags take four ring and neighbour arguments by
-value from the seeded call. A nested Lua table and a container
+Those per-atom flags are the return table.
+``seededCageAffiliation`` takes the four ring and neighbour
+arguments by value. A nested Lua table and a container
 userdata both bind.
 
 The fifth argument is ``ringAdjacentCompletion``, a boolean that
