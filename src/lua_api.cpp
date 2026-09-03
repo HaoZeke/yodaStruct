@@ -385,6 +385,41 @@ sol::table guestOccupancy(sol::this_state ts, const Cloud &cloud,
   return out;
 }
 
+sol::table guestOccupancyBoth(sol::this_state ts, const Cloud &cloud,
+                              std::vector<std::vector<int>> cages,
+                              std::vector<std::vector<std::vector<int>>> faces,
+                              std::vector<int> guests, double radius) {
+  sol::state_view lua(ts);
+  const auto both = site::guestOccupancyBoth(cloud, cages, faces, guests, radius);
+  auto pack = [&](const site::GuestOccupancy &occ) {
+    sol::table t = lua.create_table(0, 6);
+    t["guestsPerCage"] = sol::as_table(occ.guestsPerCage);
+    t["cageOfGuest"] = sol::as_table(occ.cageOfGuest);
+    t["centreDistance"] = sol::as_table(occ.centreDistance);
+    t["occupied"] = occ.occupied;
+    t["multiply"] = occ.multiply;
+    t["free"] = occ.free;
+    return t;
+  };
+  sol::table out = lua.create_table(0, 2);
+  out["radius"] = pack(both.radius);
+  out["inside"] = pack(both.inside);
+  return out;
+}
+
+sol::table shellRings(sol::this_state ts, std::vector<std::vector<int>> waterRings,
+                      std::vector<std::vector<int>> nList, int ion,
+                      std::vector<int> shell, sol::optional<int> maxRingSize) {
+  sol::state_view lua(ts);
+  const auto sh =
+      site::shellRings(waterRings, nList, ion, shell, maxRingSize.value_or(7));
+  sol::table out = lua.create_table(0, 3);
+  out["census"] = sol::as_table(sh.census);
+  out["capped"] = sh.capped;
+  out["broken"] = sh.broken;
+  return out;
+}
+
 std::vector<int> shellRingCensus(std::vector<std::vector<int>> rings, std::vector<int> shell,
                                  sol::optional<int> maxRingSize) {
   return site::shellRingCensus(rings, shell, maxRingSize.value_or(7));
@@ -698,6 +733,8 @@ void registerRings(sol::state_view lua, sol::table m) {
   m.set_function("topologyLibrary", topologyLibrary);
   m.set_function("classifyTopology", classifyTopology);
   m.set_function("guestOccupancy", guestOccupancy);
+  m.set_function("guestOccupancyBoth", guestOccupancyBoth);
+  m.set_function("shellRings", shellRings);
   m.set_function("periodicCentroid", periodicCentroid);
   m.set_function("shellRingCensus", shellRingCensus);
 }

@@ -183,6 +183,13 @@ function dseams.guest_occupancy(cloud, cages, guests, o)
   return core.guestOccupancy(cloud, cages, guests, o.radius or 4.0)
 end
 
+-- Radius and inside occupancy on the same cages. faces[c] is the rings of
+-- cage c as vertex index lists. Returns {radius=, inside=}.
+function dseams.guest_occupancy_both(cloud, cages, faces, guests, o)
+  o = opts(o)
+  return core.guestOccupancyBoth(cloud, cages, faces, guests, o.radius or 4.0)
+end
+
 -- Ions read against a per-atom ice flag list: o.type is the water type
 -- (default 1), o.cutoff the first shell radius (default 3.5).
 function dseams.ion_environment(cloud, ice, ions, o)
@@ -196,6 +203,12 @@ end
 function dseams.shell_ring_census(rings, shell, o)
   o = opts(o)
   return core.shellRingCensus(rings, shell, o.max_ring or 7)
+end
+
+-- Census, capped and broken rings for one ion: {census=, capped=, broken=}.
+function dseams.shell_rings(rings, nlist, ion, shell, o)
+  o = opts(o)
+  return core.shellRings(rings, nlist, ion, shell, o.max_ring or 7)
 end
 
 function dseams.hbonds(cloud, o)
