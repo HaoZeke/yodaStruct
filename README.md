@@ -16,6 +16,10 @@ This repository is a **library**. `require("dseams")` in Lua,
 (`import pydseams`).
 Neighbour search is [`linkcell`](https://github.com/d-SEAMS/linkcell).
 
+Released versions live in [CHANGELOG.md](CHANGELOG.md) (Keep a Changelog).
+Unreleased notes are files under `changelog.d/`. The cut is
+`towncrier build --version X.Y.Z`.
+
 ```lua
 local dseams = require("dseams")
 local cloud = dseams.read("water.lammpstrj")
