@@ -200,6 +200,12 @@ kNearestNeighbourList(const Cloud &yCloud, int k, double candidateCutoff,
                                        mutual.value_or(true));
 }
 
+std::pair<std::vector<std::vector<int>>, std::vector<std::vector<int>>>
+kNearestNeighbourPair(const Cloud &yCloud, int k, double candidateCutoff,
+                      int typeI) {
+  return nneigh::kNearestNeighbourPair(yCloud, k, candidateCutoff, typeI);
+}
+
 std::tuple<double, double> shellSeparation(const Cloud &yCloud, int k,
                                            int typeI) {
   return nneigh::shellSeparation(yCloud, k, typeI);
@@ -606,6 +612,12 @@ void registerNeighbours(sol::state_view lua, sol::table m) {
     return sol::as_nested(
         kNearestNeighbourList(yCloud, k, candidateCutoff, typeI, mutual));
   });
+  m.set_function("kNearestNeighbourPair", [](const Cloud &yCloud, int k,
+                                             double candidateCutoff, int typeI) {
+    auto both = kNearestNeighbourPair(yCloud, k, candidateCutoff, typeI);
+    return std::make_tuple(sol::as_nested(both.first),
+                           sol::as_nested(both.second));
+  });
   m.set_function("shellSeparation", shellSeparation);
   m.set_function(
       "mutualNearestUnlike",
@@ -740,6 +752,8 @@ void registerOrder(sol::state_view lua, sol::table m) {
   m.set_function("steinhardtQlVoronoi", steinhardtQlVoronoi);
   m.set_function("voronoiFacetWeights", voronoiFacetWeights);
   // Legacy spellings kept for the bulk example scripts
+  // Mutate in place and return the same Cloud&. conda sol is older
+  // than the vendored header and has no sol::returns_self.
   m.set_function("chillPlus_cij",
                  [](Cloud &c, const std::vector<std::vector<int>> &n,
                     bool slice) -> Cloud & {

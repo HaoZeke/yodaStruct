@@ -143,7 +143,7 @@ int main(int argc, char *argv[]) {
 
   sol::state lua;
   lua.open_libraries();
-  luaApi::registerAll(lua);
+  luaApi::registerAll(lua, lua.globals());
   setupHelpers(lua);
 
   if (cfg.topoTwoDim) {
