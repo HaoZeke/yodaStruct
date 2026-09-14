@@ -752,48 +752,40 @@ void registerOrder(sol::state_view lua, sol::table m) {
   m.set_function("steinhardtQlVoronoi", steinhardtQlVoronoi);
   m.set_function("voronoiFacetWeights", voronoiFacetWeights);
   // Legacy spellings kept for the bulk example scripts
+  // Mutate in place and return the same Cloud&. conda sol is older
+  // than the vendored header and has no sol::returns_self.
   m.set_function("chillPlus_cij",
-                 sol::policies(
-                     [](Cloud &c, const std::vector<std::vector<int>> &n,
-                        bool slice) -> Cloud & {
-                       chill::getCorrelPlus(c, n, slice);
-                       return c;
-                     },
-                     sol::returns_self));
+                 [](Cloud &c, const std::vector<std::vector<int>> &n,
+                    bool slice) -> Cloud & {
+                   chill::getCorrelPlus(c, n, slice);
+                   return c;
+                 });
   m.set_function("chillPlus_iceType",
-                 sol::policies(
-                     [](Cloud &c, const std::vector<std::vector<int>> &n,
-                        std::string path, int first, bool slice,
-                        std::string outName) -> Cloud & {
-                       chill::getIceTypePlus(c, n, path, first, slice, outName);
-                       return c;
-                     },
-                     sol::returns_self));
+                 [](Cloud &c, const std::vector<std::vector<int>> &n,
+                    std::string path, int first, bool slice,
+                    std::string outName) -> Cloud & {
+                   chill::getIceTypePlus(c, n, path, first, slice, outName);
+                   return c;
+                 });
   m.set_function("chill_cij",
-                 sol::policies(
-                     [](Cloud &c, const std::vector<std::vector<int>> &n,
-                        bool slice) -> Cloud & {
-                       chill::getCorrel(c, n, slice);
-                       return c;
-                     },
-                     sol::returns_self));
+                 [](Cloud &c, const std::vector<std::vector<int>> &n,
+                    bool slice) -> Cloud & {
+                   chill::getCorrel(c, n, slice);
+                   return c;
+                 });
   m.set_function("chill_iceType",
-                 sol::policies(
-                     [](Cloud &c, const std::vector<std::vector<int>> &n,
-                        std::string path, int first, bool slice,
-                        std::string outName) -> Cloud & {
-                       chill::getIceType(c, n, path, first, slice, outName);
-                       return c;
-                     },
-                     sol::returns_self));
+                 [](Cloud &c, const std::vector<std::vector<int>> &n,
+                    std::string path, int first, bool slice,
+                    std::string outName) -> Cloud & {
+                   chill::getIceType(c, n, path, first, slice, outName);
+                   return c;
+                 });
   m.set_function("averageQ6", chill::getq6);
   m.set_function("modifyChill",
-                 sol::policies(
-                     [](Cloud &c, std::vector<double> &q6) -> Cloud & {
-                       chill::reclassifyWater(c, q6);
-                       return c;
-                     },
-                     sol::returns_self));
+                 [](Cloud &c, std::vector<double> &q6) -> Cloud & {
+                   chill::reclassifyWater(c, q6);
+                   return c;
+                 });
   m.set_function("percentage_Ice", chill::printIceType);
 }
 
