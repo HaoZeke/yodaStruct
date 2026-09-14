@@ -200,6 +200,12 @@ kNearestNeighbourList(const Cloud &yCloud, int k, double candidateCutoff,
                                        mutual.value_or(true));
 }
 
+std::pair<std::vector<std::vector<int>>, std::vector<std::vector<int>>>
+kNearestNeighbourPair(const Cloud &yCloud, int k, double candidateCutoff,
+                      int typeI) {
+  return nneigh::kNearestNeighbourPair(yCloud, k, candidateCutoff, typeI);
+}
+
 std::tuple<double, double> shellSeparation(const Cloud &yCloud, int k,
                                            int typeI) {
   return nneigh::shellSeparation(yCloud, k, typeI);
@@ -605,6 +611,12 @@ void registerNeighbours(sol::state_view lua, sol::table m) {
                                              sol::optional<bool> mutual) {
     return sol::as_nested(
         kNearestNeighbourList(yCloud, k, candidateCutoff, typeI, mutual));
+  });
+  m.set_function("kNearestNeighbourPair", [](const Cloud &yCloud, int k,
+                                             double candidateCutoff, int typeI) {
+    auto both = kNearestNeighbourPair(yCloud, k, candidateCutoff, typeI);
+    return std::make_tuple(sol::as_nested(both.first),
+                           sol::as_nested(both.second));
   });
   m.set_function("shellSeparation", shellSeparation);
   m.set_function(

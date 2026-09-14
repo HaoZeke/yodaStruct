@@ -117,8 +117,7 @@ function dseams.cages(cloud, o)
   local typ = o.type or 1
   local k = o.k or 4
   local cut = o.cutoff or 5.0
-  local mutual = dseams.knn(cloud, {k = k, cutoff = cut, type = typ, mutual = true})
-  local union = dseams.knn(cloud, {k = k, cutoff = cut, type = typ, mutual = false})
+  local mutual, union = core.kNearestNeighbourPair(cloud, k, cut, typ)
   local idx_s = core.neighbourListByIndex(cloud, mutual)
   local idx_u = core.neighbourListByIndex(cloud, union)
   local six_s = {}
